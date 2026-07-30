@@ -18,8 +18,9 @@ function isAssetPath(pathname: string): boolean {
 }
 
 /**
- * betondispo.ca (and any other alias) → the canonical host, preserving path and
- * query so `betondispo.ca/fr/soumission` lands on `betondispo.com/fr/soumission`.
+ * betondispo.com (and any other alias) → the canonical host, preserving path
+ * and query so `betondispo.com/fr/soumission` lands on
+ * `betondispo.ca/fr/soumission`.
  * Skipped on localhost and on *.vercel.app preview deployments.
  */
 function canonicalHostRedirect(request: NextRequest): NextResponse | null {

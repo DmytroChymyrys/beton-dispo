@@ -3,8 +3,8 @@
 Bilingual (FR/EN) lead-generation website for **BétonDispo**, a centralized
 concrete request service for Greater Montréal and the South Shore.
 
-- Production: `betondispo.com` (canonical)
-- Alias: `betondispo.ca` → redirects to `betondispo.com`, preserving the path
+- Production: `betondispo.ca` (canonical)
+- Alias: `betondispo.com` → redirects to `betondispo.ca`, preserving the path
 
 ---
 
@@ -404,7 +404,7 @@ GitHub → Vercel. Preview deployment per branch/PR, production from `main`.
    the project. It injects `DATABASE_URL` (and the unpooled variant)
    automatically for every environment.
 3. Add the remaining environment variables from §4 to Production and Preview.
-   Set `NEXT_PUBLIC_SITE_URL` to `https://betondispo.com` in Production.
+   Set `NEXT_PUBLIC_SITE_URL` to `https://betondispo.ca` in Production.
 4. Run `npm run db:migrate` against the production database.
 5. Enable Analytics and Speed Insights in the project settings.
 
@@ -412,15 +412,15 @@ GitHub → Vercel. Preview deployment per branch/PR, production from `main`.
 
 Add both domains in Vercel:
 
-- `betondispo.com` — **set as the primary domain**
-- `betondispo.ca` — add it and let Vercel serve it
+- `betondispo.ca` — **set as the primary domain**
+- `betondispo.com` — add it and let Vercel serve it as a secondary domain
 
-`src/proxy.ts` issues a 308 to the host in `NEXT_PUBLIC_SITE_URL`, preserving
-path and query:
+`src/proxy.ts` issues a 308 to the canonical `.ca` host, preserving path and
+query:
 
 ```
-betondispo.ca/fr/soumission  →  betondispo.com/fr/soumission
-betondispo.ca/en/quote       →  betondispo.com/en/quote
+betondispo.com/fr/soumission  →  betondispo.ca/fr/soumission
+betondispo.com/en/quote       →  betondispo.ca/en/quote
 ```
 
 The redirect is skipped on `localhost` and on `*.vercel.app`, so previews keep
@@ -429,9 +429,9 @@ headers).
 
 ### robots.txt
 
-`src/app/robots.ts` allows crawling **only** when `NEXT_PUBLIC_SITE_URL` points
-at `https://betondispo.*`. Previews and local runs return `Disallow: /`, so a
-preview deployment can never be indexed.
+`src/app/robots.ts` allows crawling **only** for the canonical
+`https://betondispo.ca` host. Previews and local runs return `Disallow: /`, so
+a preview deployment can never be indexed.
 
 ---
 

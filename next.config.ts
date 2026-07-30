@@ -3,8 +3,8 @@ import { fileURLToPath } from 'node:url';
 import type { NextConfig } from 'next';
 
 /**
- * Canonical host. betondispo.ca (and any other alias) is redirected to this
- * host in `src/proxy.ts`, preserving path + query.
+ * Canonical host redirects are handled in `src/proxy.ts`, preserving path +
+ * query and consolidating public domains to betondispo.ca.
  */
 const projectRoot = dirname(fileURLToPath(import.meta.url));
 const nextConfig: NextConfig = {

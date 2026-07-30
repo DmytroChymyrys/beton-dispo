@@ -4,12 +4,7 @@ import { absoluteUrl, siteConfig } from '@/lib/site';
 function isIndexableProductionHost(url: string): boolean {
   try {
     const parsed = new URL(url);
-    return (
-      parsed.protocol === 'https:' &&
-      ['betondispo.com', 'www.betondispo.com', 'betondispo.ca', 'www.betondispo.ca'].includes(
-        parsed.hostname,
-      )
-    );
+    return parsed.protocol === 'https:' && parsed.hostname === 'betondispo.ca';
   } catch {
     return false;
   }

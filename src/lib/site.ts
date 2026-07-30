@@ -6,6 +6,13 @@ function resolveSiteUrl(): string {
 
   try {
     const url = new URL(configured);
+    if (
+      ['betondispo.ca', 'www.betondispo.ca', 'betondispo.com', 'www.betondispo.com'].includes(
+        url.hostname,
+      )
+    ) {
+      return DEFAULT_SITE_URL;
+    }
     if (process.env.VERCEL_ENV === 'production' && url.hostname === 'localhost') {
       return DEFAULT_SITE_URL;
     }
