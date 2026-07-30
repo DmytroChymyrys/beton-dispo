@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" role="presentation">
+  <title>Volumetric mixer truck batching concrete on site</title>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#faf9f7" />
+      <stop offset="1" stop-color="#ebe8e3" />
+    </linearGradient>
+    <pattern id="aggregate" width="30" height="30" patternUnits="userSpaceOnUse">
+      <circle cx="6" cy="8" r="1.2" fill="#1b1e24" opacity=".05" />
+      <circle cx="21" cy="17" r=".9" fill="#1b1e24" opacity=".04" />
+      <circle cx="12" cy="24" r="1.4" fill="#1b1e24" opacity=".045" />
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="800" fill="url(#sky)" />
+  <rect y="640" width="1200" height="160" fill="#e3dfd8" />
+  <rect width="1200" height="800" fill="url(#aggregate)" />
+  <path d="M0 640h1200" stroke="#1b1e24" stroke-opacity=".16" stroke-width="3" />
+  <!-- Faint background site, for depth. Deliberately unbranded. -->
+  <g fill="#1b1e24" opacity=".07">
+    <rect x="60" y="460" width="150" height="180" />
+    <rect x="230" y="400" width="110" height="240" />
+    <rect x="990" y="430" width="160" height="210" />
+  </g>
+  <g stroke="#1b1e24" stroke-opacity=".09" stroke-width="9" fill="none" stroke-linecap="round">
+    <path d="M912 640V150h250" />
+    <path d="M1162 150v70" />
+    <path d="M912 214l113-64" />
+  </g>
+
+  <ellipse cx="580" cy="644" rx="500" ry="14" fill="#1b1e24" opacity=".1" />
+
+  <!-- Aggregate and cement bins: a volumetric mixer carries its materials -->
+  <path d="M330 300h560l-40 190H370z" fill="#22252b" />
+  <g stroke="#f1efec" stroke-opacity=".35" stroke-width="9">
+    <path d="M516 300 496 490" />
+    <path d="M704 300 714 490" />
+  </g>
+  <rect x="330" y="278" width="560" height="26" rx="8" fill="#2f333b" />
+  <path d="M760 210h130v70H760z" fill="#2f333b" />
+
+  <rect x="118" y="490" width="920" height="38" rx="8" fill="#22252b" />
+
+  <!-- Cab, facing left -->
+  <path d="M122 492V352a14 14 0 0 1 9-13l84-31h92a14 14 0 0 1 14 14v170z" fill="#22252b" />
+  <path d="M142 368l72-26h48v60H142z" fill="#dfe3e8" />
+  <rect x="112" y="456" width="26" height="38" rx="6" fill="#2f333b" />
+
+  <!-- Mixing auger discharging at the rear -->
+  <path d="M1020 430l112 158" stroke="#c2410c" stroke-width="36" stroke-linecap="round" />
+  <g stroke="#f1efec" stroke-opacity=".45" stroke-width="7" stroke-linecap="round">
+    <path d="M1036 458l22 32" />
+    <path d="M1068 504l22 32" />
+    <path d="M1100 550l20 30" />
+  </g>
+  <rect x="944" y="392" width="96" height="70" rx="10" fill="#2f333b" />
+  <ellipse cx="1136" cy="618" rx="70" ry="22" fill="#dcd7cf" />
+
+  <g fill="#1b1e24">
+    <circle cx="248" cy="580" r="60" />
+    <circle cx="790" cy="580" r="60" />
+    <circle cx="910" cy="580" r="60" />
+  </g>
+  <g fill="#b9b4ac">
+    <circle cx="248" cy="580" r="24" />
+    <circle cx="790" cy="580" r="24" />
+    <circle cx="910" cy="580" r="24" />
+  </g>
+</svg>

@@ -1,0 +1,671 @@
+{
+  "meta": {
+    "siteName": "BétonDispo",
+    "logoLead": "Béton",
+    "logoAccent": "Dispo",
+    "ogLocale": "en_CA",
+    "pages": {
+      "home": {
+        "title": "BétonDispo | Concrete Delivery & Pumping in Greater Montréal",
+        "description": "Need concrete for your project? Send your request to BétonDispo. Concrete delivery, mobile concrete and pumping across Greater Montréal and the South Shore."
+      },
+      "quote": {
+        "title": "Request a quote | BétonDispo",
+        "description": "Describe your project in a few minutes. We check available options for concrete delivery, mobile concrete or pumping across Greater Montréal."
+      },
+      "calculator": {
+        "title": "Concrete Calculator | m³ Estimate | BétonDispo",
+        "description": "Calculate the approximate concrete quantity required for a slab, footing, wall, column or tube. Get a cubic metre estimate and continue to a prefilled quote request."
+      },
+      "howItWorks": {
+        "title": "How it works | BétonDispo",
+        "description": "Three simple steps: tell us about your project, we check availability, you receive an option suited to your site."
+      },
+      "services": {
+        "title": "Concrete Delivery & Pumping | Services | BétonDispo",
+        "description": "Concrete delivery, mobile concrete and concrete pumping for foundations, slabs, garages, pools, landscaping and commercial projects in Greater Montréal."
+      },
+      "faq": {
+        "title": "Frequently asked questions | BétonDispo",
+        "description": "Concrete volume, pumping, response times, service areas and contractors: answers to the most common questions about BétonDispo requests."
+      },
+      "privacy": {
+        "title": "Privacy Policy | BétonDispo",
+        "description": "How BétonDispo collects, uses and protects the personal information provided in a quote request."
+      },
+      "terms": {
+        "title": "Terms of Use | BétonDispo",
+        "description": "Terms of use for the BétonDispo website and the scope of quote requests."
+      }
+    }
+  },
+  "common": {
+    "skipToContent": "Skip to main content",
+    "ctaPrimary": "Request a quote",
+    "ctaSecondary": "How it works",
+    "languageLabel": "Language",
+    "switchTo": "Français",
+    "switchToAria": "View this page in French",
+    "backHome": "Back to home",
+    "required": "required",
+    "optional": "optional",
+    "loading": "Loading…"
+  },
+  "nav": {
+    "ariaLabel": "Main navigation",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "links": {
+      "calculator": "Calculator",
+      "howItWorks": "How it works",
+      "services": "Services",
+      "faq": "FAQ"
+    }
+  },
+  "footer": {
+    "tagline": "One request to find a solution suited to your concrete project.",
+    "networkDisclosure": "BétonDispo works with a network of suppliers and operators to find a solution suited to your project.",
+    "serviceAreaTitle": "Service areas",
+    "serviceArea": "South Shore • Montréal • Greater Montréal",
+    "navTitle": "Navigation",
+    "legalTitle": "Information",
+    "contactTitle": "Contact",
+    "contactEmail": "info@betondispo.com",
+    "rights": "All rights reserved.",
+    "notASupplierNote": "BétonDispo is not a concrete producer and does not operate a truck fleet."
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Greater Montréal and the South Shore",
+      "title": "Need concrete? We'll take care of it.",
+      "subtitle": "Tell us where, when and how much you need. We'll check available options and come back with a solution suited to your project.",
+      "trust": "Fast service • South Shore • Montréal • Greater Montréal",
+      "imageAlt": "Concrete delivery at a residential construction site",
+      "microcopy": "Takes 2 to 4 minutes. No obligation."
+    },
+    "howItWorks": {
+      "eyebrow": "How it works",
+      "title": "Three steps, one request",
+      "steps": [
+        {
+          "title": "Tell us about your project",
+          "body": "Provide the address, desired date, approximate quantity and requirements."
+        },
+        {
+          "title": "We check availability",
+          "body": "We look for an option suited to your location, schedule and project."
+        },
+        {
+          "title": "Receive your option",
+          "body": "We'll return with an available solution and the information needed to move forward."
+        }
+      ]
+    },
+    "services": {
+      "eyebrow": "Services",
+      "title": "What we can arrange for your site",
+      "linkLabel": "Learn more"
+    },
+    "audience": {
+      "eyebrow": "Who it's for",
+      "title": "For contractors and homeowners alike",
+      "body": "Whether you need concrete for a foundation, a slab, a garage, a pool or a commercial project, send us the details of your project.",
+      "items": [
+        "General contractors",
+        "Excavation and foundations",
+        "Landscaping",
+        "Pools",
+        "Renovation",
+        "Commercial projects",
+        "Homeowners"
+      ],
+      "repeatNote": "Pouring several times a month? Send your requests as they come up — we keep the history of your projects on file.",
+      "imageAlt": "Finishing a concrete slab"
+    },
+    "network": {
+      "title": "One point of contact, a network behind it",
+      "body": "BétonDispo works with a network of suppliers and operators to find a solution suited to your project. You fill out a single request — we handle the checking.",
+      "points": [
+        "One request instead of a dozen phone calls",
+        "Availability checked against your date and your area",
+        "Delivery, mobile concrete or pumping depending on the site"
+      ]
+    },
+    "finalCta": {
+      "title": "Tell us where, when and how much.",
+      "body": "Fill out the request in a few minutes. We'll come back to you with an option suited to your project.",
+      "imageAlt": "Concrete pumping for a foundation"
+    }
+  },
+  "howItWorksPage": {
+    "title": "How it works",
+    "intro": "BétonDispo centralizes your concrete request. You describe the project once; we take care of checking the available options.",
+    "steps": [
+      {
+        "title": "Tell us about your project",
+        "body": "Provide the address, desired date, approximate quantity and requirements. If you don't know the exact volume or the required strength, simply select \"I don't know\"."
+      },
+      {
+        "title": "We check availability",
+        "body": "We look for an option suited to your location, schedule and project, including a pump if your site needs one."
+      },
+      {
+        "title": "Receive your option",
+        "body": "We contact you by phone, text or email — whichever you prefer — with an available solution and the information needed to move forward."
+      }
+    ],
+    "notesTitle": "Good to know",
+    "notes": [
+      "A request is not a confirmed booking. Booking happens once availability, pricing and service details are confirmed.",
+      "We process requests as quickly as possible depending on the date, area and project requirements.",
+      "BétonDispo works with a network of suppliers and operators to find a solution suited to your project."
+    ]
+  },
+  "servicesPage": {
+    "title": "Services",
+    "intro": "Three main needs, one request. Describe your site and we'll check what's available.",
+    "items": [
+      {
+        "key": "delivery",
+        "title": "Concrete Delivery",
+        "short": "For foundations, slabs, garages, extensions, renovations and other projects.",
+        "body": "Ready-mix concrete delivery suits most residential and light commercial projects: footings, foundation walls, garage slabs, basement floors, sidewalks and driveways. Let us know the approximate volume, the desired date and the site access.",
+        "bullets": [
+          "Foundations and footings",
+          "Slabs and floors",
+          "Garages and driveways",
+          "Sidewalks and walkways"
+        ],
+        "imageAlt": "Ready-mix concrete truck at a construction site"
+      },
+      {
+        "key": "mobile",
+        "title": "Mobile Concrete",
+        "short": "For projects where flexible quantities or on-site mixing may be advantageous.",
+        "body": "Mobile concrete (volumetric mixer) mixes the concrete directly on site. This option can be useful when the exact volume is hard to estimate, when the pour is spread out over time, or when only a small volume is needed.",
+        "bullets": [
+          "Small volumes",
+          "Hard-to-estimate volume",
+          "Staged pours",
+          "Remote sites or unusual schedules"
+        ],
+        "imageAlt": "Volumetric mixer for mobile concrete"
+      },
+      {
+        "key": "pumping",
+        "title": "Concrete Pumping",
+        "short": "For pours requiring a pump because of distance, height or limited access.",
+        "body": "A concrete pump becomes necessary when the truck can't reach the pour area: backyard, basement, grade change, elevation or restricted access. If you're not sure, choose \"I don't know\" in the request and we'll assess it with you.",
+        "bullets": [
+          "Backyards and restricted access",
+          "Basements and crawl spaces",
+          "Elevated pours",
+          "Long pumping distances"
+        ],
+        "imageAlt": "Concrete pumping for a foundation"
+      }
+    ],
+    "disclosureTitle": "How we work",
+    "disclosure": "BétonDispo works with a network of suppliers and operators to find a solution suited to your project. We do not produce the concrete and do not operate a fleet of trucks or pumps.",
+    "ctaTitle": "Not sure what you need?",
+    "ctaBody": "Send us the project details. We'll help you determine the right option."
+  },
+  "faqPage": {
+    "title": "Frequently asked questions",
+    "intro": "Answers to the most common questions before sending a request.",
+    "items": [
+      {
+        "question": "How much concrete should I order?",
+        "answer": "You can provide a rough estimate in cubic metres. If you don't know, select \"I don't know\" in the request: give us the dimensions or a description of the project and we'll confirm the quantity with you."
+      },
+      {
+        "question": "Does BétonDispo deliver the concrete?",
+        "answer": "BétonDispo is not a concrete producer and does not operate a fleet. We work with a network of suppliers and operators to find a solution suited to your project, then coordinate the next steps with you."
+      },
+      {
+        "question": "Can I request a concrete pump?",
+        "answer": "Yes. Indicate it in your request. If you're not sure whether a pump is needed, choose \"I don't know\" and describe the site access — we'll assess it with you."
+      },
+      {
+        "question": "Do you work with contractors?",
+        "answer": "Yes, and we strongly encourage it. General contractors, excavation, foundations, landscaping, pools and renovation businesses can send us requests project by project. We keep the history on file to speed up future requests."
+      },
+      {
+        "question": "Which areas do you serve?",
+        "answer": "We currently handle requests for the South Shore, Montréal and Greater Montréal. If your site is at the edge of that area, send the request anyway and we'll tell you whether we can help."
+      },
+      {
+        "question": "How long does it take to get a response?",
+        "answer": "We process requests as quickly as possible depending on the date, area and project requirements. If your schedule is tight, mention it in the additional details."
+      },
+      {
+        "question": "Is this a confirmed booking?",
+        "answer": "No. Submitting the form is a request. It is not a booking until availability, pricing and service details have been confirmed with you."
+      },
+      {
+        "question": "How much does it cost?",
+        "answer": "Pricing depends on volume, concrete type, date, area and specific requirements such as pumping. We don't publish prices on the site: we come back to you with the details once options have been checked."
+      },
+      {
+        "question": "Which concrete strength should I choose?",
+        "answer": "Common residential projects often use 25 to 35 MPa depending on use and freeze exposure. If you don't know, select \"I don't know\": describe the project and we'll confirm with you. For structural work, refer to your drawings or your engineer."
+      }
+    ],
+    "stillHaveQuestions": "Another question?",
+    "stillHaveQuestionsBody": "Send your request and add your question in the additional details."
+  },
+  "concreteCalculator": {
+    "hero": {
+      "eyebrow": "Free tool",
+      "title": "Concrete Calculator",
+      "intro": "Quickly calculate the approximate amount of concrete required for a slab, foundation, wall, column or another project. Enter your dimensions and get an estimate in cubic metres.",
+      "primaryCta": "Calculate my volume"
+    },
+    "toolEyebrow": "m³ estimate",
+    "toolTitle": "Quickly estimate the amount of concrete required for your project.",
+    "selectorLabel": "Choose a project shape",
+    "calculate": "Calculate",
+    "geometries": {
+      "rectangular": {
+        "shortLabel": "Slab",
+        "title": "Slab, wall or rectangular footing",
+        "description": "For rectangular surfaces such as a garage slab, sidewalk, wall or footing.",
+        "formula": "Volume = length × width × thickness × quantity"
+      },
+      "cylinder": {
+        "shortLabel": "Round",
+        "title": "Round footing, column or hole",
+        "description": "For post holes, columns, piers or round footings.",
+        "formula": "Volume = π × radius² × height × quantity"
+      },
+      "circularSlab": {
+        "shortLabel": "Circular",
+        "title": "Circular slab",
+        "description": "For round slabs where the vertical dimension is a thickness.",
+        "formula": "Volume = π × radius² × thickness × quantity"
+      },
+      "hollowCylinder": {
+        "shortLabel": "Tube",
+        "title": "Hollow circular tube or ring",
+        "description": "For a tube, ring or hollow circular shape.",
+        "formula": "Volume = π × (outer radius² - inner radius²) × height × quantity"
+      }
+    },
+    "fields": {
+      "length": "Length",
+      "width": "Width",
+      "thickness": "Thickness",
+      "diameter": "Diameter",
+      "height": "Height",
+      "outerDiameter": "Outer diameter",
+      "innerDiameter": "Inner diameter",
+      "quantity": "Quantity"
+    },
+    "units": {
+      "mm": "mm",
+      "cm": "cm",
+      "m": "m",
+      "in": "in",
+      "ft": "ft"
+    },
+    "diagram": {
+      "length": "Length",
+      "thickness": "Thickness",
+      "diameter": "Diameter",
+      "height": "Height",
+      "outerDiameter": "Outer diameter",
+      "innerDiameter": "Inner diameter"
+    },
+    "result": {
+      "title": "Your estimate",
+      "empty": "Enter your dimensions, then calculate to see the recommended quantity and request a quote.",
+      "calculated": "Calculated volume",
+      "wasteLabel": "Extra allowance",
+      "wasteCopy": "It is usually wise to allow extra material for depth variations, waste and site irregularities.",
+      "withWaste": "With {percent}% allowance",
+      "disclaimer": "This calculator provides an estimate only. Actual site conditions may affect the amount of concrete required.",
+      "ctaTitle": "Need this amount of concrete?",
+      "quoteButton": "Request a quote for {volume}"
+    },
+    "errors": {
+      "dimension": "Enter a positive, realistic value.",
+      "quantity": "Quantity must be a whole number between 1 and 1000.",
+      "innerDiameter": "The inner diameter must be smaller than the outer diameter."
+    },
+    "seo": {
+      "howTitle": "How do you calculate concrete quantity?",
+      "howBody": "Concrete quantity is calculated from the physical dimensions of the project. For a rectangular slab, multiply length, width and thickness. For a round shape, use the radius and height. The result is then converted to cubic metres.",
+      "wasteTitle": "How much extra concrete should I allow?",
+      "wasteBody": "An allowance can help cover small depth variations, site waste and irregular ground or formwork. The calculator lets you choose 0%, 5%, 10% or 15% depending on the level of uncertainty.",
+      "unitsTitle": "Which unit is used to order concrete in Québec?",
+      "unitsBody": "In Québec, concrete is generally ordered by the cubic metre. You can enter measurements in metric or imperial units; the calculator converts the result to m³ to simplify the quote request.",
+      "unsureTitle": "I do not know my exact dimensions",
+      "unsureBody": "You can still request a quote. Provide the dimensions you have, photos or a project description when submitting your request.",
+      "ctaTitle": "Have your quantity?",
+      "ctaBody": "Let us check availability for your area, date and concrete requirements.",
+      "servicesLink": "View services"
+    }
+  },
+  "quote": {
+    "title": "Request a quote",
+    "intro": "Describe your project in a few minutes. We'll then check the available options and come back with a solution suited to your project.",
+    "duration": "About 2 to 4 minutes • No obligation",
+    "progress": "Step",
+    "progressOf": "of",
+    "requiredHint": "Fields marked with an asterisk (*) are required.",
+    "noscript": "This form requires JavaScript. You can also email us at info@betondispo.com with the site location, the desired date and the approximate quantity.",
+    "prefilledVolume": "Estimated quantity: {volume} m³",
+    "privacyLinkLabel": "Privacy Policy",
+    "termsLinkLabel": "Terms of Use",
+    "steps": [
+      {
+        "title": "Site",
+        "legend": "Where is the project?",
+        "description": "Provide the address or location of the job site."
+      },
+      {
+        "title": "Project",
+        "legend": "What concrete do you need?",
+        "description": "If you don't know the technical details, choose \"I don't know\". We'll confirm with you."
+      },
+      {
+        "title": "Schedule",
+        "legend": "When do you need the concrete?",
+        "description": "Availability depends on the date — the more precise the information, the faster the answer."
+      },
+      {
+        "title": "Contact",
+        "legend": "How can we reach you?",
+        "description": "We use this information only to process your request."
+      }
+    ],
+    "fields": {
+      "address": {
+        "label": "Job site address or location",
+        "placeholder": "145 rue des Érables"
+      },
+      "city": {
+        "label": "City",
+        "placeholder": "Brossard"
+      },
+      "postalCode": {
+        "label": "Postal code",
+        "placeholder": "J4W 2K3"
+      },
+      "accessNotes": {
+        "label": "Access instructions",
+        "hint": "Optional. Entrance, laneway, passage width, parking constraints, etc.",
+        "placeholder": "Access through the back lane, 3 m gate."
+      },
+      "projectType": {
+        "label": "Project type"
+      },
+      "volume": {
+        "label": "Approximate quantity",
+        "unit": "m³",
+        "hint": "An estimate is enough.",
+        "unknown": "I don't know"
+      },
+      "concreteStrength": {
+        "label": "Concrete specification",
+        "hint": "No technical expertise is needed to send a request."
+      },
+      "pumpRequired": {
+        "label": "Do you need a concrete pump?"
+      },
+      "pumpNotes": {
+        "label": "Pumping details",
+        "hint": "Optional. Approximate distance, difficult access, basement, backyard, elevation.",
+        "placeholder": "Backyard pour, roughly 30 m of hose."
+      },
+      "desiredDate": {
+        "label": "Desired date"
+      },
+      "preferredTime": {
+        "label": "Time of day",
+        "hint": "Optional.",
+        "none": "No preference"
+      },
+      "scheduleFlexible": {
+        "label": "My schedule is flexible"
+      },
+      "customerType": {
+        "label": "You are"
+      },
+      "name": {
+        "label": "Name",
+        "placeholder": "First and last name"
+      },
+      "companyName": {
+        "label": "Company name",
+        "hint": "Optional.",
+        "placeholder": "Nolan Commercial Builders"
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "you@example.com"
+      },
+      "phone": {
+        "label": "Phone",
+        "placeholder": "450 555-0142"
+      },
+      "preferredContactMethod": {
+        "label": "Preferred contact method"
+      },
+      "additionalNotes": {
+        "label": "Additional details",
+        "hint": "Optional.",
+        "placeholder": "Site access, project type, specific constraints, useful information, etc."
+      },
+      "consent": {
+        "label": "I agree that BétonDispo may use the information provided to process my request and contact me about my project.",
+        "linksIntro": "Learn more:"
+      },
+      "honeypot": {
+        "label": "Leave this field empty"
+      }
+    },
+    "options": {
+      "projectType": {
+        "FOUNDATION": "Foundation",
+        "SLAB": "Slab",
+        "GARAGE": "Garage",
+        "POOL": "Pool",
+        "LANDSCAPING": "Patio / landscaping",
+        "COMMERCIAL": "Commercial",
+        "REPAIR": "Repair",
+        "OTHER": "Other"
+      },
+      "concreteStrength": {
+        "UNKNOWN": "I don't know",
+        "MPA_25": "25 MPa",
+        "MPA_30": "30 MPa",
+        "MPA_32": "32 MPa",
+        "MPA_35": "35 MPa",
+        "OTHER": "Other"
+      },
+      "pumpRequired": {
+        "YES": "Yes",
+        "NO": "No",
+        "UNKNOWN": "I don't know"
+      },
+      "preferredTime": {
+        "MORNING": "Morning",
+        "AFTERNOON": "Afternoon",
+        "FLEXIBLE": "Flexible"
+      },
+      "customerType": {
+        "BUSINESS": "Contractor / business",
+        "INDIVIDUAL": "Homeowner"
+      },
+      "contactMethod": {
+        "PHONE": "Phone",
+        "SMS": "Text message",
+        "EMAIL": "Email"
+      }
+    },
+    "actions": {
+      "next": "Continue",
+      "back": "Back",
+      "submit": "Send my request",
+      "submitting": "Sending…"
+    },
+    "errorSummary": {
+      "title": "Please correct the following fields",
+      "single": "Please correct the field below."
+    },
+    "errors": {
+      "tooLong": "This field is too long.",
+      "addressRequired": "Provide the job site address or location.",
+      "cityRequired": "Provide the city.",
+      "postalCodeRequired": "Provide the postal code.",
+      "postalCodeInvalid": "Enter a valid Canadian postal code (e.g. J4W 2K3).",
+      "projectTypeRequired": "Choose a project type.",
+      "volumeRequired": "Enter an approximate quantity or check \"I don't know\".",
+      "volumeInvalid": "Enter a quantity in cubic metres.",
+      "volumeRange": "The quantity must be between 0.1 and 2000 m³.",
+      "concreteStrengthRequired": "Choose an option.",
+      "pumpRequiredRequired": "Choose an option.",
+      "desiredDateRequired": "Provide the desired date.",
+      "desiredDateInvalid": "Enter a valid date.",
+      "desiredDatePast": "The desired date cannot be in the past.",
+      "desiredDateFar": "That date is too far out. Check the year.",
+      "customerTypeRequired": "Choose an option.",
+      "nameRequired": "Provide your name.",
+      "emailRequired": "Provide your email.",
+      "emailInvalid": "Enter a valid email address.",
+      "phoneRequired": "Provide your phone number.",
+      "phoneInvalid": "Enter a 10-digit phone number.",
+      "preferredContactRequired": "Choose a contact method.",
+      "consentRequired": "You must agree before we can process your request.",
+      "spam": "Your request could not be sent.",
+      "rateLimited": "Too many requests have been sent from this device. Try again in a few minutes.",
+      "server": "Something went wrong and your request was not saved. Please try again, or email us at info@betondispo.com."
+    },
+    "confirmation": {
+      "title": "Request received",
+      "body": "Thank you. We're now checking available options for your project and will contact you once we have the necessary information.",
+      "referenceLabel": "Request number",
+      "referenceHint": "Keep this number for any communication about your project.",
+      "notBooked": "This is a request, not a confirmed booking. Booking happens once availability, pricing and service details have been confirmed with you.",
+      "backHome": "Back to home",
+      "readFaq": "Read the FAQ"
+    }
+  },
+  "legal": {
+    "lastUpdatedLabel": "Last updated",
+    "lastUpdated": "July 29, 2026",
+    "privacy": {
+      "title": "Privacy Policy",
+      "intro": "BétonDispo collects personal information for the sole purpose of processing quote requests and communicating with the people who submit them. This policy explains what information is collected, why, and how it is used.",
+      "sections": [
+        {
+          "heading": "Information we collect",
+          "paragraphs": [
+            "When you submit a request, we collect the information you provide: name, company name (if applicable), email, phone, preferred contact method, project address or location, city, postal code, project type, approximate quantity, concrete specification, pump requirement, desired date and any additional details you add.",
+            "We also retain limited technical information related to your visit: landing page, referring site and campaign parameters (UTM) where applicable. This information is used to understand where requests come from."
+          ]
+        },
+        {
+          "heading": "How we use the information",
+          "paragraphs": [
+            "The information is used to process your request, check available options with our network of suppliers and operators, and communicate with you about your project.",
+            "We do not sell your personal information. We do not subscribe you to marketing communications without your separate, explicit consent."
+          ]
+        },
+        {
+          "heading": "Disclosure of information",
+          "paragraphs": [
+            "In order to check availability and obtain an option for your project, the necessary information (for example the area, project type, approximate volume and desired date) may be shared with suppliers or operators in our network.",
+            "We use technical service providers for site hosting, the database and transactional email. Those providers process the information solely on our behalf."
+          ]
+        },
+        {
+          "heading": "Retention",
+          "paragraphs": [
+            "Requests are retained for as long as necessary for commercial follow-up and applicable legal obligations, then deleted or anonymized."
+          ]
+        },
+        {
+          "heading": "Cookies and analytics",
+          "paragraphs": [
+            "The site uses a privacy-friendly analytics solution to measure traffic and the request funnel in aggregate. No information that identifies you (name, phone, email, address) is sent to the analytics tool.",
+            "The site does not use advertising or retargeting cookies."
+          ]
+        },
+        {
+          "heading": "Your rights",
+          "paragraphs": [
+            "You may request access to the personal information we hold about you, its correction, or its deletion, subject to the exceptions provided by law. You may also withdraw your consent to the processing of your request.",
+            "To exercise these rights, write to us at privacy@betondispo.com."
+          ]
+        },
+        {
+          "heading": "Security",
+          "paragraphs": [
+            "Information is transmitted over an encrypted connection and stored in a database with restricted access. Internal access is limited to the people who need to process requests."
+          ]
+        },
+        {
+          "heading": "Contact us",
+          "paragraphs": [
+            "For any question about this policy or the handling of your personal information: privacy@betondispo.com."
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "title": "Terms of Use",
+      "intro": "By using betondispo.com and submitting a request, you accept the terms below.",
+      "sections": [
+        {
+          "heading": "Nature of the service",
+          "paragraphs": [
+            "BétonDispo is a request-centralization service. We receive your request, check available options with a network of suppliers and operators, and come back to you with a suitable solution.",
+            "BétonDispo is not a concrete producer and does not operate a fleet of trucks, volumetric mixers or pumps."
+          ]
+        },
+        {
+          "heading": "Requests are not bookings",
+          "paragraphs": [
+            "Submitting the form constitutes a request for information. It creates no obligation for BétonDispo or for you, and does not constitute a booking, a contract, or a guarantee of availability or pricing.",
+            "A booking exists only once availability, pricing and service details have been explicitly confirmed with you."
+          ]
+        },
+        {
+          "heading": "Accuracy of information",
+          "paragraphs": [
+            "You are responsible for the accuracy of the information provided, in particular the site location, access, desired date and estimated volume. Inaccurate information may make it impossible to find a suitable option."
+          ]
+        },
+        {
+          "heading": "No technical advice",
+          "paragraphs": [
+            "The information presented on this site is general in nature and does not constitute engineering advice or a technical recommendation. For any structural work, refer to your drawings, your contractor or a qualified professional."
+          ]
+        },
+        {
+          "heading": "Limitation of liability",
+          "paragraphs": [
+            "The site is provided \"as is\". To the extent permitted by law, BétonDispo cannot be held liable for indirect damages arising from the use of the site or from the inability to find an option for a given project."
+          ]
+        },
+        {
+          "heading": "Governing law",
+          "paragraphs": ["These terms are governed by the laws applicable in Québec, Canada."]
+        },
+        {
+          "heading": "Changes",
+          "paragraphs": [
+            "These terms may be modified. The version in force is the one published on this page."
+          ]
+        }
+      ]
+    }
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "The page you requested does not exist or has been moved.",
+    "cta": "Back to home"
+  }
+}

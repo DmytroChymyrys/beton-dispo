@@ -1,0 +1,106 @@
+@import 'tailwindcss';
+
+/*
+ * BétonDispo design tokens.
+ *
+ * Direction: modern Québec construction / logistics. Off-white ground,
+ * charcoal type, one strong safety-orange accent, restrained shadows.
+ * Every accent used behind white text meets WCAG AA for normal text.
+ */
+@theme {
+  --color-ground: #f8f7f5;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #f1efec;
+
+  --color-ink: #17181c;
+  --color-ink-soft: #3c4149;
+  --color-ink-muted: #5f6570;
+
+  --color-line: #e2dfda;
+  --color-line-strong: #cbc6bf;
+
+  /* Safety orange. `accent` carries white text (4.9:1); `accent-bright` is for
+     rules, icons and decoration only — never for text on a light ground. */
+  --color-accent: #c2410c;
+  --color-accent-hover: #9a3412;
+  --color-accent-bright: #f97316;
+  --color-accent-tint: #fdf0e7;
+
+  /* Charcoal used for dark sections. */
+  --color-steel: #1b1e24;
+  --color-steel-soft: #2a2e36;
+
+  --color-success: #15803d;
+  --color-danger: #b91c1c;
+  --color-warning: #a16207;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: var(--font-archivo), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 0.75rem;
+
+  --shadow-card: 0 1px 2px rgb(23 24 28 / 0.04), 0 8px 24px -12px rgb(23 24 28 / 0.12);
+  --shadow-raised: 0 2px 4px rgb(23 24 28 / 0.06), 0 18px 40px -20px rgb(23 24 28 / 0.25);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    background-color: var(--color-ground);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-wrap: pretty;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    color: var(--color-ink);
+  }
+
+  /* A single, consistently visible focus ring across the whole site. */
+  :focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: #fff;
+  }
+}
+
+@utility container-page {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 76rem;
+  padding-inline: 1.25rem;
+
+  @media (width >= 48rem) {
+    padding-inline: 2rem;
+  }
+}

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="BétonDispo">
+  <!--
+    Brand mark: the "B" of BétonDispo, split the way the wordmark is.
+    White upper bowl = "Béton", safety-orange lower bowl = "Dispo".
+    Drawn as paths, not text, so it renders identically without a webfont,
+    and stays legible as a two-tone letter down to 16px.
+  -->
+  <rect width="64" height="64" rx="13" fill="#17181c" />
+  <rect x="17" y="13" width="9" height="38" fill="#ffffff" />
+  <path d="M24 13h12a9 9 0 0 1 0 18H24z" fill="#ffffff" />
+  <path d="M24 31h14a10 10 0 0 1 0 20H24z" fill="#f97316" />
+</svg>

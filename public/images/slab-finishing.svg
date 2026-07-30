@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900" role="presentation">
+  <title>Freshly poured concrete slab being screeded and levelled</title>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#faf9f7" />
+      <stop offset="1" stop-color="#ebe8e3" />
+    </linearGradient>
+    <pattern id="aggregate" width="30" height="30" patternUnits="userSpaceOnUse">
+      <circle cx="6" cy="8" r="1.2" fill="#1b1e24" opacity=".05" />
+      <circle cx="21" cy="17" r=".9" fill="#1b1e24" opacity=".04" />
+      <circle cx="12" cy="24" r="1.4" fill="#1b1e24" opacity=".045" />
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#sky)" />
+  <rect y="420" width="1200" height="480" fill="#e3dfd8" />
+  <rect width="1200" height="900" fill="url(#aggregate)" />
+  <path d="M0 420h1200" stroke="#1b1e24" stroke-opacity=".16" stroke-width="3" />
+  <!-- Faint background site, for depth. Deliberately unbranded. -->
+  <g fill="#1b1e24" opacity=".07">
+    <rect x="90" y="250" width="200" height="170" />
+    <rect x="330" y="190" width="130" height="230" />
+    <rect x="900" y="230" width="210" height="190" />
+  </g>
+
+  <!-- The slab, in perspective -->
+  <path d="M170 880h860L830 440H370z" fill="#cfcac2" />
+  <path d="M170 880h860L830 440H370z" fill="none" stroke="#8d867c" stroke-width="6" />
+
+  <!-- Rebar grid showing through the wet surface -->
+  <g stroke="#a49b90" stroke-width="5" opacity=".65">
+    <path d="M392 480h416" />
+    <path d="M370 560h460" />
+    <path d="M344 660h512" />
+    <path d="M312 780h576" />
+    <path d="M470 440 350 880" />
+    <path d="M560 440 520 880" />
+    <path d="M650 440 690 880" />
+    <path d="M740 440 860 880" />
+  </g>
+
+  <!-- Levelled band behind the screed reads as finished surface -->
+  <path d="M286 640h628l60 240H226z" fill="#dcd7cf" opacity=".9" />
+  <g stroke="#b8b2a9" stroke-width="7" stroke-linecap="round" opacity=".8">
+    <path d="M320 730h560" />
+    <path d="M280 810h640" />
+  </g>
+
+  <!-- Screed board being drawn across the slab -->
+  <g transform="rotate(-3 600 610)">
+    <rect x="250" y="596" width="700" height="26" rx="10" fill="#22252b" />
+  </g>
+  <g stroke="#c2410c" stroke-width="22" stroke-linecap="round">
+    <path d="M300 588l-40-70" />
+    <path d="M900 620l40-70" />
+  </g>
+</svg>

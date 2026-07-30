@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" role="presentation">
+  <title>Concrete pump hose placing concrete on a slab</title>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#faf9f7" />
+      <stop offset="1" stop-color="#ebe8e3" />
+    </linearGradient>
+    <pattern id="aggregate" width="30" height="30" patternUnits="userSpaceOnUse">
+      <circle cx="6" cy="8" r="1.2" fill="#1b1e24" opacity=".05" />
+      <circle cx="21" cy="17" r=".9" fill="#1b1e24" opacity=".04" />
+      <circle cx="12" cy="24" r="1.4" fill="#1b1e24" opacity=".045" />
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="800" fill="url(#sky)" />
+  <rect y="520" width="1200" height="280" fill="#e3dfd8" />
+  <rect width="1200" height="800" fill="url(#aggregate)" />
+  <path d="M0 520h1200" stroke="#1b1e24" stroke-opacity=".16" stroke-width="3" />
+  <!-- Faint background site, for depth. Deliberately unbranded. -->
+  <g fill="#1b1e24" opacity=".07">
+    <rect x="70" y="330" width="180" height="190" />
+    <rect x="290" y="270" width="120" height="250" />
+    <rect x="960" y="300" width="180" height="220" />
+  </g>
+
+  <!-- Slab in perspective, rebar showing through -->
+  <path d="M60 780h1080L920 540H280z" fill="#cfcac2" />
+  <path d="M60 780h1080L920 540H280z" fill="none" stroke="#8d867c" stroke-width="6" />
+  <g stroke="#a49b90" stroke-width="5" opacity=".6">
+    <path d="M300 580h600" />
+    <path d="M256 650h688" />
+    <path d="M196 730h808" />
+    <path d="M420 540 330 780" />
+    <path d="M560 540 540 780" />
+    <path d="M700 540 760 780" />
+    <path d="M840 540 980 780" />
+  </g>
+
+  <!-- Hopper feeding the line -->
+  <path d="M120 200h300l-52 150H172z" fill="#22252b" />
+  <rect x="120" y="180" width="300" height="24" rx="8" fill="#2f333b" />
+  <g stroke="#2f333b" stroke-width="16" stroke-linecap="round">
+    <path d="M180 350v120" />
+    <path d="M360 350v120" />
+  </g>
+
+  <!-- The line itself: steel pipe into a flexible placing hose -->
+  <path d="M270 350q40 150 220 170" stroke="#22252b" stroke-width="34" stroke-linecap="round" fill="none" />
+  <path d="M490 520q210 20 300 -60 90 -78 150 30" stroke="#c2410c" stroke-width="30" stroke-linecap="round" fill="none" />
+  <circle cx="490" cy="520" r="22" fill="#2f333b" />
+
+  <!-- Concrete arriving on the slab -->
+  <path d="M926 508h32l26 88h-84z" fill="#dcd7cf" />
+  <ellipse cx="942" cy="606" rx="92" ry="26" fill="#dcd7cf" />
+</svg>

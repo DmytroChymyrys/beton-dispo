@@ -1,0 +1,671 @@
+{
+  "meta": {
+    "siteName": "BétonDispo",
+    "logoLead": "Béton",
+    "logoAccent": "Dispo",
+    "ogLocale": "fr_CA",
+    "pages": {
+      "home": {
+        "title": "BétonDispo | Livraison de béton et pompage dans le Grand Montréal",
+        "description": "Besoin de béton pour votre projet? Envoyez votre demande à BétonDispo. Livraison de béton, béton mobile et pompage dans le Grand Montréal et sur la Rive-Sud."
+      },
+      "quote": {
+        "title": "Obtenir une soumission | BétonDispo",
+        "description": "Décrivez votre projet en quelques minutes. Nous vérifions les options disponibles pour la livraison de béton, le béton mobile ou le pompage."
+      },
+      "calculator": {
+        "title": "Calculateur de béton | Estimation en m³ | BétonDispo",
+        "description": "Estimez le volume de béton en m³ pour une dalle, une semelle ou un mur. Calcul gratuit, puis envoyez votre demande à BétonDispo."
+      },
+      "howItWorks": {
+        "title": "Comment ça marche | BétonDispo",
+        "description": "Trois étapes simples : décrivez votre projet, nous vérifions la disponibilité, vous recevez une option adaptée à votre chantier."
+      },
+      "services": {
+        "title": "Livraison de béton et pompage | Services | BétonDispo",
+        "description": "Livraison de béton, béton mobile et pompage de béton pour fondations, dalles, garages, piscines, aménagements et projets commerciaux dans le Grand Montréal."
+      },
+      "faq": {
+        "title": "Foire aux questions | BétonDispo",
+        "description": "Quantité de béton, pompe, délais, secteurs desservis et entrepreneurs : les réponses aux questions les plus fréquentes sur les demandes BétonDispo."
+      },
+      "privacy": {
+        "title": "Politique de confidentialité | BétonDispo",
+        "description": "Comment BétonDispo recueille, utilise et protège les renseignements personnels fournis dans une demande de soumission."
+      },
+      "terms": {
+        "title": "Conditions d’utilisation | BétonDispo",
+        "description": "Conditions d’utilisation du site BétonDispo et portée des demandes de soumission."
+      }
+    }
+  },
+  "common": {
+    "skipToContent": "Aller au contenu principal",
+    "ctaPrimary": "Obtenir une soumission",
+    "ctaSecondary": "Comment ça marche",
+    "languageLabel": "Langue",
+    "switchTo": "English",
+    "switchToAria": "Afficher cette page en anglais",
+    "backHome": "Retour à l’accueil",
+    "required": "obligatoire",
+    "optional": "facultatif",
+    "loading": "Chargement…"
+  },
+  "nav": {
+    "ariaLabel": "Navigation principale",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "links": {
+      "calculator": "Calculateur",
+      "howItWorks": "Comment ça marche",
+      "services": "Services",
+      "faq": "FAQ"
+    }
+  },
+  "footer": {
+    "tagline": "Une seule demande pour trouver une solution adaptée à votre projet de béton.",
+    "networkDisclosure": "BétonDispo travaille avec un réseau de fournisseurs et d’opérateurs afin de trouver une solution adaptée à votre projet.",
+    "serviceAreaTitle": "Secteurs desservis",
+    "serviceArea": "Rive-Sud • Montréal • Grand Montréal",
+    "navTitle": "Navigation",
+    "legalTitle": "Informations",
+    "contactTitle": "Nous joindre",
+    "contactEmail": "info@betondispo.com",
+    "rights": "Tous droits réservés.",
+    "notASupplierNote": "BétonDispo n’est pas un producteur de béton et n’exploite pas de flotte de camions."
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Grand Montréal et Rive-Sud",
+      "title": "Besoin de béton? On s’en occupe.",
+      "subtitle": "Indiquez-nous où, quand et combien. Nous vérifions les options disponibles pour votre projet et vous revenons avec une solution adaptée.",
+      "trust": "Service rapide • Rive-Sud • Montréal • Grand Montréal",
+      "imageAlt": "Livraison de béton sur un chantier résidentiel",
+      "microcopy": "Demande en 2 à 4 minutes. Aucune obligation."
+    },
+    "howItWorks": {
+      "eyebrow": "Comment ça marche",
+      "title": "Trois étapes, une seule demande",
+      "steps": [
+        {
+          "title": "Décrivez votre projet",
+          "body": "Indiquez l’adresse, la date souhaitée, la quantité approximative et vos besoins."
+        },
+        {
+          "title": "Nous vérifions la disponibilité",
+          "body": "Nous recherchons une solution adaptée à votre emplacement, votre échéancier et votre projet."
+        },
+        {
+          "title": "Recevez votre option",
+          "body": "Nous vous revenons avec une solution disponible et les détails nécessaires pour aller de l’avant."
+        }
+      ]
+    },
+    "services": {
+      "eyebrow": "Services",
+      "title": "Ce que nous pouvons organiser pour votre chantier",
+      "linkLabel": "En savoir plus"
+    },
+    "audience": {
+      "eyebrow": "Pour qui",
+      "title": "Pour les entrepreneurs comme pour les particuliers",
+      "body": "Que vous ayez besoin de béton pour une fondation, une dalle, un garage, une piscine ou un projet commercial, envoyez-nous les détails de votre projet.",
+      "items": [
+        "Entrepreneurs généraux",
+        "Excavation et fondations",
+        "Aménagement paysager",
+        "Piscines",
+        "Rénovation",
+        "Projets commerciaux",
+        "Particuliers"
+      ],
+      "repeatNote": "Vous faites plusieurs coulées par mois? Envoyez-nous vos demandes au fur et à mesure, nous conservons l’historique de vos projets.",
+      "imageAlt": "Finition d'une dalle de béton"
+    },
+    "network": {
+      "title": "Un point de contact, un réseau derrière",
+      "body": "BétonDispo travaille avec un réseau de fournisseurs et d’opérateurs afin de trouver une solution adaptée à votre projet. Vous n’avez qu’une seule demande à remplir : nous nous occupons des vérifications.",
+      "points": [
+        "Une seule demande plutôt que plusieurs appels",
+        "Vérification de la disponibilité selon votre date et votre secteur",
+        "Livraison, béton mobile ou pompage selon les besoins du chantier"
+      ]
+    },
+    "finalCta": {
+      "title": "Dites-nous où, quand et combien.",
+      "body": "Remplissez la demande en quelques minutes. Nous revenons vers vous avec une option adaptée à votre projet.",
+      "imageAlt": "Pompage de béton pour une fondation"
+    }
+  },
+  "howItWorksPage": {
+    "title": "Comment ça marche",
+    "intro": "BétonDispo centralise votre demande de béton. Vous décrivez le projet une seule fois; nous nous occupons de vérifier les options disponibles.",
+    "steps": [
+      {
+        "title": "Décrivez votre projet",
+        "body": "Indiquez l’adresse, la date souhaitée, la quantité approximative et vos besoins. Si vous ne connaissez pas la quantité exacte ou la résistance requise, vous pouvez simplement choisir « Je ne sais pas »."
+      },
+      {
+        "title": "Nous vérifions la disponibilité",
+        "body": "Nous recherchons une solution adaptée à votre emplacement, votre échéancier et votre projet, incluant la pompe si votre chantier en a besoin."
+      },
+      {
+        "title": "Recevez votre option",
+        "body": "Nous communiquons avec vous par téléphone, texto ou courriel, selon votre préférence, avec une solution disponible et les détails nécessaires pour aller de l’avant."
+      }
+    ],
+    "notesTitle": "Bon à savoir",
+    "notes": [
+      "Une demande n’est pas une réservation confirmée. La réservation se fait une fois la disponibilité, le prix et les détails de service confirmés.",
+      "Nous traitons les demandes le plus rapidement possible selon la date, le secteur et les besoins du projet.",
+      "BétonDispo travaille avec un réseau de fournisseurs et d’opérateurs afin de trouver une solution adaptée à votre projet."
+    ]
+  },
+  "servicesPage": {
+    "title": "Services",
+    "intro": "Trois besoins principaux, une seule demande. Décrivez votre chantier et nous vérifions ce qui est disponible.",
+    "items": [
+      {
+        "key": "delivery",
+        "title": "Livraison de béton",
+        "short": "Pour fondations, dalles, garages, agrandissements, rénovations et autres projets.",
+        "body": "La livraison de béton prêt à l’emploi convient à la majorité des projets résidentiels et commerciaux légers : semelles, murs de fondation, dalles de garage, planchers de sous-sol, trottoirs et stationnements. Indiquez-nous le volume approximatif, la date souhaitée et l’accès au chantier.",
+        "bullets": [
+          "Fondations et semelles",
+          "Dalles et planchers",
+          "Garages et stationnements",
+          "Trottoirs et allées"
+        ],
+        "imageAlt": "Camion de béton prêt à l'emploi sur un chantier"
+      },
+      {
+        "key": "mobile",
+        "title": "Béton mobile",
+        "short": "Pour les projets où des quantités flexibles ou un mélange sur place peuvent être avantageux.",
+        "body": "Le béton mobile (malaxeur volumétrique) mélange le béton directement au chantier. Cette option peut être intéressante lorsque le volume exact est difficile à estimer, lorsque la coulée s’étale dans le temps ou lorsqu’un petit volume est requis.",
+        "bullets": [
+          "Petits volumes",
+          "Volume exact difficile à estimer",
+          "Coulées échelonnées",
+          "Chantiers éloignés ou horaires atypiques"
+        ],
+        "imageAlt": "Malaxeur volumétrique pour béton mobile"
+      },
+      {
+        "key": "pumping",
+        "title": "Pompage de béton",
+        "short": "Pour les coulées nécessitant une pompe en raison de la distance, de la hauteur ou d’un accès limité.",
+        "body": "Une pompe à béton devient nécessaire lorsque le camion ne peut pas atteindre la zone de coulée : cour arrière, sous-sol, dénivelé, hauteur ou accès restreint. Si vous n’êtes pas certain, choisissez « Je ne sais pas » dans la demande et nous évaluerons avec vous.",
+        "bullets": [
+          "Cour arrière et accès restreint",
+          "Sous-sols et vides sanitaires",
+          "Coulées en hauteur",
+          "Longues distances de pompage"
+        ],
+        "imageAlt": "Pompage de béton pour une fondation"
+      }
+    ],
+    "disclosureTitle": "Comment nous travaillons",
+    "disclosure": "BétonDispo travaille avec un réseau de fournisseurs et d’opérateurs afin de trouver une solution adaptée à votre projet. Nous ne produisons pas le béton et n’exploitons pas de flotte de camions ou de pompes.",
+    "ctaTitle": "Pas certain de ce dont vous avez besoin?",
+    "ctaBody": "Envoyez-nous les détails du projet. Nous vous aiderons à déterminer l’option appropriée."
+  },
+  "faqPage": {
+    "title": "Foire aux questions",
+    "intro": "Les réponses aux questions les plus fréquentes avant d’envoyer une demande.",
+    "items": [
+      {
+        "question": "Combien de béton dois-je commander?",
+        "answer": "Vous pouvez fournir une estimation approximative en mètres cubes. Si vous ne le savez pas, sélectionnez « Je ne sais pas » dans la demande : donnez-nous les dimensions ou une description du projet et nous validerons la quantité avec vous."
+      },
+      {
+        "question": "Est-ce que BétonDispo livre le béton?",
+        "answer": "BétonDispo n’est pas un producteur de béton et n’exploite pas de flotte. Nous travaillons avec un réseau de fournisseurs et d’opérateurs afin de trouver une solution adaptée à votre projet, puis nous coordonnons la suite avec vous."
+      },
+      {
+        "question": "Puis-je demander une pompe à béton?",
+        "answer": "Oui. Indiquez-le dans votre demande. Si vous n’êtes pas certain qu’une pompe soit nécessaire, choisissez « Je ne sais pas » et décrivez l’accès au chantier : nous évaluerons avec vous."
+      },
+      {
+        "question": "Travaillez-vous avec les entrepreneurs?",
+        "answer": "Oui, et c’est fortement encouragé. Entrepreneurs généraux, excavation, fondations, aménagement paysager, piscines et rénovation peuvent nous envoyer leurs demandes projet par projet. Nous conservons l’historique afin d’accélérer les demandes suivantes."
+      },
+      {
+        "question": "Quels secteurs desservez-vous?",
+        "answer": "Nous traitons présentement les demandes pour la Rive-Sud, Montréal et le Grand Montréal. Si votre chantier est à la limite de ce secteur, envoyez tout de même votre demande et nous vous dirons si nous pouvons vous aider."
+      },
+      {
+        "question": "Combien de temps faut-il pour recevoir une réponse?",
+        "answer": "Nous traitons les demandes le plus rapidement possible selon la date, le secteur et les besoins du projet. Si votre échéancier est serré, mentionnez-le dans les détails supplémentaires."
+      },
+      {
+        "question": "Est-ce une réservation confirmée?",
+        "answer": "Non. L’envoi du formulaire constitue une demande. Il ne s’agit pas d’une réservation tant que la disponibilité, le prix et les détails de service n’ont pas été confirmés avec vous."
+      },
+      {
+        "question": "Combien ça coûte?",
+        "answer": "Le prix dépend du volume, du type de béton, de la date, du secteur et des besoins particuliers comme le pompage. Nous ne publions pas de prix sur le site : nous vous revenons avec les détails une fois les options vérifiées."
+      },
+      {
+        "question": "Quelle résistance de béton dois-je choisir?",
+        "answer": "Les projets résidentiels courants utilisent souvent du 25 à 35 MPa selon l’usage et l’exposition au gel. Si vous ne savez pas, sélectionnez « Je ne sais pas » : décrivez le projet et nous validerons avec vous. Pour un ouvrage structural, référez-vous aux plans ou à votre ingénieur."
+      }
+    ],
+    "stillHaveQuestions": "Une autre question?",
+    "stillHaveQuestionsBody": "Envoyez votre demande et ajoutez votre question dans les détails supplémentaires."
+  },
+  "concreteCalculator": {
+    "hero": {
+      "eyebrow": "Outil gratuit",
+      "title": "Calculateur de béton",
+      "intro": "Calculez rapidement la quantité approximative de béton nécessaire pour une dalle, une fondation, un mur, une colonne ou un autre projet. Entrez simplement vos dimensions et obtenez une estimation en mètres cubes.",
+      "primaryCta": "Calculer mon volume"
+    },
+    "toolEyebrow": "Estimation en m³",
+    "toolTitle": "Estimez rapidement la quantité de béton nécessaire pour votre projet.",
+    "selectorLabel": "Choisir une forme de projet",
+    "calculate": "Calculer",
+    "geometries": {
+      "rectangular": {
+        "shortLabel": "Dalle",
+        "title": "Dalle, mur ou semelle",
+        "description": "Pour les surfaces rectangulaires comme une dalle de garage, un trottoir, un mur ou une semelle.",
+        "formula": "Volume = longueur × largeur × épaisseur × quantité"
+      },
+      "cylinder": {
+        "shortLabel": "Rond",
+        "title": "Trou, colonne ou semelle ronde",
+        "description": "Pour les trous de poteau, colonnes, pieux ou semelles rondes.",
+        "formula": "Volume = π × rayon² × hauteur × quantité"
+      },
+      "circularSlab": {
+        "shortLabel": "Circulaire",
+        "title": "Dalle circulaire",
+        "description": "Pour les dalles rondes où la dimension verticale est une épaisseur.",
+        "formula": "Volume = π × rayon² × épaisseur × quantité"
+      },
+      "hollowCylinder": {
+        "shortLabel": "Tube",
+        "title": "Tube ou anneau circulaire",
+        "description": "Pour un tube, un anneau ou une forme circulaire creuse.",
+        "formula": "Volume = π × (rayon extérieur² - rayon intérieur²) × hauteur × quantité"
+      }
+    },
+    "fields": {
+      "length": "Longueur",
+      "width": "Largeur",
+      "thickness": "Épaisseur",
+      "diameter": "Diamètre",
+      "height": "Hauteur",
+      "outerDiameter": "Diamètre extérieur",
+      "innerDiameter": "Diamètre intérieur",
+      "quantity": "Quantité"
+    },
+    "units": {
+      "mm": "mm",
+      "cm": "cm",
+      "m": "m",
+      "in": "po",
+      "ft": "pi"
+    },
+    "diagram": {
+      "length": "Longueur",
+      "thickness": "Épaisseur",
+      "diameter": "Diamètre",
+      "height": "Hauteur",
+      "outerDiameter": "Diamètre extérieur",
+      "innerDiameter": "Diamètre intérieur"
+    },
+    "result": {
+      "title": "Votre estimation",
+      "empty": "Entrez vos dimensions, puis calculez pour voir la quantité recommandée et demander une soumission.",
+      "calculated": "Volume calculé",
+      "wasteLabel": "Marge supplémentaire",
+      "wasteCopy": "Il est généralement prudent de prévoir une marge supplémentaire pour les variations de profondeur, les pertes et les irrégularités du chantier.",
+      "withWaste": "Avec marge de {percent} %",
+      "disclaimer": "Cette calculatrice fournit une estimation seulement. Les conditions réelles du chantier peuvent modifier la quantité nécessaire.",
+      "ctaTitle": "Besoin de cette quantité de béton?",
+      "quoteButton": "Obtenir une soumission pour {volume}"
+    },
+    "errors": {
+      "dimension": "Entrez une valeur positive et réaliste.",
+      "quantity": "La quantité doit être un nombre entier entre 1 et 1000.",
+      "innerDiameter": "Le diamètre intérieur doit être inférieur au diamètre extérieur."
+    },
+    "seo": {
+      "howTitle": "Comment calculer la quantité de béton?",
+      "howBody": "La quantité de béton se calcule à partir des dimensions physiques du projet. Pour une dalle rectangulaire, on multiplie la longueur, la largeur et l’épaisseur. Pour une forme ronde, on utilise le rayon et la hauteur. Le résultat est ensuite converti en mètres cubes.",
+      "wasteTitle": "Combien de béton dois-je prévoir en plus?",
+      "wasteBody": "Une marge peut aider à couvrir les petites variations de profondeur, les pertes au chantier et les irrégularités du sol ou du coffrage. La calculatrice vous laisse choisir 0 %, 5 %, 10 % ou 15 % selon le niveau d’incertitude.",
+      "unitsTitle": "Quelle unité utilise-t-on pour commander du béton au Québec?",
+      "unitsBody": "Au Québec, le béton est généralement commandé en mètres cubes. Vous pouvez saisir vos mesures en unités métriques ou impériales; la calculatrice convertit le résultat en m³ pour faciliter la demande de soumission.",
+      "unsureTitle": "Je ne connais pas exactement mes dimensions",
+      "unsureBody": "Vous pouvez quand même demander une soumission. Indiquez les dimensions dont vous disposez et ajoutez les détails ou photos utiles à votre demande.",
+      "ctaTitle": "Vous avez votre quantité?",
+      "ctaBody": "Vérifions maintenant la disponibilité pour votre secteur, votre date et le type de béton requis.",
+      "servicesLink": "Voir les services"
+    }
+  },
+  "quote": {
+    "title": "Obtenir une soumission",
+    "intro": "Décrivez votre projet en quelques minutes. Nous vérifions ensuite les options disponibles et nous vous revenons avec une solution adaptée.",
+    "duration": "Environ 2 à 4 minutes • Aucune obligation",
+    "progress": "Étape",
+    "progressOf": "sur",
+    "requiredHint": "Les champs marqués d’un astérisque (*) sont obligatoires.",
+    "noscript": "Ce formulaire nécessite JavaScript. Vous pouvez aussi nous écrire à info@betondispo.com en précisant l’emplacement du chantier, la date souhaitée et la quantité approximative.",
+    "prefilledVolume": "Quantité estimée : {volume} m³",
+    "privacyLinkLabel": "Politique de confidentialité",
+    "termsLinkLabel": "Conditions d’utilisation",
+    "steps": [
+      {
+        "title": "Chantier",
+        "legend": "Où se déroule le projet?",
+        "description": "Indiquez l’adresse ou l’emplacement du chantier."
+      },
+      {
+        "title": "Projet",
+        "legend": "De quel béton avez-vous besoin?",
+        "description": "Si vous ne connaissez pas les détails techniques, choisissez « Je ne sais pas ». Nous validerons avec vous."
+      },
+      {
+        "title": "Échéancier",
+        "legend": "Quand avez-vous besoin du béton?",
+        "description": "La disponibilité dépend de la date : plus l’information est précise, plus la réponse est rapide."
+      },
+      {
+        "title": "Coordonnées",
+        "legend": "Comment pouvons-nous vous joindre?",
+        "description": "Nous utilisons ces renseignements uniquement pour traiter votre demande."
+      }
+    ],
+    "fields": {
+      "address": {
+        "label": "Adresse ou emplacement du chantier",
+        "placeholder": "145 rue des Érables"
+      },
+      "city": {
+        "label": "Ville",
+        "placeholder": "Brossard"
+      },
+      "postalCode": {
+        "label": "Code postal",
+        "placeholder": "J4W 2K3"
+      },
+      "accessNotes": {
+        "label": "Instructions d’accès",
+        "hint": "Facultatif. Entrée, ruelle, largeur du passage, contraintes de stationnement, etc.",
+        "placeholder": "Accès par la ruelle arrière, portail de 3 m."
+      },
+      "projectType": {
+        "label": "Type de projet"
+      },
+      "volume": {
+        "label": "Quantité approximative",
+        "unit": "m³",
+        "hint": "Une estimation suffit.",
+        "unknown": "Je ne sais pas"
+      },
+      "concreteStrength": {
+        "label": "Spécification du béton",
+        "hint": "Aucune expertise technique n’est nécessaire pour envoyer une demande."
+      },
+      "pumpRequired": {
+        "label": "Avez-vous besoin d’une pompe à béton?"
+      },
+      "pumpNotes": {
+        "label": "Détails sur le pompage",
+        "hint": "Facultatif. Distance approximative, accès difficile, sous-sol, cour arrière, dénivelé.",
+        "placeholder": "Coulée en cour arrière, environ 30 m de boyau."
+      },
+      "desiredDate": {
+        "label": "Date souhaitée"
+      },
+      "preferredTime": {
+        "label": "Moment de la journée",
+        "hint": "Facultatif.",
+        "none": "Aucune préférence"
+      },
+      "scheduleFlexible": {
+        "label": "Mon échéancier est flexible"
+      },
+      "customerType": {
+        "label": "Vous êtes"
+      },
+      "name": {
+        "label": "Nom",
+        "placeholder": "Prénom et nom"
+      },
+      "companyName": {
+        "label": "Nom de l’entreprise",
+        "hint": "Facultatif.",
+        "placeholder": "Excavation Tremblay inc."
+      },
+      "email": {
+        "label": "Courriel",
+        "placeholder": "vous@exemple.com"
+      },
+      "phone": {
+        "label": "Téléphone",
+        "placeholder": "450 555-0142"
+      },
+      "preferredContactMethod": {
+        "label": "Mode de communication préféré"
+      },
+      "additionalNotes": {
+        "label": "Détails supplémentaires",
+        "hint": "Facultatif.",
+        "placeholder": "Accès au chantier, type de projet, contraintes particulières, information utile, etc."
+      },
+      "consent": {
+        "label": "J’accepte que BétonDispo utilise les renseignements fournis afin de traiter ma demande et de communiquer avec moi concernant mon projet.",
+        "linksIntro": "En savoir plus :"
+      },
+      "honeypot": {
+        "label": "Laissez ce champ vide"
+      }
+    },
+    "options": {
+      "projectType": {
+        "FOUNDATION": "Fondation",
+        "SLAB": "Dalle",
+        "GARAGE": "Garage",
+        "POOL": "Piscine",
+        "LANDSCAPING": "Terrasse / aménagement",
+        "COMMERCIAL": "Commercial",
+        "REPAIR": "Réparation",
+        "OTHER": "Autre"
+      },
+      "concreteStrength": {
+        "UNKNOWN": "Je ne sais pas",
+        "MPA_25": "25 MPa",
+        "MPA_30": "30 MPa",
+        "MPA_32": "32 MPa",
+        "MPA_35": "35 MPa",
+        "OTHER": "Autre"
+      },
+      "pumpRequired": {
+        "YES": "Oui",
+        "NO": "Non",
+        "UNKNOWN": "Je ne sais pas"
+      },
+      "preferredTime": {
+        "MORNING": "Matin",
+        "AFTERNOON": "Après-midi",
+        "FLEXIBLE": "Flexible"
+      },
+      "customerType": {
+        "BUSINESS": "Entrepreneur / entreprise",
+        "INDIVIDUAL": "Particulier"
+      },
+      "contactMethod": {
+        "PHONE": "Téléphone",
+        "SMS": "SMS",
+        "EMAIL": "Courriel"
+      }
+    },
+    "actions": {
+      "next": "Continuer",
+      "back": "Retour",
+      "submit": "Envoyer ma demande",
+      "submitting": "Envoi en cours…"
+    },
+    "errorSummary": {
+      "title": "Veuillez corriger les champs suivants",
+      "single": "Veuillez corriger le champ ci-dessous."
+    },
+    "errors": {
+      "tooLong": "Ce champ est trop long.",
+      "addressRequired": "Indiquez l’adresse ou l’emplacement du chantier.",
+      "cityRequired": "Indiquez la ville.",
+      "postalCodeRequired": "Indiquez le code postal.",
+      "postalCodeInvalid": "Entrez un code postal canadien valide (ex. : J4W 2K3).",
+      "projectTypeRequired": "Choisissez un type de projet.",
+      "volumeRequired": "Indiquez une quantité approximative ou cochez « Je ne sais pas ».",
+      "volumeInvalid": "Entrez une quantité en mètres cubes.",
+      "volumeRange": "La quantité doit se situer entre 0,1 et 2000 m³.",
+      "concreteStrengthRequired": "Choisissez une option.",
+      "pumpRequiredRequired": "Choisissez une option.",
+      "desiredDateRequired": "Indiquez la date souhaitée.",
+      "desiredDateInvalid": "Entrez une date valide.",
+      "desiredDatePast": "La date souhaitée ne peut pas être dans le passé.",
+      "desiredDateFar": "Cette date est trop éloignée. Vérifiez l’année.",
+      "customerTypeRequired": "Choisissez une option.",
+      "nameRequired": "Indiquez votre nom.",
+      "emailRequired": "Indiquez votre courriel.",
+      "emailInvalid": "Entrez une adresse courriel valide.",
+      "phoneRequired": "Indiquez votre numéro de téléphone.",
+      "phoneInvalid": "Entrez un numéro de téléphone à 10 chiffres.",
+      "preferredContactRequired": "Choisissez un mode de communication.",
+      "consentRequired": "Vous devez accepter pour que nous puissions traiter votre demande.",
+      "spam": "Votre demande n’a pas pu être envoyée.",
+      "rateLimited": "Trop de demandes ont été envoyées depuis cet appareil. Réessayez dans quelques minutes.",
+      "server": "Une erreur est survenue et votre demande n’a pas été enregistrée. Réessayez, ou écrivez-nous à info@betondispo.com."
+    },
+    "confirmation": {
+      "title": "Demande reçue",
+      "body": "Merci. Nous vérifions maintenant les options disponibles pour votre projet. Nous communiquerons avec vous dès que nous aurons les informations nécessaires.",
+      "referenceLabel": "Numéro de demande",
+      "referenceHint": "Conservez ce numéro pour toute communication concernant votre projet.",
+      "notBooked": "Ceci est une demande, et non une réservation confirmée. La réservation se fait une fois la disponibilité, le prix et les détails de service confirmés avec vous.",
+      "backHome": "Retour à l’accueil",
+      "readFaq": "Consulter la FAQ"
+    }
+  },
+  "legal": {
+    "lastUpdatedLabel": "Dernière mise à jour",
+    "lastUpdated": "29 juillet 2026",
+    "privacy": {
+      "title": "Politique de confidentialité",
+      "intro": "BétonDispo recueille des renseignements personnels dans le seul but de traiter les demandes de soumission et de communiquer avec les personnes qui les soumettent. Cette politique explique quels renseignements sont recueillis, pourquoi, et comment ils sont utilisés.",
+      "sections": [
+        {
+          "heading": "Renseignements recueillis",
+          "paragraphs": [
+            "Lorsque vous soumettez une demande, nous recueillons les renseignements que vous fournissez : nom, nom de l’entreprise (le cas échéant), courriel, téléphone, mode de communication préféré, adresse ou emplacement du projet, ville, code postal, type de projet, quantité approximative, spécification du béton, besoin de pompe, date souhaitée et tout détail additionnel que vous ajoutez.",
+            "Nous conservons également des renseignements techniques limités liés à votre visite : page d’arrivée, site référent et paramètres de campagne (UTM) le cas échéant. Ces renseignements servent à comprendre d’où proviennent les demandes."
+          ]
+        },
+        {
+          "heading": "Utilisation des renseignements",
+          "paragraphs": [
+            "Les renseignements sont utilisés pour traiter votre demande, vérifier les options disponibles auprès de notre réseau de fournisseurs et d’opérateurs, et communiquer avec vous au sujet de votre projet.",
+            "Nous ne vendons pas vos renseignements personnels. Nous ne vous inscrivons pas à des communications de marketing sans votre consentement distinct et explicite."
+          ]
+        },
+        {
+          "heading": "Communication de renseignements",
+          "paragraphs": [
+            "Afin de vérifier la disponibilité et d’obtenir une option pour votre projet, certains renseignements nécessaires (par exemple le secteur, le type de projet, le volume approximatif et la date souhaitée) peuvent être communiqués à des fournisseurs ou opérateurs de notre réseau.",
+            "Nous faisons appel à des fournisseurs de services techniques pour l’hébergement du site, la base de données et l’envoi de courriels transactionnels. Ces fournisseurs traitent les renseignements uniquement pour notre compte."
+          ]
+        },
+        {
+          "heading": "Conservation",
+          "paragraphs": [
+            "Les demandes sont conservées aussi longtemps que nécessaire pour le suivi commercial et les obligations légales applicables, puis supprimées ou anonymisées."
+          ]
+        },
+        {
+          "heading": "Témoins et analytique",
+          "paragraphs": [
+            "Le site utilise une solution d’analytique respectueuse de la vie privée afin de mesurer la fréquentation et le parcours de demande de manière agrégée. Aucun renseignement permettant de vous identifier (nom, téléphone, courriel, adresse) n’est transmis à l’outil d’analytique.",
+            "Le site n’utilise pas de témoins publicitaires ni de reciblage."
+          ]
+        },
+        {
+          "heading": "Vos droits",
+          "paragraphs": [
+            "Vous pouvez demander l’accès aux renseignements personnels que nous détenons à votre sujet, leur rectification, ou leur suppression, sous réserve des exceptions prévues par la loi. Vous pouvez également retirer votre consentement au traitement de votre demande.",
+            "Pour exercer ces droits, écrivez-nous à privacy@betondispo.com."
+          ]
+        },
+        {
+          "heading": "Sécurité",
+          "paragraphs": [
+            "Les renseignements sont transmis par connexion chiffrée et conservés dans une base de données à accès restreint. L’accès interne est limité aux personnes qui doivent traiter les demandes."
+          ]
+        },
+        {
+          "heading": "Nous joindre",
+          "paragraphs": [
+            "Pour toute question concernant cette politique ou le traitement de vos renseignements personnels : privacy@betondispo.com."
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "title": "Conditions d’utilisation",
+      "intro": "En utilisant le site betondispo.com et en soumettant une demande, vous acceptez les conditions ci-dessous.",
+      "sections": [
+        {
+          "heading": "Nature du service",
+          "paragraphs": [
+            "BétonDispo est un service de centralisation de demandes. Nous recevons votre demande, vérifions les options disponibles auprès d’un réseau de fournisseurs et d’opérateurs, et vous revenons avec une solution adaptée.",
+            "BétonDispo n’est pas un producteur de béton et n’exploite pas de flotte de camions, de malaxeurs volumétriques ou de pompes."
+          ]
+        },
+        {
+          "heading": "Les demandes ne sont pas des réservations",
+          "paragraphs": [
+            "L’envoi du formulaire constitue une demande d’information. Elle ne crée aucune obligation pour BétonDispo ni pour vous, et ne constitue pas une réservation, un contrat ou une garantie de disponibilité ou de prix.",
+            "Une réservation n’existe qu’une fois la disponibilité, le prix et les détails de service confirmés explicitement avec vous."
+          ]
+        },
+        {
+          "heading": "Exactitude des renseignements",
+          "paragraphs": [
+            "Vous êtes responsable de l’exactitude des renseignements fournis, notamment l’emplacement du chantier, l’accès, la date souhaitée et le volume estimé. Des renseignements inexacts peuvent rendre impossible la recherche d’une option adaptée."
+          ]
+        },
+        {
+          "heading": "Aucun avis technique",
+          "paragraphs": [
+            "L’information présentée sur ce site est de nature générale et ne constitue pas un avis d’ingénierie ni une recommandation technique. Pour tout ouvrage structural, référez-vous à vos plans, à votre entrepreneur ou à un professionnel compétent."
+          ]
+        },
+        {
+          "heading": "Limitation de responsabilité",
+          "paragraphs": [
+            "Le site est fourni « tel quel ». Dans la mesure permise par la loi, BétonDispo ne peut être tenue responsable des dommages indirects découlant de l’utilisation du site ou de l’impossibilité de trouver une option pour un projet donné."
+          ]
+        },
+        {
+          "heading": "Droit applicable",
+          "paragraphs": ["Ces conditions sont régies par les lois applicables au Québec, Canada."]
+        },
+        {
+          "heading": "Modifications",
+          "paragraphs": [
+            "Ces conditions peuvent être modifiées. La version en vigueur est celle publiée sur cette page."
+          ]
+        }
+      ]
+    }
+  },
+  "notFound": {
+    "title": "Page introuvable",
+    "body": "La page demandée n’existe pas ou a été déplacée.",
+    "cta": "Retour à l’accueil"
+  }
+}
