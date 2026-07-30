@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { isAuthenticated } from '@/server/auth';
 import { signOutAction } from '@/app/admin/actions';
 import { archivo, inter } from '@/app/fonts';
+import { adminText } from '@/app/admin/i18n';
+import { getAdminLocale } from '@/app/admin/locale';
 import '@/app/globals.css';
 
 /**
@@ -20,11 +22,12 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
-  const signedIn = await isAuthenticated();
+  const [signedIn, locale] = await Promise.all([isAuthenticated(), getAdminLocale()]);
+  const t = adminText[locale];
 
   return (
     <html
-      lang="fr-CA"
+      lang={t.lang}
       data-scroll-behavior="smooth"
       className={`${inter.variable} ${archivo.variable}`}
     >
@@ -39,30 +42,38 @@ export default async function AdminLayout({ children }: { children: ReactNode })
                     Admin
                   </span>
                 </Link>
-                <nav aria-label="Navigation admin" className="flex gap-1">
+                <nav aria-label={t.navLabel} className="flex gap-1">
                   <Link
                     href="/admin"
                     className="text-ink-soft hover:bg-surface-sunken hover:text-ink inline-flex min-h-10 items-center rounded-lg px-3 text-sm font-medium"
                   >
-                    Tableau de bord
+                    {t.dashboard}
                   </Link>
                   <Link
                     href="/admin/requests"
                     className="text-ink-soft hover:bg-surface-sunken hover:text-ink inline-flex min-h-10 items-center rounded-lg px-3 text-sm font-medium"
                   >
-                    Demandes
+                    {t.requests}
                   </Link>
                 </nav>
               </div>
 
-              <form action={signOutAction}>
-                <button
-                  type="submit"
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/admin/language?lang=${t.otherLocale}`}
                   className="border-line-strong text-ink-soft hover:bg-surface-sunken inline-flex min-h-10 items-center rounded-lg border px-3 text-sm font-medium"
                 >
-                  Se déconnecter
-                </button>
-              </form>
+                  {t.languageToggle}
+                </Link>
+                <form action={signOutAction}>
+                  <button
+                    type="submit"
+                    className="border-line-strong text-ink-soft hover:bg-surface-sunken inline-flex min-h-10 items-center rounded-lg border px-3 text-sm font-medium"
+                  >
+                    {t.signOut}
+                  </button>
+                </form>
+              </div>
             </div>
           </header>
         ) : null}

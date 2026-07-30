@@ -4,6 +4,7 @@ import { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { updateRequestAction, type UpdateState } from '@/app/admin/actions';
 import { STATUS_LABELS } from '@/app/admin/labels';
+import { adminText, type AdminLocale } from '@/app/admin/i18n';
 import { QUOTE_STATUSES, type QuoteStatus } from '@/lib/quote-options';
 import { buttonClass } from '@/components/ui/button-styles';
 
@@ -19,14 +20,17 @@ export function RequestEditor({
   status,
   internalNotes,
   lostReason,
+  locale,
 }: {
   id: string;
   status: QuoteStatus;
   internalNotes: string;
   lostReason: string;
+  locale: AdminLocale;
 }) {
   const [state, formAction] = useActionState<UpdateState, FormData>(updateRequestAction, {});
   const [currentStatus, setCurrentStatus] = useState<QuoteStatus>(status);
+  const t = adminText[locale].editor;
 
   return (
     <form
@@ -36,12 +40,12 @@ export function RequestEditor({
       <input type="hidden" name="id" value={id} />
 
       <h2 className="text-ink-muted font-display text-xs font-bold tracking-[0.12em] uppercase">
-        Suivi interne
+        {t.title}
       </h2>
 
       <div className="space-y-1.5">
         <label htmlFor="status" className="block text-sm font-semibold">
-          Statut
+          {t.status}
         </label>
         <select
           id="status"
@@ -52,13 +56,23 @@ export function RequestEditor({
         >
           {QUOTE_STATUSES.map((value) => (
             <option key={value} value={value}>
-              {STATUS_LABELS[value]}
+              {STATUS_LABELS[locale][value]}
             </option>
           ))}
         </select>
         <div className="flex flex-wrap gap-2 pt-1">
-          <QuickStatus current={currentStatus} value="WON" onSelect={setCurrentStatus} />
-          <QuickStatus current={currentStatus} value="LOST" onSelect={setCurrentStatus} />
+          <QuickStatus
+            current={currentStatus}
+            value="WON"
+            label={t.markWon}
+            onSelect={setCurrentStatus}
+          />
+          <QuickStatus
+            current={currentStatus}
+            value="LOST"
+            label={t.markLost}
+            onSelect={setCurrentStatus}
+          />
         </div>
       </div>
 
@@ -67,14 +81,14 @@ export function RequestEditor({
       {currentStatus === 'LOST' ? (
         <div className="space-y-1.5">
           <label htmlFor="lostReason" className="block text-sm font-semibold">
-            Raison de la perte
+            {t.lostReason}
           </label>
           <input
             id="lostReason"
             name="lostReason"
             defaultValue={lostReason}
             maxLength={500}
-            placeholder="Prix, délai, aucune disponibilité, client injoignable…"
+            placeholder={t.lostReasonPlaceholder}
             className={controlClass}
           />
         </div>
@@ -84,7 +98,7 @@ export function RequestEditor({
 
       <div className="space-y-1.5">
         <label htmlFor="internalNotes" className="block text-sm font-semibold">
-          Notes internes
+          {t.internalNotes}
         </label>
         <textarea
           id="internalNotes"
@@ -92,19 +106,23 @@ export function RequestEditor({
           rows={8}
           maxLength={5000}
           defaultValue={internalNotes}
-          placeholder="Fournisseurs contactés, disponibilités, prix obtenus, suivi…"
+          placeholder={t.internalNotesPlaceholder}
           className={`${controlClass} min-h-40 resize-y`}
         />
       </div>
 
       <div aria-live="polite" className="min-h-5">
-        {state.error ? <p className="text-danger text-sm font-medium">{state.error}</p> : null}
+        {state.error ? (
+          <p className="text-danger text-sm font-medium">
+            {state.error === 'validation' ? t.validationError : t.serverError}
+          </p>
+        ) : null}
         {state.savedAt ? (
-          <p className="text-success text-sm font-medium">Modifications enregistrées.</p>
+          <p className="text-success text-sm font-medium">{t.saved}</p>
         ) : null}
       </div>
 
-      <SaveButton />
+      <SaveButton save={t.save} saving={t.saving} />
     </form>
   );
 }
@@ -112,10 +130,12 @@ export function RequestEditor({
 function QuickStatus({
   current,
   value,
+  label,
   onSelect,
 }: {
   current: QuoteStatus;
   value: Extract<QuoteStatus, 'WON' | 'LOST'>;
+  label: string;
   onSelect: (status: QuoteStatus) => void;
 }) {
   const active = current === value;
@@ -132,16 +152,16 @@ function QuickStatus({
         active ? 'ring-accent ring-2' : ''
       }`}
     >
-      Marquer {value === 'WON' ? 'gagnée' : 'perdue'}
+      {label}
     </button>
   );
 }
 
-function SaveButton() {
+function SaveButton({ save, saving }: { save: string; saving: string }) {
   const { pending } = useFormStatus();
   return (
     <button type="submit" disabled={pending} className={buttonClass('primary', 'md', 'w-full')}>
-      {pending ? 'Enregistrement…' : 'Enregistrer'}
+      {pending ? saving : save}
     </button>
   );
 }

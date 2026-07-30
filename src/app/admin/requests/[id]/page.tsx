@@ -3,7 +3,9 @@ import { notFound } from 'next/navigation';
 import { requireAdmin } from '@/server/auth';
 import { getQuoteRequest } from '@/server/admin-queries';
 import { StatusBadge } from '@/app/admin/StatusBadge';
-import { formatDateTime, formatVolume, frOptions } from '@/app/admin/labels';
+import { adminOptions, formatDateTime, formatVolume } from '@/app/admin/labels';
+import { adminText } from '@/app/admin/i18n';
+import { getAdminLocale } from '@/app/admin/locale';
 import { RequestEditor } from './RequestEditor';
 
 export const dynamic = 'force-dynamic';
@@ -12,6 +14,9 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default async function AdminRequestPage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdmin();
+  const locale = await getAdminLocale();
+  const t = adminText[locale].requestDetail;
+  const options = adminOptions(locale);
 
   const { id } = await params;
   if (!UUID.test(id)) notFound();
@@ -27,27 +32,29 @@ export default async function AdminRequestPage({ params }: { params: Promise<{ i
     <div className="container-page space-y-6">
       <div>
         <Link href="/admin/requests" className="text-ink-muted hover:text-ink text-sm">
-          ← Toutes les demandes
+          {t.back}
         </Link>
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <h1 className="font-display text-3xl font-extrabold">{request.publicId}</h1>
-          <StatusBadge status={request.status} />
+          <StatusBadge status={request.status} locale={locale} />
         </div>
         <p className="text-ink-muted mt-1 text-sm">
-          Reçue le {formatDateTime(request.createdAt)} · Modifiée le{' '}
-          {formatDateTime(request.updatedAt)} · Demande soumise en{' '}
-          {request.locale === 'fr' ? 'français' : 'anglais'}
+          {t.receivedMeta(
+            formatDateTime(request.createdAt, locale),
+            formatDateTime(request.updatedAt, locale),
+            request.locale === 'fr' ? t.french : t.english,
+          )}
         </p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr] lg:items-start">
         <div className="space-y-6">
-          <Card title="Client">
-            <Row label="Nom" value={request.name} />
-            {request.companyName ? <Row label="Entreprise" value={request.companyName} /> : null}
-            <Row label="Type" value={frOptions.customerType[request.customerType]} />
+          <Card title={t.client}>
+            <Row label={t.name} value={request.name} />
+            {request.companyName ? <Row label={t.company} value={request.companyName} /> : null}
+            <Row label={t.type} value={options.customerType[request.customerType]} />
             <Row
-              label="Téléphone"
+              label={t.phone}
               value={
                 <a href={`tel:${request.phone}`} className="text-accent hover:underline">
                   {request.phone}
@@ -55,7 +62,7 @@ export default async function AdminRequestPage({ params }: { params: Promise<{ i
               }
             />
             <Row
-              label="Courriel"
+              label={t.email}
               value={
                 <a href={`mailto:${request.email}`} className="text-accent hover:underline">
                   {request.email}
@@ -63,58 +70,58 @@ export default async function AdminRequestPage({ params }: { params: Promise<{ i
               }
             />
             <Row
-              label="Contact préféré"
-              value={frOptions.contactMethod[request.preferredContactMethod]}
+              label={t.preferredContact}
+              value={options.contactMethod[request.preferredContactMethod]}
             />
           </Card>
 
-          <Card title="Chantier">
-            <Row label="Adresse" value={request.address} />
-            <Row label="Ville" value={`${request.city} ${request.postalCode}`} />
-            {request.accessNotes ? <Row label="Accès" value={request.accessNotes} /> : null}
+          <Card title={t.site}>
+            <Row label={t.address} value={request.address} />
+            <Row label={t.city} value={`${request.city} ${request.postalCode}`} />
+            {request.accessNotes ? <Row label={t.access} value={request.accessNotes} /> : null}
           </Card>
 
-          <Card title="Projet">
-            <Row label="Type" value={frOptions.projectType[request.projectType]} />
+          <Card title={t.project}>
+            <Row label={t.type} value={options.projectType[request.projectType]} />
             <Row
-              label="Quantité"
-              value={formatVolume(request.estimatedVolumeM3, request.volumeUnknown)}
+              label={t.quantity}
+              value={formatVolume(request.estimatedVolumeM3, request.volumeUnknown, locale)}
             />
             <Row
-              label="Spécification"
-              value={frOptions.concreteStrength[request.concreteStrength]}
+              label={t.specification}
+              value={options.concreteStrength[request.concreteStrength]}
             />
-            <Row label="Pompe" value={frOptions.pumpRequired[request.pumpRequired]} />
-            {request.pumpNotes ? <Row label="Notes pompage" value={request.pumpNotes} /> : null}
+            <Row label={t.pump} value={options.pumpRequired[request.pumpRequired]} />
+            {request.pumpNotes ? <Row label={t.pumpNotes} value={request.pumpNotes} /> : null}
           </Card>
 
-          <Card title="Échéancier">
-            <Row label="Date souhaitée" value={request.desiredDate} />
+          <Card title={t.schedule}>
+            <Row label={t.desiredDate} value={request.desiredDate} />
             <Row
-              label="Moment"
+              label={t.time}
               value={
                 request.preferredTime
-                  ? frOptions.preferredTime[request.preferredTime]
-                  : 'Aucune préférence'
+                  ? options.preferredTime[request.preferredTime]
+                  : t.noPreference
               }
             />
-            <Row label="Flexible" value={request.scheduleFlexible ? 'Oui' : 'Non'} />
+            <Row label={t.flexible} value={request.scheduleFlexible ? t.yes : t.no} />
           </Card>
 
           {request.additionalNotes ? (
-            <Card title="Détails supplémentaires">
+            <Card title={t.additional}>
               <p className="text-ink-soft whitespace-pre-wrap">{request.additionalNotes}</p>
             </Card>
           ) : null}
 
-          <Card title="Acquisition">
-            <Row label="Source" value={source || '—'} />
+          <Card title={t.acquisition}>
+            <Row label={t.source} value={source || '—'} />
             <Row
-              label="Terme / contenu"
+              label={t.termContent}
               value={[request.utmTerm, request.utmContent].filter(Boolean).join(' / ') || '—'}
             />
-            <Row label="Référent" value={request.referrer || '—'} />
-            <Row label="Page d’arrivée" value={request.landingPage || '—'} />
+            <Row label={t.referrer} value={request.referrer || '—'} />
+            <Row label={t.landingPage} value={request.landingPage || '—'} />
           </Card>
         </div>
 
@@ -124,6 +131,7 @@ export default async function AdminRequestPage({ params }: { params: Promise<{ i
           status={request.status}
           internalNotes={request.internalNotes ?? ''}
           lostReason={request.lostReason ?? ''}
+          locale={locale}
         />
       </div>
     </div>

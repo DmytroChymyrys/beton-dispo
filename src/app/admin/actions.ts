@@ -8,7 +8,7 @@ import { updateQuoteRequest } from '@/server/admin-queries';
 import { QUOTE_STATUSES } from '@/lib/quote-options';
 
 export type SignInState = {
-  error?: string;
+  error?: 'invalid';
   /**
    * Echoed back so a failed attempt doesn't wipe the field the operator
    * already typed. The password is deliberately never returned.
@@ -31,7 +31,7 @@ export async function signInAction(_prev: SignInState, formData: FormData): Prom
   // exists or only the password was wrong.
   if (!parsed.success || !verifyCredentials(parsed.data)) {
     return {
-      error: 'Identifiants invalides.',
+      error: 'invalid',
       email: typeof formData.get('email') === 'string' ? String(formData.get('email')) : '',
     };
   }
@@ -52,7 +52,7 @@ const updateSchema = z.object({
   lostReason: z.string().trim().max(500),
 });
 
-export type UpdateState = { error?: string; savedAt?: number };
+export type UpdateState = { error?: 'validation' | 'server'; savedAt?: number };
 
 export async function updateRequestAction(
   _prev: UpdateState,
@@ -70,7 +70,7 @@ export async function updateRequestAction(
   });
 
   if (!parsed.success) {
-    return { error: 'La mise à jour n’a pas pu être enregistrée. Vérifiez les champs.' };
+    return { error: 'validation' };
   }
 
   const { id, status, internalNotes, lostReason } = parsed.data;
@@ -87,7 +87,7 @@ export async function updateRequestAction(
       id,
       error: error instanceof Error ? error.message : 'unknown error',
     });
-    return { error: 'Une erreur est survenue. La mise à jour n’a pas été enregistrée.' };
+    return { error: 'server' };
   }
 
   revalidatePath('/admin');

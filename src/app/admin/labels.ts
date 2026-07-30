@@ -1,25 +1,42 @@
 import frMessages from '@/messages/fr.json';
+import enMessages from '@/messages/en.json';
+import type { AdminLocale } from '@/app/admin/i18n';
 import type { QuoteStatus } from '@/lib/quote-options';
 
 /*
- * The admin is internal and single-language (French), unlike the public site.
- *
- * This module is imported by client components, so it reads the French
- * messages directly rather than through `getDictionary`, which is server-only.
- * Option labels are reused from that dictionary so an option never ends up with
- * two different names; only the workflow vocabulary is defined here.
+ * This module is imported by client components, so it reads the static message
+ * files directly rather than through `getDictionary`, which is server-only.
+ * Option labels are reused from the public dictionaries so an option never ends
+ * up with two different names; only the workflow vocabulary is defined here.
  */
 export const frOptions = frMessages.quote.options;
+export const enOptions = enMessages.quote.options;
 
-export const STATUS_LABELS: Record<QuoteStatus, string> = {
-  NEW: 'Nouvelle',
-  CONTACTED: 'Contactée',
-  QUALIFIED: 'Qualifiée',
-  QUOTING: 'En recherche',
-  OFFER_SENT: 'Option envoyée',
-  WON: 'Gagnée',
-  LOST: 'Perdue',
-  INVALID: 'Non valide',
+export function adminOptions(locale: AdminLocale) {
+  return locale === 'en' ? enOptions : frOptions;
+}
+
+export const STATUS_LABELS: Record<AdminLocale, Record<QuoteStatus, string>> = {
+  fr: {
+    NEW: 'Nouvelle',
+    CONTACTED: 'Contactée',
+    QUALIFIED: 'Qualifiée',
+    QUOTING: 'En recherche',
+    OFFER_SENT: 'Option envoyée',
+    WON: 'Gagnée',
+    LOST: 'Perdue',
+    INVALID: 'Non valide',
+  },
+  en: {
+    NEW: 'New',
+    CONTACTED: 'Contacted',
+    QUALIFIED: 'Qualified',
+    QUOTING: 'Searching',
+    OFFER_SENT: 'Option sent',
+    WON: 'Won',
+    LOST: 'Lost',
+    INVALID: 'Invalid',
+  },
 };
 
 /** Badge colours. Won/lost read at a glance; everything else stays neutral. */
@@ -34,14 +51,20 @@ export const STATUS_CLASSES: Record<QuoteStatus, string> = {
   INVALID: 'bg-surface-sunken text-ink-muted border-line-strong',
 };
 
-export function formatVolume(value: string | null, unknown: boolean): string {
-  if (unknown || !value) return 'Inconnu';
+export function formatVolume(value: string | null, unknown: boolean, locale: AdminLocale): string {
+  if (unknown || !value) return locale === 'en' ? 'Unknown' : 'Inconnu';
   const n = Number(value);
-  return `${Number.isInteger(n) ? n : n.toFixed(2).replace('.', ',')} m³`;
+  const formatted = Number.isInteger(n)
+    ? String(n)
+    : n.toLocaleString(locale === 'en' ? 'en-CA' : 'fr-CA', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+  return `${formatted} m³`;
 }
 
-export function formatDateTime(value: Date): string {
-  return value.toLocaleString('fr-CA', {
+export function formatDateTime(value: Date, locale: AdminLocale): string {
+  return value.toLocaleString(locale === 'en' ? 'en-CA' : 'fr-CA', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -50,6 +73,7 @@ export function formatDateTime(value: Date): string {
   });
 }
 
-export function formatPercent(fraction: number): string {
+export function formatPercent(fraction: number, locale: AdminLocale): string {
+  if (locale === 'en') return `${Math.round(fraction * 100)}%`;
   return `${Math.round(fraction * 100)} %`;
 }

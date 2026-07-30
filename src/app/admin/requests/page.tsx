@@ -12,7 +12,9 @@ import {
 import { CUSTOMER_TYPES, QUOTE_STATUSES } from '@/lib/quote-options';
 import type { CustomerType, QuoteStatus } from '@/lib/quote-options';
 import { StatusBadge } from '@/app/admin/StatusBadge';
-import { formatDateTime, formatVolume, frOptions, STATUS_LABELS } from '@/app/admin/labels';
+import { adminOptions, formatDateTime, formatVolume, STATUS_LABELS } from '@/app/admin/labels';
+import { adminText } from '@/app/admin/i18n';
+import { getAdminLocale } from '@/app/admin/locale';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,6 +70,9 @@ const selectClass =
 
 export default async function AdminRequestsPage({ searchParams }: { searchParams: SearchParams }) {
   await requireAdmin();
+  const locale = await getAdminLocale();
+  const t = adminText[locale].requestList;
+  const options = adminOptions(locale);
 
   const params = await searchParams;
   const filters = parseFilters(params);
@@ -78,19 +83,18 @@ export default async function AdminRequestsPage({ searchParams }: { searchParams
   ]);
 
   const columns: { key: SortKey; label: string }[] = [
-    { key: 'createdAt', label: 'Reçue' },
-    { key: 'city', label: 'Ville' },
-    { key: 'desiredDate', label: 'Date souhaitée' },
-    { key: 'status', label: 'Statut' },
+    { key: 'createdAt', label: t.received },
+    { key: 'city', label: t.city },
+    { key: 'desiredDate', label: t.desiredDate },
+    { key: 'status', label: t.status },
   ];
 
   return (
     <div className="container-page space-y-6">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <h1 className="text-3xl">Demandes</h1>
+        <h1 className="text-3xl">{t.title}</h1>
         <p className="text-ink-muted text-sm tabular-nums">
-          {total} demande{total === 1 ? '' : 's'}
-          {pageCount > 1 ? ` · page ${page} sur ${pageCount}` : ''}
+          {t.count(total, page, pageCount)}
         </p>
       </div>
 
@@ -98,11 +102,12 @@ export default async function AdminRequestsPage({ searchParams }: { searchParams
           and survives a reload. */}
       <form
         method="get"
+        action="/admin/requests"
         className="rounded-card border-line bg-surface grid gap-4 border p-5 sm:grid-cols-2 lg:grid-cols-4"
       >
         <div className="space-y-1.5">
           <label htmlFor="status" className="block text-sm font-semibold">
-            Statut
+            {t.status}
           </label>
           <select
             id="status"
@@ -110,10 +115,10 @@ export default async function AdminRequestsPage({ searchParams }: { searchParams
             defaultValue={filters.status ?? ''}
             className={selectClass}
           >
-            <option value="">Tous</option>
+            <option value="">{t.all}</option>
             {QUOTE_STATUSES.map((status) => (
               <option key={status} value={status}>
-                {STATUS_LABELS[status]}
+                {STATUS_LABELS[locale][status]}
               </option>
             ))}
           </select>
@@ -121,14 +126,14 @@ export default async function AdminRequestsPage({ searchParams }: { searchParams
 
         <div className="space-y-1.5">
           <label htmlFor="city" className="block text-sm font-semibold">
-            Ville
+            {t.city}
           </label>
           <input
             id="city"
             name="city"
             list="admin-cities"
             defaultValue={filters.city ?? ''}
-            placeholder="Toutes"
+            placeholder={t.cityPlaceholder}
             className={selectClass}
           />
           <datalist id="admin-cities">
@@ -140,7 +145,7 @@ export default async function AdminRequestsPage({ searchParams }: { searchParams
 
         <div className="space-y-1.5">
           <label htmlFor="customerType" className="block text-sm font-semibold">
-            Type de client
+            {t.customerType}
           </label>
           <select
             id="customerType"
@@ -148,29 +153,29 @@ export default async function AdminRequestsPage({ searchParams }: { searchParams
             defaultValue={filters.customerType ?? ''}
             className={selectClass}
           >
-            <option value="">Tous</option>
+            <option value="">{t.all}</option>
             {CUSTOMER_TYPES.map((type) => (
               <option key={type} value={type}>
-                {frOptions.customerType[type]}
+                {options.customerType[type]}
               </option>
             ))}
           </select>
         </div>
 
         <div className="space-y-1.5">
-          <span className="block text-sm font-semibold">Date souhaitée</span>
+          <span className="block text-sm font-semibold">{t.desiredDate}</span>
           <div className="flex gap-2">
             <input
               type="date"
               name="desiredFrom"
-              aria-label="Date souhaitée — du"
+              aria-label={t.desiredFrom}
               defaultValue={filters.desiredFrom ?? ''}
               className={selectClass}
             />
             <input
               type="date"
               name="desiredTo"
-              aria-label="Date souhaitée — au"
+              aria-label={t.desiredTo}
               defaultValue={filters.desiredTo ?? ''}
               className={selectClass}
             />
@@ -178,19 +183,19 @@ export default async function AdminRequestsPage({ searchParams }: { searchParams
         </div>
 
         <div className="space-y-1.5">
-          <span className="block text-sm font-semibold">Date de création</span>
+          <span className="block text-sm font-semibold">{t.createdDate}</span>
           <div className="flex gap-2">
             <input
               type="date"
               name="createdFrom"
-              aria-label="Date de création — du"
+              aria-label={t.createdFrom}
               defaultValue={filters.createdFrom ?? ''}
               className={selectClass}
             />
             <input
               type="date"
               name="createdTo"
-              aria-label="Date de création — au"
+              aria-label={t.createdTo}
               defaultValue={filters.createdTo ?? ''}
               className={selectClass}
             />
@@ -199,42 +204,43 @@ export default async function AdminRequestsPage({ searchParams }: { searchParams
 
         <input type="hidden" name="sort" value={filters.sort} />
         <input type="hidden" name="direction" value={filters.direction} />
+        <input type="hidden" name="page" value="1" />
 
         <div className="flex items-end gap-2 lg:col-span-2">
           <button
             type="submit"
             className="bg-accent hover:bg-accent-hover inline-flex min-h-11 items-center rounded-lg px-5 font-semibold text-white"
           >
-            Filtrer
+            {t.filter}
           </button>
           <Link
             href="/admin/requests"
             className="border-line-strong hover:bg-surface-sunken inline-flex min-h-11 items-center rounded-lg border px-5 font-semibold"
           >
-            Réinitialiser
+            {t.reset}
           </Link>
         </div>
       </form>
 
       {rows.length === 0 ? (
         <p className="rounded-card border-line bg-surface text-ink-muted border border-dashed p-10 text-center">
-          Aucune demande ne correspond à ces critères.
+          {t.noMatches}
         </p>
       ) : (
         <div className="rounded-card border-line bg-surface overflow-x-auto border">
           <table className="w-full min-w-[68rem] border-collapse text-sm">
             <thead>
               <tr className="border-line bg-surface-sunken border-b text-left">
-                <Th>N°</Th>
+                <Th>{t.number}</Th>
                 <SortableTh column="createdAt" filters={filters} columns={columns} />
-                <Th>Client</Th>
+                <Th>{t.client}</Th>
                 <SortableTh column="city" filters={filters} columns={columns} />
-                <Th>Projet</Th>
-                <Th>Quantité</Th>
-                <Th>Pompe</Th>
+                <Th>{t.project}</Th>
+                <Th>{t.quantity}</Th>
+                <Th>{t.pump}</Th>
                 <SortableTh column="desiredDate" filters={filters} columns={columns} />
-                <Th>Téléphone</Th>
-                <Th>Courriel</Th>
+                <Th>{t.phone}</Th>
+                <Th>{t.email}</Th>
                 <SortableTh column="status" filters={filters} columns={columns} />
               </tr>
             </thead>
@@ -250,7 +256,7 @@ export default async function AdminRequestsPage({ searchParams }: { searchParams
                     </Link>
                   </td>
                   <td className="text-ink-muted px-4 py-3 whitespace-nowrap tabular-nums">
-                    {formatDateTime(row.createdAt)}
+                    {formatDateTime(row.createdAt, locale)}
                   </td>
                   <td className="px-4 py-3">
                     <span className="font-medium">{row.name}</span>
@@ -258,15 +264,15 @@ export default async function AdminRequestsPage({ searchParams }: { searchParams
                       <span className="text-ink-muted block text-xs">{row.companyName}</span>
                     ) : null}
                     <span className="text-ink-muted block text-xs">
-                      {frOptions.customerType[row.customerType]}
+                      {options.customerType[row.customerType]}
                     </span>
                   </td>
                   <td className="px-4 py-3">{row.city}</td>
-                  <td className="px-4 py-3">{frOptions.projectType[row.projectType]}</td>
+                  <td className="px-4 py-3">{options.projectType[row.projectType]}</td>
                   <td className="px-4 py-3 whitespace-nowrap tabular-nums">
-                    {formatVolume(row.estimatedVolumeM3, row.volumeUnknown)}
+                    {formatVolume(row.estimatedVolumeM3, row.volumeUnknown, locale)}
                   </td>
-                  <td className="px-4 py-3">{frOptions.pumpRequired[row.pumpRequired]}</td>
+                  <td className="px-4 py-3">{options.pumpRequired[row.pumpRequired]}</td>
                   <td className="px-4 py-3 whitespace-nowrap tabular-nums">{row.desiredDate}</td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <a href={`tel:${row.phone}`} className="hover:underline">
@@ -279,7 +285,7 @@ export default async function AdminRequestsPage({ searchParams }: { searchParams
                     </a>
                   </td>
                   <td className="px-4 py-3">
-                    <StatusBadge status={row.status} />
+                    <StatusBadge status={row.status} locale={locale} />
                   </td>
                 </tr>
               ))}
@@ -295,20 +301,20 @@ export default async function AdminRequestsPage({ searchParams }: { searchParams
               href={`/admin/requests${queryString(filters, { page: page - 1 })}`}
               className="border-line-strong hover:bg-surface-sunken inline-flex min-h-11 items-center rounded-lg border px-4 text-sm font-semibold"
             >
-              ← Précédent
+              {t.previous}
             </Link>
           ) : (
             <span />
           )}
           <span className="text-ink-muted text-sm tabular-nums">
-            {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} sur {total}
+            {t.range((page - 1) * PAGE_SIZE + 1, Math.min(page * PAGE_SIZE, total), total)}
           </span>
           {page < pageCount ? (
             <Link
               href={`/admin/requests${queryString(filters, { page: page + 1 })}`}
               className="border-line-strong hover:bg-surface-sunken inline-flex min-h-11 items-center rounded-lg border px-4 text-sm font-semibold"
             >
-              Suivant →
+              {t.next}
             </Link>
           ) : (
             <span />

@@ -2,13 +2,18 @@ import Link from 'next/link';
 import { requireAdmin } from '@/server/auth';
 import { getDashboardStats, listQuoteRequests } from '@/server/admin-queries';
 import { StatusBadge } from '@/app/admin/StatusBadge';
-import { formatDateTime, formatPercent, formatVolume, frOptions } from '@/app/admin/labels';
+import { adminOptions, formatDateTime, formatPercent, formatVolume } from '@/app/admin/labels';
+import { adminText } from '@/app/admin/i18n';
+import { getAdminLocale } from '@/app/admin/locale';
 
 /** Always reflects the current database state — never a cached snapshot. */
 export const dynamic = 'force-dynamic';
 
 export default async function AdminDashboardPage() {
   await requireAdmin();
+  const locale = await getAdminLocale();
+  const t = adminText[locale].dashboardPage;
+  const options = adminOptions(locale);
 
   const [stats, latest] = await Promise.all([
     getDashboardStats(),
@@ -18,38 +23,36 @@ export default async function AdminDashboardPage() {
   return (
     <div className="container-page space-y-8">
       <div>
-        <h1 className="text-3xl">Tableau de bord</h1>
-        <p className="text-ink-muted mt-1">
-          L’indicateur principal de la phase 1 est le nombre de demandes qualifiées.
-        </p>
+        <h1 className="text-3xl">{t.title}</h1>
+        <p className="text-ink-muted mt-1">{t.intro}</p>
       </div>
 
       <section aria-labelledby="kpis">
         <h2 id="kpis" className="sr-only">
-          Indicateurs
+          {t.kpis}
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Stat label="Demandes — 7 derniers jours" value={stats.last7} emphasis />
-          <Stat label="Demandes — 30 derniers jours" value={stats.last30} emphasis />
+          <Stat label={t.last7} value={stats.last7} emphasis />
+          <Stat label={t.last30} value={stats.last30} emphasis />
           <Stat
-            label="Demandes qualifiées"
+            label={t.qualified}
             value={stats.qualified}
-            note={`${formatPercent(stats.qualifiedRate)} du total`}
+            note={`${formatPercent(stats.qualifiedRate, locale)} ${t.qualifiedNote}`}
           />
           <Stat
-            label="Conversion en gagnées"
-            value={formatPercent(stats.wonRate)}
-            note={`${stats.won} gagnées · ${stats.lost} perdues`}
+            label={t.wonConversion}
+            value={formatPercent(stats.wonRate, locale)}
+            note={t.wonLost(stats.won, stats.lost)}
           />
-          <Stat label="Entrepreneurs" value={stats.contractors} />
-          <Stat label="Particuliers" value={stats.homeowners} />
-          <Stat label="Total des demandes" value={stats.total} />
+          <Stat label={t.contractors} value={stats.contractors} />
+          <Stat label={t.homeowners} value={stats.homeowners} />
+          <Stat label={t.total} value={stats.total} />
           <div className="rounded-card border-line bg-surface border p-5">
             <p className="text-ink-muted font-display text-xs font-bold tracking-[0.12em] uppercase">
-              Principales villes
+              {t.topCities}
             </p>
             {stats.topCities.length === 0 ? (
-              <p className="text-ink-muted mt-3 text-sm">Aucune donnée.</p>
+              <p className="text-ink-muted mt-3 text-sm">{t.noData}</p>
             ) : (
               <ul className="mt-3 space-y-1 text-sm">
                 {stats.topCities.map((row) => (
@@ -67,19 +70,19 @@ export default async function AdminDashboardPage() {
       <section aria-labelledby="latest" className="space-y-4">
         <div className="flex items-baseline justify-between gap-4">
           <h2 id="latest" className="text-xl">
-            Dernières demandes
+            {t.latest}
           </h2>
           <Link
             href="/admin/requests"
             className="text-accent text-sm font-semibold hover:underline"
           >
-            Voir toutes les demandes →
+            {t.viewAll}
           </Link>
         </div>
 
         {latest.rows.length === 0 ? (
           <p className="rounded-card border-line bg-surface text-ink-muted border border-dashed p-8 text-center">
-            Aucune demande pour le moment.
+            {t.empty}
           </p>
         ) : (
           <ul className="rounded-card border-line bg-surface divide-line divide-y overflow-hidden border">
@@ -93,15 +96,15 @@ export default async function AdminDashboardPage() {
                   <span className="min-w-40 flex-1 font-medium">{row.name}</span>
                   <span className="text-ink-muted min-w-28 text-sm">{row.city}</span>
                   <span className="text-ink-muted min-w-32 text-sm">
-                    {frOptions.projectType[row.projectType]}
+                    {options.projectType[row.projectType]}
                   </span>
                   <span className="text-ink-muted min-w-20 text-sm tabular-nums">
-                    {formatVolume(row.estimatedVolumeM3, row.volumeUnknown)}
+                    {formatVolume(row.estimatedVolumeM3, row.volumeUnknown, locale)}
                   </span>
                   <span className="text-ink-muted min-w-28 text-sm tabular-nums">
-                    {formatDateTime(row.createdAt)}
+                    {formatDateTime(row.createdAt, locale)}
                   </span>
-                  <StatusBadge status={row.status} />
+                  <StatusBadge status={row.status} locale={locale} />
                 </Link>
               </li>
             ))}
