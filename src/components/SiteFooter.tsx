@@ -15,6 +15,8 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
   const navLabels: Record<RouteKey, string> = {
     home: meta.siteName,
     calculator: nav.links.calculator,
+    concreteSlab: locale === 'fr' ? 'Dalle de béton' : 'Concrete slab',
+    concreteDelivery: locale === 'fr' ? 'Livraison de béton' : 'Concrete delivery',
     howItWorks: nav.links.howItWorks,
     services: nav.links.services,
     faq: nav.links.faq,

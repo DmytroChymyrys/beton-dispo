@@ -11,6 +11,8 @@ const PAGE_PAIRS: [string, string][] = [
   ['/fr', '/en'],
   ['/fr/soumission', '/en/quote'],
   ['/fr/calculateur-beton', '/en/concrete-calculator'],
+  ['/fr/dalle-beton', '/en/concrete-slab'],
+  ['/fr/livraison-beton', '/en/concrete-delivery'],
   ['/fr/comment-ca-marche', '/en/how-it-works'],
   ['/fr/services', '/en/services'],
   ['/fr/faq', '/en/faq'],
@@ -18,7 +20,15 @@ const PAGE_PAIRS: [string, string][] = [
   ['/fr/conditions', '/en/terms'],
 ];
 
-const ALL_PAGES = PAGE_PAIRS.flat();
+const CITY_PAGE_PAIRS: [string, string][] = [
+  ['/fr/beton/longueuil', '/en/concrete/longueuil'],
+  ['/fr/beton/brossard', '/en/concrete/brossard'],
+  ['/fr/beton/candiac', '/en/concrete/candiac'],
+  ['/fr/beton/la-prairie', '/en/concrete/la-prairie'],
+  ['/fr/beton/boucherville', '/en/concrete/boucherville'],
+];
+
+const ALL_PAGES = [...PAGE_PAIRS, ...CITY_PAGE_PAIRS].flat();
 
 async function content(page: Page, selector: string): Promise<string | null> {
   return page.locator(selector).first().getAttribute('content');
@@ -68,6 +78,34 @@ test.describe('canonical and hreflang', () => {
           new RegExp(`${other}$`),
         );
         // x-default is French: Québec is the primary market.
+        await expect(page.locator('link[hreflang="x-default"]')).toHaveAttribute(
+          'href',
+          new RegExp(`${fr}$`),
+        );
+      }
+    });
+  }
+
+  for (const [fr, en] of CITY_PAGE_PAIRS) {
+    test(`${fr} and ${en} point at each other`, async ({ page }) => {
+      for (const [self, other, selfTag, otherTag] of [
+        [fr, en, 'fr-CA', 'en-CA'],
+        [en, fr, 'en-CA', 'fr-CA'],
+      ] as const) {
+        await page.goto(self);
+
+        await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+          'href',
+          new RegExp(`^https?://[^/]+${self}$`),
+        );
+        await expect(page.locator(`link[hreflang="${selfTag}"]`)).toHaveAttribute(
+          'href',
+          new RegExp(`${self}$`),
+        );
+        await expect(page.locator(`link[hreflang="${otherTag}"]`)).toHaveAttribute(
+          'href',
+          new RegExp(`${other}$`),
+        );
         await expect(page.locator('link[hreflang="x-default"]')).toHaveAttribute(
           'href',
           new RegExp(`${fr}$`),

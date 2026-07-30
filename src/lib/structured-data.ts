@@ -74,3 +74,46 @@ export function faqSchema(locale: Locale) {
     })),
   };
 }
+
+export function breadcrumbSchema(items: { name: string; url?: string }[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      ...(item.url ? { item: item.url } : {}),
+    })),
+  };
+}
+
+export function cityServiceSchema({
+  locale,
+  cityName,
+  url,
+  name,
+  description,
+  areaType = 'City',
+}: {
+  locale: Locale;
+  cityName: string;
+  url: string;
+  name: string;
+  description: string;
+  areaType?: 'City' | 'Place';
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name,
+    description,
+    provider: { '@id': ORGANIZATION_ID },
+    areaServed: [
+      { '@type': areaType, name: cityName },
+      { '@type': 'Place', name: 'Rive-Sud' },
+    ],
+    availableLanguage: locale === 'fr' ? 'fr-CA' : 'en-CA',
+    url,
+  };
+}

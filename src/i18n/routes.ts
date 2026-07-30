@@ -16,6 +16,8 @@ export const routes = {
   home: { fr: '', en: '' },
   quote: { fr: 'soumission', en: 'quote' },
   calculator: { fr: 'calculateur-beton', en: 'concrete-calculator' },
+  concreteSlab: { fr: 'dalle-beton', en: 'concrete-slab' },
+  concreteDelivery: { fr: 'livraison-beton', en: 'concrete-delivery' },
   howItWorks: { fr: 'comment-ca-marche', en: 'how-it-works' },
   services: { fr: 'services', en: 'services' },
   faq: { fr: 'faq', en: 'faq' },
@@ -26,14 +28,12 @@ export const routes = {
 export type RouteKey = keyof typeof routes;
 
 /**
- * Prefix for the future per-city landing pages
- * (`/fr/livraison-beton/brossard`, `/en/concrete-delivery/brossard`).
- * The slugs are registered now so the language switcher and sitemap keep
- * working the day those pages are added; no pages exist for them in Phase 1.
+ * Prefix for city landing pages
+ * (`/fr/beton/brossard`, `/en/concrete/brossard`).
  */
 export const locationSegment = {
-  fr: 'livraison-beton',
-  en: 'concrete-delivery',
+  fr: 'beton',
+  en: 'concrete',
 } as const satisfies Record<Locale, string>;
 
 /** Absolute, locale-prefixed path for a route key. Always starts with `/`. */
@@ -68,7 +68,7 @@ export function switchLocalePath(pathname: string, target: Locale): string {
   const [first, ...tail] = rest;
   if (!first) return `/${target}`;
 
-  // Future location pages: /fr/livraison-beton/brossard -> /en/concrete-delivery/brossard
+  // City pages: /fr/beton/brossard -> /en/concrete/brossard
   if (first === locationSegment[from]) {
     return [`/${target}`, locationSegment[target], ...tail].join('/');
   }

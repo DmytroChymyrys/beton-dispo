@@ -17,6 +17,14 @@
         "title": "Calculateur de béton | Estimation en m³ | BétonDispo",
         "description": "Estimez le volume de béton en m³ pour une dalle, une semelle ou un mur. Calcul gratuit, puis envoyez votre demande à BétonDispo."
       },
+      "concreteSlab": {
+        "title": "Dalle de béton — Calcul du volume et livraison | BétonDispo",
+        "description": "Calculez le béton nécessaire pour une dalle, choisissez une marge et demandez une soumission pour votre projet."
+      },
+      "concreteDelivery": {
+        "title": "Livraison de béton à Montréal et Rive-Sud | BétonDispo",
+        "description": "Préparez une demande de livraison de béton avec volume estimé, date, adresse, accès au chantier et besoins de pompage."
+      },
       "howItWorks": {
         "title": "Comment ça marche | BétonDispo",
         "description": "Trois étapes simples : décrivez votre projet, nous vérifions la disponibilité, vous recevez une option adaptée à votre chantier."

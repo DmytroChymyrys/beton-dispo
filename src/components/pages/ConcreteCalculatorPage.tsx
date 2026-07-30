@@ -7,6 +7,7 @@ import { JsonLd } from '@/components/JsonLd';
 import { buttonClass } from '@/components/ui/button-styles';
 import { Section, SectionTitle } from '@/components/ui/Section';
 import { absoluteUrl } from '@/lib/site';
+import { relatedSeoLinks } from '@/lib/seo-landing-pages';
 
 export function ConcreteCalculatorPage({ locale }: { locale: Locale }) {
   const dict = getDictionary(locale);
@@ -96,6 +97,25 @@ export function ConcreteCalculatorPage({ locale }: { locale: Locale }) {
               >
                 {page.seo.servicesLink}
               </Link>
+            </div>
+            <div className="border-line mt-6 border-t pt-5">
+              <h2 className="font-display text-lg font-bold">
+                {locale === 'fr' ? 'Guides connexes' : 'Related guides'}
+              </h2>
+              <ul className="mt-3 space-y-1">
+                {relatedSeoLinks(locale)
+                  .slice(0, 4)
+                  .map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        className="text-ink-soft hover:text-accent inline-flex min-h-10 items-center font-medium"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+              </ul>
             </div>
           </aside>
         </div>

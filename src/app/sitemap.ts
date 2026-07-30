@@ -2,12 +2,15 @@ import type { MetadataRoute } from 'next';
 import { defaultLocale, localeTags, locales } from '@/i18n/config';
 import { pathFor, routes, type RouteKey } from '@/i18n/routes';
 import { absoluteUrl } from '@/lib/site';
+import { cityAlternates, cityPath, citySlugs } from '@/lib/city-pages';
 
 /** Relative crawl priority. The home page and the quote form are the goal. */
 const priorities: Record<RouteKey, number> = {
   home: 1,
   quote: 0.9,
   calculator: 0.95,
+  concreteSlab: 0.86,
+  concreteDelivery: 0.86,
   services: 0.8,
   howItWorks: 0.7,
   faq: 0.6,
@@ -26,7 +29,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const keys = Object.keys(routes) as RouteKey[];
   const lastModified = new Date();
 
-  return keys.flatMap((key) =>
+  const staticPages = keys.flatMap((key) =>
     locales.map((locale) => {
       const languages: Record<string, string> = {};
       for (const l of locales) {
@@ -43,4 +46,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
       };
     }),
   );
+
+  const cityPages = citySlugs.flatMap((city) =>
+    locales.map((locale) => ({
+      url: absoluteUrl(cityPath(city, locale)),
+      lastModified,
+      changeFrequency: 'monthly' as const,
+      priority: 0.75,
+      alternates: { languages: cityAlternates(city) },
+    })),
+  );
+
+  return [...staticPages, ...cityPages];
 }

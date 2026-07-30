@@ -54,6 +54,10 @@ describe('route registry', () => {
     ['home', 'en', '/en'],
     ['quote', 'fr', '/fr/soumission'],
     ['quote', 'en', '/en/quote'],
+    ['concreteSlab', 'fr', '/fr/dalle-beton'],
+    ['concreteSlab', 'en', '/en/concrete-slab'],
+    ['concreteDelivery', 'fr', '/fr/livraison-beton'],
+    ['concreteDelivery', 'en', '/en/concrete-delivery'],
     ['howItWorks', 'fr', '/fr/comment-ca-marche'],
     ['howItWorks', 'en', '/en/how-it-works'],
     ['privacy', 'fr', '/fr/politique-confidentialite'],
@@ -77,6 +81,10 @@ describe('switchLocalePath', () => {
     ['/en', 'fr', '/fr'],
     ['/fr/soumission', 'en', '/en/quote'],
     ['/en/quote', 'fr', '/fr/soumission'],
+    ['/fr/dalle-beton', 'en', '/en/concrete-slab'],
+    ['/en/concrete-slab', 'fr', '/fr/dalle-beton'],
+    ['/fr/livraison-beton', 'en', '/en/concrete-delivery'],
+    ['/en/concrete-delivery', 'fr', '/fr/livraison-beton'],
     ['/fr/comment-ca-marche', 'en', '/en/how-it-works'],
     ['/en/how-it-works', 'fr', '/fr/comment-ca-marche'],
     ['/fr/politique-confidentialite', 'en', '/en/privacy'],
@@ -87,10 +95,8 @@ describe('switchLocalePath', () => {
   });
 
   it('preserves the page for future per-city landing pages', () => {
-    expect(switchLocalePath('/fr/livraison-beton/brossard', 'en')).toBe(
-      '/en/concrete-delivery/brossard',
-    );
-    expect(switchLocalePath('/en/concrete-delivery/laval', 'fr')).toBe('/fr/livraison-beton/laval');
+    expect(switchLocalePath('/fr/beton/brossard', 'en')).toBe('/en/concrete/brossard');
+    expect(switchLocalePath('/en/concrete/longueuil', 'fr')).toBe('/fr/beton/longueuil');
   });
 
   it('falls back to the target home page for an unknown path', () => {
