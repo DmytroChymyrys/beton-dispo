@@ -3,10 +3,12 @@ import type { Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 import { QuoteForm } from '@/components/quote/QuoteForm';
 import { Section } from '@/components/ui/Section';
+import { issueQuoteFormToken } from '@/server/abuse';
 
 export function QuotePage({ locale }: { locale: Locale }) {
   const dict = getDictionary(locale);
   const quote = dict.quote;
+  const formToken = issueQuoteFormToken();
 
   return (
     <>
@@ -26,7 +28,7 @@ export function QuotePage({ locale }: { locale: Locale }) {
       <Section tone="ground" className="py-10 md:py-14">
         <div className="mx-auto max-w-3xl">
           <Suspense fallback={null}>
-            <QuoteForm locale={locale} strings={quote} />
+            <QuoteForm locale={locale} strings={quote} formToken={formToken} />
           </Suspense>
 
           <p className="text-ink-muted mt-8 text-center text-sm leading-relaxed">

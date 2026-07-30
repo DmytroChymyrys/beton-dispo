@@ -163,19 +163,27 @@ const attributionShape = {
 /* Full submission                                                             */
 /* -------------------------------------------------------------------------- */
 
-export const quoteSubmissionSchema = z.object({
-  locale: z.enum(LOCALES),
-  ...locationShape,
-  ...projectShape,
-  ...scheduleShape,
-  ...contactShape,
-  ...attributionShape,
-  /**
-   * Honeypot. Hidden from sighted users and skipped by assistive technology;
-   * only a bot fills it in. Must be empty.
-   */
-  websiteUrl: z.literal('', key('spam')),
-});
+export const quoteSubmissionSchema = z
+  .object({
+    locale: z.enum(LOCALES),
+    ...locationShape,
+    ...projectShape,
+    ...scheduleShape,
+    ...contactShape,
+    ...attributionShape,
+    /**
+     * Honeypot. Hidden from sighted users and skipped by assistive technology;
+     * only a bot fills it in. Must be empty.
+     */
+    websiteUrl: z.literal('', key('spam')),
+    /** Signed server-issued timing token. Verified only on the server. */
+    formIssuedAt: z
+      .string()
+      .trim()
+      .regex(/^\d{10,16}$/, key('spam')),
+    formToken: trimmed(256).min(32, key('spam')),
+  })
+  .strict();
 
 /** Re-applies the cross-field rules that `.shape` spreading drops. */
 export const quoteSubmission = quoteSubmissionSchema

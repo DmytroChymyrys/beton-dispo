@@ -48,6 +48,8 @@ const validSubmission = {
   utmContent: '',
   referrer: '',
   landingPage: '/fr',
+  formIssuedAt: '1785433200000',
+  formToken: 'x'.repeat(64),
 };
 
 /** Parses and returns `{ field: errorKey }`, or `{}` when valid. */
@@ -156,6 +158,11 @@ describe('quoteSubmission', () => {
     expect(errorsFor({ ...validSubmission, projectType: 'BRIDGE' })).toEqual({
       projectType: 'projectTypeRequired',
     });
+  });
+
+  it('rejects unknown fields rather than storing them', () => {
+    const result = quoteSubmission.safeParse({ ...validSubmission, unexpected: 'x' });
+    expect(result.success).toBe(false);
   });
 
   it('rejects an over-long free-text field', () => {

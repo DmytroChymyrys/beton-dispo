@@ -5,6 +5,8 @@ import { QuotePage } from '@/components/pages/QuotePage';
 
 type Props = { params: Promise<{ locale: string }> };
 
+export const dynamic = 'force-dynamic';
+
 export function generateStaticParams() {
   return staticParamsFor('fr');
 }

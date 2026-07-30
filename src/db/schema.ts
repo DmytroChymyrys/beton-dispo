@@ -138,6 +138,9 @@ export const quoteRequests = pgTable(
 
     /* ---- Internal ------------------------------------------------------- */
     /* Never selected into anything that reaches the public site. */
+    abuseStatus: varchar('abuse_status', { length: 32 }).notNull().default('clean'),
+    sourceIpHash: varchar('source_ip_hash', { length: 64 }),
+    duplicateFingerprint: varchar('duplicate_fingerprint', { length: 64 }),
     status: quoteStatusEnum('status').notNull().default('NEW'),
     internalNotes: text('internal_notes'),
     lostReason: text('lost_reason'),
@@ -148,6 +151,8 @@ export const quoteRequests = pgTable(
     index('quote_requests_city_idx').on(table.city),
     index('quote_requests_desired_date_idx').on(table.desiredDate),
     index('quote_requests_customer_type_idx').on(table.customerType),
+    index('quote_requests_source_ip_hash_idx').on(table.sourceIpHash),
+    index('quote_requests_duplicate_fingerprint_idx').on(table.duplicateFingerprint),
   ],
 );
 

@@ -16,7 +16,6 @@ import {
   type Option,
 } from '@/components/quote/fields';
 import { QuoteConfirmation } from '@/components/quote/QuoteConfirmation';
-import { submitQuoteAction } from '@/app/actions/submit-quote';
 import {
   CONCRETE_STRENGTHS,
   CONTACT_METHODS,
@@ -56,9 +55,11 @@ type Values = {
   additionalNotes: string;
   consent: boolean;
   websiteUrl: string;
+  formIssuedAt: string;
+  formToken: string;
 };
 
-const INITIAL: Values = {
+const INITIAL: Omit<Values, 'formIssuedAt' | 'formToken'> = {
   address: '',
   city: '',
   postalCode: '',
@@ -131,7 +132,19 @@ function todayIso(): string {
   return new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
 }
 
-export function QuoteForm({ locale, strings }: { locale: Locale; strings: QuoteStrings }) {
+type SubmitQuoteResult =
+  | { ok: true; publicId: string }
+  | { ok: false; fieldErrors?: Record<string, string>; formError?: string };
+
+export function QuoteForm({
+  locale,
+  strings,
+  formToken,
+}: {
+  locale: Locale;
+  strings: QuoteStrings;
+  formToken: { issuedAt: string; token: string };
+}) {
   const searchParams = useSearchParams();
   const prefilledVolume = readPrefilledVolume(searchParams.get('volume'));
   const [step, setStep] = useState<StepIndex>(prefilledVolume ? 1 : 0);
@@ -139,6 +152,8 @@ export function QuoteForm({ locale, strings }: { locale: Locale; strings: QuoteS
     ...INITIAL,
     estimatedVolumeM3: prefilledVolume,
     volumeUnknown: false,
+    formIssuedAt: formToken.issuedAt,
+    formToken: formToken.token,
   }));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -275,7 +290,18 @@ export function QuoteForm({ locale, strings }: { locale: Locale; strings: QuoteS
     };
 
     startTransition(async () => {
-      const result = await submitQuoteAction(payload);
+      let result: SubmitQuoteResult;
+      try {
+        const response = await fetch('/api/quote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        result = (await response.json()) as SubmitQuoteResult;
+        if (response.status === 429) result = { ok: false, formError: 'rateLimited' };
+      } catch {
+        result = { ok: false, formError: 'server' };
+      }
 
       if (result.ok) {
         track('quote_submitted', {
@@ -643,6 +669,8 @@ export function QuoteForm({ locale, strings }: { locale: Locale; strings: QuoteS
           onChange={(v) => set('websiteUrl', v)}
           label={t.honeypot.label}
         />
+        <input type="hidden" name="formIssuedAt" value={values.formIssuedAt} readOnly />
+        <input type="hidden" name="formToken" value={values.formToken} readOnly />
 
         <div className="border-line mt-8 flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:justify-between">
           {step > 0 ? (

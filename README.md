@@ -72,7 +72,7 @@ src/
       politique-confidentialite/  conditions/  EN: privacy/  terms/
       opengraph-image.tsx   Generated social card, per locale
     admin/                  Internal operator UI (French, noindex)
-    actions/submit-quote.ts Server action for the public form
+    api/quote/route.ts      Hardened quote submission endpoint
     sitemap.ts  robots.ts
   components/               Presentational components
     quote/                  Multi-step form + field primitives
@@ -233,17 +233,20 @@ each location page should earn its place with real, specific content.
 
 ## 7. Quote submission pipeline
 
-`src/app/actions/submit-quote.ts` runs in this order, and the order matters:
+`/api/quote` is the only browser submission endpoint. It runs in this order, and
+the order matters:
 
-1. **Validate** the whole payload with `quoteSubmission` (Zod). Client-side
-   validation is for fast feedback only and is never trusted.
-2. **Reject spam.** A filled honeypot (`websiteUrl`) returns a generic error and
-   stores nothing.
-3. **Rate limit** — five submissions per IP per ten minutes. In-memory and
-   therefore per-instance; it blunts casual spam without a CAPTCHA. Move to a
-   shared store only if spam becomes real.
-4. **Persist** to Postgres. This is the source of truth.
-5. **Notify** by email, best-effort.
+1. **Validate** the whole payload with a strict `quoteSubmission` Zod schema.
+   Client-side validation is for fast feedback only and is never trusted.
+2. **Reject spam.** Unknown fields, a filled honeypot (`websiteUrl`), an invalid
+   form token, a stale form token or an unrealistically fast submission return a
+   generic error and store nothing.
+3. **Rate limit** — five valid-looking submissions per hashed source IP per ten
+   minutes. Real rate-limit violations return HTTP `429`.
+4. **Deduplicate** effectively identical recent requests from the same contact.
+   Duplicates return the existing reference instead of creating repeated rows.
+5. **Persist** to Postgres. This is the source of truth.
+6. **Notify** by email, best-effort.
 
 **A notification failure never fails the submission.** Once the row is in
 Postgres the request is a success from the customer's point of view; email
@@ -252,6 +255,14 @@ problems are logged and the lead is still visible in the admin.
 Server-side normalization: emails are lowercased, phone numbers stored as
 `450-555-0142`, postal codes as `J4W 2K3`, and volumes as `numeric(7,2)` with
 comma decimals accepted (French keyboards).
+
+Privacy-conscious abuse metadata is stored server-side only:
+`source_ip_hash`, `duplicate_fingerprint` and `abuse_status`. Raw IP addresses
+are not stored. Rejected submissions are logged with structured, low-PII
+metadata only.
+
+Do not add CAPTCHA by default. Cloudflare Turnstile or another challenge can be
+added later if real spam appears.
 
 ---
 
