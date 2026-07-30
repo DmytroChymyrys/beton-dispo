@@ -78,7 +78,7 @@
     "navTitle": "Navigation",
     "legalTitle": "Informations",
     "contactTitle": "Nous joindre",
-    "contactEmail": "info@betondispo.com",
+    "contactEmail": "info@betondispo.ca",
     "rights": "Tous droits réservés.",
     "notASupplierNote": "BétonDispo n’est pas un producteur de béton et n’exploite pas de flotte de camions."
   },
@@ -361,7 +361,7 @@
     "progress": "Étape",
     "progressOf": "sur",
     "requiredHint": "Les champs marqués d’un astérisque (*) sont obligatoires.",
-    "noscript": "Ce formulaire nécessite JavaScript. Vous pouvez aussi nous écrire à info@betondispo.com en précisant l’emplacement du chantier, la date souhaitée et la quantité approximative.",
+    "noscript": "Ce formulaire nécessite JavaScript. Vous pouvez aussi nous écrire à info@betondispo.ca en précisant l’emplacement du chantier, la date souhaitée et la quantité approximative.",
     "prefilledVolume": "Quantité estimée : {volume} m³",
     "privacyLinkLabel": "Politique de confidentialité",
     "termsLinkLabel": "Conditions d’utilisation",
@@ -548,7 +548,7 @@
       "consentRequired": "Vous devez accepter pour que nous puissions traiter votre demande.",
       "spam": "Votre demande n’a pas pu être envoyée.",
       "rateLimited": "Trop de demandes ont été envoyées depuis cet appareil. Réessayez dans quelques minutes.",
-      "server": "Une erreur est survenue et votre demande n’a pas été enregistrée. Réessayez, ou écrivez-nous à info@betondispo.com."
+      "server": "Une erreur est survenue et votre demande n’a pas été enregistrée. Réessayez, ou écrivez-nous à info@betondispo.ca."
     },
     "confirmation": {
       "title": "Demande reçue",
@@ -605,7 +605,7 @@
           "heading": "Vos droits",
           "paragraphs": [
             "Vous pouvez demander l’accès aux renseignements personnels que nous détenons à votre sujet, leur rectification, ou leur suppression, sous réserve des exceptions prévues par la loi. Vous pouvez également retirer votre consentement au traitement de votre demande.",
-            "Pour exercer ces droits, écrivez-nous à privacy@betondispo.com."
+            "Pour exercer ces droits, écrivez-nous à privacy@betondispo.ca."
           ]
         },
         {
@@ -617,7 +617,7 @@
         {
           "heading": "Nous joindre",
           "paragraphs": [
-            "Pour toute question concernant cette politique ou le traitement de vos renseignements personnels : privacy@betondispo.com."
+            "Pour toute question concernant cette politique ou le traitement de vos renseignements personnels : privacy@betondispo.ca."
           ]
         }
       ]

@@ -143,7 +143,7 @@ Full list with comments in [`.env.example`](.env.example).
 | `DATABASE_URL`                  | yes      | Neon pooled connection string. Injected by the Vercel integration         |
 | `DATABASE_URL_UNPOOLED`         | no       | Direct connection for migrations; falls back to `DATABASE_URL`            |
 | `RESEND_API_KEY`                | no\*     | Transactional email                                                       |
-| `QUOTE_NOTIFICATION_FROM`       | no\*     | Verified sender, e.g. `BétonDispo <notifications@betondispo.com>`         |
+| `QUOTE_NOTIFICATION_FROM`       | no\*     | Verified sender, e.g. `BétonDispo <notifications@betondispo.ca>`          |
 | `QUOTE_NOTIFICATION_EMAIL`      | no\*     | Internal recipient(s), comma-separated                                    |
 | `ADMIN_EMAIL`                   | yes      | Operator sign-in                                                          |
 | `ADMIN_PASSWORD`                | yes      | Operator sign-in. Use a long random value                                 |
@@ -465,8 +465,8 @@ The site operates in Québec and is built accordingly:
 
 `src/messages/*.json` holds the privacy policy and terms. They are written to
 match what the application actually does; **have them reviewed by counsel
-before launch**, and point the contact addresses (`privacy@betondispo.com`,
-`info@betondispo.com`) at real, monitored mailboxes.
+before launch**, and point the contact addresses (`privacy@betondispo.ca`,
+`info@betondispo.ca`) at real, monitored mailboxes.
 
 ---
 

@@ -32,8 +32,8 @@ export const siteConfig = {
   /** Canonical origin, no trailing slash. */
   url: resolveSiteUrl().replace(/\/$/, ''),
   hasExplicitSiteUrl: Boolean(process.env.NEXT_PUBLIC_SITE_URL),
-  contactEmail: 'info@betondispo.com',
-  privacyEmail: 'privacy@betondispo.com',
+  contactEmail: 'info@betondispo.ca',
+  privacyEmail: 'privacy@betondispo.ca',
   /**
    * Areas we currently accept requests for. Deliberately broad regions rather
    * than a precise coverage promise.

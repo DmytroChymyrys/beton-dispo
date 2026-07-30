@@ -78,7 +78,7 @@
     "navTitle": "Navigation",
     "legalTitle": "Information",
     "contactTitle": "Contact",
-    "contactEmail": "info@betondispo.com",
+    "contactEmail": "info@betondispo.ca",
     "rights": "All rights reserved.",
     "notASupplierNote": "BétonDispo is not a concrete producer and does not operate a truck fleet."
   },
@@ -361,7 +361,7 @@
     "progress": "Step",
     "progressOf": "of",
     "requiredHint": "Fields marked with an asterisk (*) are required.",
-    "noscript": "This form requires JavaScript. You can also email us at info@betondispo.com with the site location, the desired date and the approximate quantity.",
+    "noscript": "This form requires JavaScript. You can also email us at info@betondispo.ca with the site location, the desired date and the approximate quantity.",
     "prefilledVolume": "Estimated quantity: {volume} m³",
     "privacyLinkLabel": "Privacy Policy",
     "termsLinkLabel": "Terms of Use",
@@ -548,7 +548,7 @@
       "consentRequired": "You must agree before we can process your request.",
       "spam": "Your request could not be sent.",
       "rateLimited": "Too many requests have been sent from this device. Try again in a few minutes.",
-      "server": "Something went wrong and your request was not saved. Please try again, or email us at info@betondispo.com."
+      "server": "Something went wrong and your request was not saved. Please try again, or email us at info@betondispo.ca."
     },
     "confirmation": {
       "title": "Request received",
@@ -605,7 +605,7 @@
           "heading": "Your rights",
           "paragraphs": [
             "You may request access to the personal information we hold about you, its correction, or its deletion, subject to the exceptions provided by law. You may also withdraw your consent to the processing of your request.",
-            "To exercise these rights, write to us at privacy@betondispo.com."
+            "To exercise these rights, write to us at privacy@betondispo.ca."
           ]
         },
         {
@@ -617,7 +617,7 @@
         {
           "heading": "Contact us",
           "paragraphs": [
-            "For any question about this policy or the handling of your personal information: privacy@betondispo.com."
+            "For any question about this policy or the handling of your personal information: privacy@betondispo.ca."
           ]
         }
       ]
