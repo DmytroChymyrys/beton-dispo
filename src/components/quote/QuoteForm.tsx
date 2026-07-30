@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useRef, useState, useTransition } from 'react';
+import { useEffect, useId, useRef, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import type { Locale } from '@/i18n/config';
@@ -145,12 +145,32 @@ export function QuoteForm({ locale, strings }: { locale: Locale; strings: QuoteS
   const [confirmedId, setConfirmedId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const startedRef = useRef(false);
+  const prefilledTrackedRef = useRef(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const summaryRef = useRef<HTMLDivElement>(null);
   const formId = useId();
 
   const options = strings.options;
   const t = strings.fields;
+
+  useEffect(() => {
+    track('quote_step_viewed', {
+      locale,
+      step: step + 1,
+      stepName: STEP_NAMES[step],
+      hasPrefilledVolume: prefilledVolume ? 'yes' : 'no',
+    });
+  }, [locale, prefilledVolume, step]);
+
+  useEffect(() => {
+    if (!prefilledVolume || prefilledTrackedRef.current) return;
+    prefilledTrackedRef.current = true;
+    track('quote_form_prefilled', {
+      locale,
+      source: 'calculator',
+      volumeBucket: volumeBucket(Number(prefilledVolume)),
+    });
+  }, [locale, prefilledVolume]);
 
   function set<K extends keyof Values>(field: K, value: Values[K]) {
     // The visitor is fixing something; drop that field's error as they type.
@@ -186,6 +206,12 @@ export function QuoteForm({ locale, strings }: { locale: Locale; strings: QuoteS
     return false;
   }
 
+  function stepErrorCount(index: StepIndex): number {
+    const result = STEP_SCHEMAS[index].safeParse(values);
+    if (result.success) return 0;
+    return Object.keys(fieldErrors(result.error)).length;
+  }
+
   function focusSummary() {
     // Announce and move focus to the error list rather than silently failing.
     requestAnimationFrame(() => summaryRef.current?.focus());
@@ -193,6 +219,12 @@ export function QuoteForm({ locale, strings }: { locale: Locale; strings: QuoteS
 
   function goNext() {
     if (!validateStep(step)) {
+      track('quote_step_validation_failed', {
+        locale,
+        step: step + 1,
+        stepName: STEP_NAMES[step],
+        errorCount: stepErrorCount(step),
+      });
       focusSummary();
       return;
     }
@@ -209,6 +241,11 @@ export function QuoteForm({ locale, strings }: { locale: Locale; strings: QuoteS
   function goBack() {
     setErrors({});
     setFormError(null);
+    track('quote_step_back_clicked', {
+      locale,
+      step: step + 1,
+      stepName: STEP_NAMES[step],
+    });
     const prev = Math.max(step - 1, 0) as StepIndex;
     setStep(prev);
     requestAnimationFrame(() => headingRef.current?.focus());
@@ -219,6 +256,12 @@ export function QuoteForm({ locale, strings }: { locale: Locale; strings: QuoteS
     setFormError(null);
 
     if (!validateStep(step)) {
+      track('quote_step_validation_failed', {
+        locale,
+        step: step + 1,
+        stepName: STEP_NAMES[step],
+        errorCount: stepErrorCount(step),
+      });
       focusSummary();
       return;
     }

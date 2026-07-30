@@ -44,18 +44,18 @@ supplier portal, and no automated quoting. Those belong to later phases.
 One Next.js application contains both the frontend and all server-side code.
 There is no separate backend service.
 
-| Layer      | Choice                                               |
-| ---------- | ---------------------------------------------------- |
-| Framework  | Next.js 16 (App Router, React 19, Server Components) |
-| Language   | TypeScript (strict, `noUncheckedIndexedAccess`)      |
-| Styling    | Tailwind CSS v4 (tokens in `src/app/globals.css`)    |
-| Database   | Neon Postgres via the Vercel Marketplace             |
-| ORM        | Drizzle ORM + drizzle-kit                            |
-| Validation | Zod (shared between browser and server)              |
-| Email      | Resend                                               |
-| Analytics  | Vercel Analytics + Speed Insights                    |
-| Hosting    | Vercel                                               |
-| Tests      | Vitest (unit) + Playwright (E2E)                     |
+| Layer      | Choice                                                 |
+| ---------- | ------------------------------------------------------ |
+| Framework  | Next.js 16 (App Router, React 19, Server Components)   |
+| Language   | TypeScript (strict, `noUncheckedIndexedAccess`)        |
+| Styling    | Tailwind CSS v4 (tokens in `src/app/globals.css`)      |
+| Database   | Neon Postgres via the Vercel Marketplace               |
+| ORM        | Drizzle ORM + drizzle-kit                              |
+| Validation | Zod (shared between browser and server)                |
+| Email      | Resend                                                 |
+| Analytics  | Google Analytics 4 + Vercel Analytics + Speed Insights |
+| Hosting    | Vercel                                                 |
+| Tests      | Vitest (unit) + Playwright (E2E)                       |
 
 ### Directory map
 
@@ -136,17 +136,18 @@ Two options, both supported by `src/db/client.ts`:
 
 Full list with comments in [`.env.example`](.env.example).
 
-| Variable                   | Required | Purpose                                                                   |
-| -------------------------- | -------- | ------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_SITE_URL`     | yes      | Canonical origin. Drives canonicals, hreflang, sitemap, admin email links |
-| `DATABASE_URL`             | yes      | Neon pooled connection string. Injected by the Vercel integration         |
-| `DATABASE_URL_UNPOOLED`    | no       | Direct connection for migrations; falls back to `DATABASE_URL`            |
-| `RESEND_API_KEY`           | no\*     | Transactional email                                                       |
-| `QUOTE_NOTIFICATION_FROM`  | no\*     | Verified sender, e.g. `BétonDispo <notifications@betondispo.com>`         |
-| `QUOTE_NOTIFICATION_EMAIL` | no\*     | Internal recipient(s), comma-separated                                    |
-| `ADMIN_EMAIL`              | yes      | Operator sign-in                                                          |
-| `ADMIN_PASSWORD`           | yes      | Operator sign-in. Use a long random value                                 |
-| `AUTH_SECRET`              | yes      | Signs the admin session cookie. `openssl rand -base64 32`                 |
+| Variable                        | Required | Purpose                                                                   |
+| ------------------------------- | -------- | ------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SITE_URL`          | yes      | Canonical origin. Drives canonicals, hreflang, sitemap, admin email links |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | no       | GA4 measurement ID, e.g. `G-NHG2ZL55KG`                                   |
+| `DATABASE_URL`                  | yes      | Neon pooled connection string. Injected by the Vercel integration         |
+| `DATABASE_URL_UNPOOLED`         | no       | Direct connection for migrations; falls back to `DATABASE_URL`            |
+| `RESEND_API_KEY`                | no\*     | Transactional email                                                       |
+| `QUOTE_NOTIFICATION_FROM`       | no\*     | Verified sender, e.g. `BétonDispo <notifications@betondispo.com>`         |
+| `QUOTE_NOTIFICATION_EMAIL`      | no\*     | Internal recipient(s), comma-separated                                    |
+| `ADMIN_EMAIL`                   | yes      | Operator sign-in                                                          |
+| `ADMIN_PASSWORD`                | yes      | Operator sign-in. Use a long random value                                 |
+| `AUTH_SECRET`                   | yes      | Signs the admin session cookie. `openssl rand -base64 32`                 |
 
 \* Without these three the site still accepts and stores requests; it just logs
 a warning instead of emailing. That is intentional — see §7.
@@ -256,9 +257,12 @@ comma decimals accepted (French keyboards).
 
 ## 8. Analytics
 
-Vercel Analytics and Speed Insights are mounted in
-`src/app/[locale]/layout.tsx`. Enable both in the Vercel project settings; no
-key is needed.
+Google Analytics 4, Vercel Analytics and Speed Insights are mounted in
+`src/app/[locale]/layout.tsx`. Enable Vercel Analytics and Speed Insights in
+the Vercel project settings; no key is needed for those.
+
+For GA4, set `NEXT_PUBLIC_GA_MEASUREMENT_ID` in Vercel Production. The current
+BétonDispo web stream uses `G-NHG2ZL55KG`.
 
 Funnel events (`src/lib/analytics.ts`):
 

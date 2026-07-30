@@ -7,6 +7,8 @@ import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import { StickyMobileCta } from '@/components/StickyMobileCta';
 import { AttributionTracker } from '@/components/AttributionTracker';
+import { AnalyticsInteractions } from '@/components/AnalyticsInteractions';
+import { GoogleAnalytics } from '@/components/GoogleAnalytics';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { JsonLd } from '@/components/JsonLd';
@@ -75,12 +77,14 @@ export default async function LocaleLayout({ children, params }: Props) {
         <SiteFooter locale={locale} dict={dict} />
         <StickyMobileCta locale={locale} label={dict.common.ctaPrimary} />
         <AttributionTracker />
+        <AnalyticsInteractions />
 
         <JsonLd data={organizationSchema(locale)} />
         <JsonLd data={websiteSchema(locale)} />
 
         {/* Cookieless, aggregate-only. No customer detail is ever sent here —
             see the allowed event properties in `src/lib/analytics.ts`. */}
+        <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
         <Analytics />
         <SpeedInsights />
       </body>

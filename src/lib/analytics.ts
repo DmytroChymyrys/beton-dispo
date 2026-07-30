@@ -1,5 +1,11 @@
 import { track as vercelTrack } from '@vercel/analytics';
 
+declare global {
+  interface Window {
+    gtag?: (command: 'event', eventName: string, params?: Record<string, string | number>) => void;
+  }
+}
+
 /**
  * Phase-1 funnel events.
  *
@@ -8,11 +14,23 @@ import { track as vercelTrack } from '@vercel/analytics';
  * form, how far they get, and how many finish.
  */
 export type QuoteEvent =
+  | 'site_link_clicked'
+  | 'site_cta_clicked'
+  | 'language_switched'
+  | 'contact_clicked'
+  | 'mobile_menu_toggled'
   | 'quote_form_started'
+  | 'quote_form_prefilled'
+  | 'quote_step_viewed'
   | 'quote_step_completed'
+  | 'quote_step_validation_failed'
+  | 'quote_step_back_clicked'
   | 'quote_submitted'
   | 'quote_submit_failed'
   | 'concrete_calculator_viewed'
+  | 'concrete_calculator_geometry_changed'
+  | 'concrete_calculator_allowance_changed'
+  | 'concrete_calculator_validation_failed'
   | 'concrete_calculator_calculated'
   | 'calculator_quote_clicked';
 
@@ -38,6 +56,14 @@ export type QuoteEventProps = {
   geometryType?: string;
   unitsType?: string;
   wastePercentage?: number;
+  source?: string;
+  area?: string;
+  targetPath?: string;
+  linkText?: string;
+  destinationType?: string;
+  hasPrefilledVolume?: string;
+  errorCount?: number;
+  menuState?: string;
 };
 
 export function track(event: QuoteEvent, props: QuoteEventProps = {}): void {
@@ -49,6 +75,7 @@ export function track(event: QuoteEvent, props: QuoteEventProps = {}): void {
 
   try {
     vercelTrack(event, clean);
+    window.gtag?.('event', event, clean);
   } catch {
     // Analytics must never break a submission.
   }

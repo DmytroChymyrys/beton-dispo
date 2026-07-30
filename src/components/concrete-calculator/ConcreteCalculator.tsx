@@ -158,7 +158,16 @@ export function ConcreteCalculator({
   function handleCalculate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitted(true);
-    if (Object.keys(errors).length > 0 || !result) return;
+    if (Object.keys(errors).length > 0 || !result) {
+      track('concrete_calculator_validation_failed', {
+        locale,
+        geometryType: geometry,
+        unitsType: unitFamily(state, geometry),
+        wastePercentage: state.wastePercent,
+        errorCount: Object.keys(errors).length,
+      });
+      return;
+    }
     setHighlightResult(true);
     setCalculationCount((count) => count + 1);
     track('concrete_calculator_calculated', {
@@ -195,6 +204,11 @@ export function ConcreteCalculator({
                 role="tab"
                 aria-selected={geometry === item}
                 onClick={() => {
+                  track('concrete_calculator_geometry_changed', {
+                    locale,
+                    geometryType: item,
+                    source: geometry,
+                  });
                   setGeometry(item);
                   setSubmitted(false);
                 }}
@@ -269,7 +283,14 @@ export function ConcreteCalculator({
                       name="wastePercent"
                       value={option}
                       checked={state.wastePercent === option}
-                      onChange={() => setState((prev) => ({ ...prev, wastePercent: option }))}
+                      onChange={() => {
+                        track('concrete_calculator_allowance_changed', {
+                          locale,
+                          geometryType: geometry,
+                          wastePercentage: option,
+                        });
+                        setState((prev) => ({ ...prev, wastePercent: option }));
+                      }}
                       className="sr-only"
                     />
                     {option}%

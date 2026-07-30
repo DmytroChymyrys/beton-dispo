@@ -86,6 +86,7 @@ export function SiteHeader({ locale, strings }: { locale: Locale; strings: Heade
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
+            data-analytics-event="mobile_menu_toggled"
             aria-expanded={open}
             aria-controls="mobile-nav"
             aria-label={open ? strings.closeMenu : strings.openMenu}
