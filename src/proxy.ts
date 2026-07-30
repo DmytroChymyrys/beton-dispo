@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { defaultLocale, locales } from '@/i18n/config';
+import { siteConfig } from '@/lib/site';
 
 /** Paths that must never be locale-prefixed or host-rewritten by locale logic. */
 const NON_LOCALIZED_PREFIXES = ['/api', '/admin', '/_next', '/_vercel'];
@@ -22,12 +23,9 @@ function isAssetPath(pathname: string): boolean {
  * Skipped on localhost and on *.vercel.app preview deployments.
  */
 function canonicalHostRedirect(request: NextRequest): NextResponse | null {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  if (!siteUrl) return null;
-
   let canonical: URL;
   try {
-    canonical = new URL(siteUrl);
+    canonical = new URL(siteConfig.url);
   } catch {
     return null;
   }

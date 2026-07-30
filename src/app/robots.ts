@@ -17,7 +17,9 @@ function isIndexableProductionHost(url: string): boolean {
 
 export default function robots(): MetadataRoute.Robots {
   // Preview deployments and local runs must never be indexed.
-  const isProduction = isIndexableProductionHost(siteConfig.url);
+  const isProduction =
+    isIndexableProductionHost(siteConfig.url) &&
+    (siteConfig.hasExplicitSiteUrl || process.env.VERCEL_ENV === 'production');
 
   if (!isProduction) {
     return { rules: [{ userAgent: '*', disallow: '/' }] };
