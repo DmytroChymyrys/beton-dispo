@@ -2,7 +2,7 @@ import 'server-only';
 
 import { and, asc, count, desc, eq, gte, ilike, lte, sql, type SQL } from 'drizzle-orm';
 import { getDb } from '@/db/client';
-import { quoteRequests, type QuoteRequest } from '@/db/schema';
+import { quoteRequestEvents, quoteRequests, type QuoteRequest, type QuoteRequestEvent } from '@/db/schema';
 import { QUALIFIED_STATUSES, type CustomerType, type QuoteStatus } from '@/lib/quote-options';
 
 export const PAGE_SIZE = 50;
@@ -121,15 +121,74 @@ export async function getQuoteRequest(id: string): Promise<QuoteRequest | null> 
   return row ?? null;
 }
 
+export async function listQuoteRequestEvents(id: string): Promise<QuoteRequestEvent[]> {
+  const db = await getDb();
+  return db
+    .select()
+    .from(quoteRequestEvents)
+    .where(eq(quoteRequestEvents.quoteRequestId, id))
+    .orderBy(desc(quoteRequestEvents.createdAt));
+}
+
 export async function updateQuoteRequest(
   id: string,
   patch: { status?: QuoteStatus; internalNotes?: string | null; lostReason?: string | null },
 ): Promise<void> {
   const db = await getDb();
-  await db
-    .update(quoteRequests)
-    .set({ ...patch, updatedAt: new Date() })
-    .where(eq(quoteRequests.id, id));
+  await db.transaction(async (tx) => {
+    const [before] = await tx.select().from(quoteRequests).where(eq(quoteRequests.id, id)).limit(1);
+    if (!before) return;
+
+    const [after] = await tx
+      .update(quoteRequests)
+      .set({ ...patch, updatedAt: new Date() })
+      .where(eq(quoteRequests.id, id))
+      .returning();
+
+    if (!after) return;
+
+    const events: {
+      type: string;
+      message: string;
+      metadata?: Record<string, unknown>;
+    }[] = [];
+
+    if (patch.status && patch.status !== before.status) {
+      events.push({
+        type: 'status_changed',
+        message: `Status changed from ${before.status} to ${patch.status}.`,
+        metadata: { from: before.status, to: patch.status },
+      });
+    }
+
+    if (patch.lostReason !== undefined && patch.lostReason !== before.lostReason) {
+      events.push({
+        type: patch.lostReason ? 'lost_reason_updated' : 'lost_reason_cleared',
+        message: patch.lostReason ? 'Lost reason updated.' : 'Lost reason cleared.',
+        metadata: { hasLostReason: Boolean(patch.lostReason) },
+      });
+    }
+
+    if (patch.internalNotes !== undefined && patch.internalNotes !== before.internalNotes) {
+      events.push({
+        type: patch.internalNotes ? 'internal_notes_updated' : 'internal_notes_cleared',
+        message: patch.internalNotes ? 'Internal notes updated.' : 'Internal notes cleared.',
+        metadata: { hasInternalNotes: Boolean(patch.internalNotes) },
+      });
+    }
+
+    if (events.length > 0) {
+      await tx.insert(quoteRequestEvents).values(
+        events.map((event) => ({
+          quoteRequestId: id,
+          actor: 'admin',
+          type: event.type,
+          message: event.message,
+          metadata: event.metadata,
+        })),
+      );
+    }
+  });
 }
 
 /** Distinct cities, for the filter dropdown. */

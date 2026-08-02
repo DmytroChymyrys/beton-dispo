@@ -1,11 +1,13 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { requireAdmin } from '@/server/auth';
-import { getQuoteRequest } from '@/server/admin-queries';
+import { getQuoteRequest, listQuoteRequestEvents } from '@/server/admin-queries';
 import { StatusBadge } from '@/app/admin/StatusBadge';
-import { adminOptions, formatDateTime, formatVolume } from '@/app/admin/labels';
+import { adminOptions, formatDateTime, formatVolume, STATUS_LABELS } from '@/app/admin/labels';
 import { adminText } from '@/app/admin/i18n';
 import { getAdminLocale } from '@/app/admin/locale';
+import type { QuoteRequestEvent } from '@/db/schema';
+import type { QuoteStatus } from '@/lib/quote-options';
 import { RequestEditor } from './RequestEditor';
 
 export const dynamic = 'force-dynamic';
@@ -21,7 +23,7 @@ export default async function AdminRequestPage({ params }: { params: Promise<{ i
   const { id } = await params;
   if (!UUID.test(id)) notFound();
 
-  const request = await getQuoteRequest(id);
+  const [request, events] = await Promise.all([getQuoteRequest(id), listQuoteRequestEvents(id)]);
   if (!request) notFound();
 
   const source = [request.utmSource, request.utmMedium, request.utmCampaign]
@@ -123,6 +125,10 @@ export default async function AdminRequestPage({ params }: { params: Promise<{ i
             <Row label={t.referrer} value={request.referrer || '—'} />
             <Row label={t.landingPage} value={request.landingPage || '—'} />
           </Card>
+
+          <Card title={t.timeline}>
+            <Timeline events={events} locale={locale} />
+          </Card>
         </div>
 
         {/* Internal only — nothing in this column is ever exposed publicly. */}
@@ -135,6 +141,52 @@ export default async function AdminRequestPage({ params }: { params: Promise<{ i
         />
       </div>
     </div>
+  );
+}
+
+function Timeline({
+  events,
+  locale,
+}: {
+  events: QuoteRequestEvent[];
+  locale: Awaited<ReturnType<typeof getAdminLocale>>;
+}) {
+  const t = adminText[locale].requestDetail;
+
+  if (events.length === 0) {
+    return <p className="text-ink-muted text-sm">{t.emptyTimeline}</p>;
+  }
+
+  return (
+    <ol className="space-y-4">
+      {events.map((event) => {
+        const statusFrom =
+          typeof event.metadata?.from === 'string' ? (event.metadata.from as QuoteStatus) : null;
+        const statusTo =
+          typeof event.metadata?.to === 'string' ? (event.metadata.to as QuoteStatus) : null;
+        const detail =
+          statusFrom && statusTo
+            ? t.statusChange(STATUS_LABELS[locale][statusFrom], STATUS_LABELS[locale][statusTo])
+            : event.message;
+
+        return (
+          <li key={event.id} className="border-line border-l-2 pl-4">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <p className="font-semibold">
+                {t.eventTypes[event.type as keyof typeof t.eventTypes] ?? event.type}
+              </p>
+              <time className="text-ink-muted text-xs tabular-nums">
+                {formatDateTime(event.createdAt, locale)}
+              </time>
+            </div>
+            <p className="text-ink-muted mt-1 text-sm">{detail}</p>
+            <p className="text-ink-muted mt-1 text-xs">
+              {t.eventActor[event.actor as keyof typeof t.eventActor] ?? event.actor}
+            </p>
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 

@@ -15,6 +15,13 @@
       "when": 1785433200839,
       "tag": "0001_nice_electro",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1785700622244,
+      "tag": "0002_huge_captain_britain",
+      "breakpoints": true
     }
   ]
 }

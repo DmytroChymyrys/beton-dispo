@@ -14,6 +14,7 @@ import {
   boolean,
   date,
   index,
+  jsonb,
   numeric,
   pgEnum,
   pgSequence,
@@ -158,3 +159,29 @@ export const quoteRequests = pgTable(
 
 export type QuoteRequest = typeof quoteRequests.$inferSelect;
 export type NewQuoteRequest = typeof quoteRequests.$inferInsert;
+
+/* -------------------------------------------------------------------------- */
+/* quote_request_events                                                       */
+/* -------------------------------------------------------------------------- */
+
+export const quoteRequestEvents = pgTable(
+  'quote_request_events',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    quoteRequestId: uuid('quote_request_id')
+      .notNull()
+      .references(() => quoteRequests.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    actor: varchar('actor', { length: 40 }).notNull().default('system'),
+    type: varchar('type', { length: 80 }).notNull(),
+    message: text('message').notNull(),
+    metadata: jsonb('metadata').$type<Record<string, unknown>>(),
+  },
+  (table) => [
+    index('quote_request_events_request_created_idx').on(table.quoteRequestId, table.createdAt),
+    index('quote_request_events_type_idx').on(table.type),
+  ],
+);
+
+export type QuoteRequestEvent = typeof quoteRequestEvents.$inferSelect;
+export type NewQuoteRequestEvent = typeof quoteRequestEvents.$inferInsert;
