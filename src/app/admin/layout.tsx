@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { AdminLanguageToggle } from '@/app/admin/AdminLanguageToggle';
 import { isAuthenticated } from '@/server/auth';
 import { signOutAction } from '@/app/admin/actions';
 import { archivo, inter } from '@/app/fonts';
@@ -59,12 +60,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
               </div>
 
               <div className="flex items-center gap-2">
-                <Link
-                  href={`/admin/language?lang=${t.otherLocale}`}
-                  className="border-line-strong text-ink-soft hover:bg-surface-sunken inline-flex min-h-10 items-center rounded-lg border px-3 text-sm font-medium"
-                >
-                  {t.languageToggle}
-                </Link>
+                <AdminLanguageToggle label={t.languageToggle} nextLocale={t.otherLocale} />
                 <form action={signOutAction}>
                   <button
                     type="submit"
