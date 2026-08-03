@@ -32,7 +32,8 @@ export type QuoteEvent =
   | 'concrete_calculator_allowance_changed'
   | 'concrete_calculator_validation_failed'
   | 'concrete_calculator_calculated'
-  | 'calculator_quote_clicked';
+  | 'calculator_quote_clicked'
+  | 'local_calculator_page_view';
 
 /**
  * Properties allowed on analytics events.
@@ -58,6 +59,8 @@ export type QuoteEventProps = {
   wastePercentage?: number;
   source?: string;
   area?: string;
+  city?: string;
+  landing_page?: string;
   targetPath?: string;
   linkText?: string;
   destinationType?: string;

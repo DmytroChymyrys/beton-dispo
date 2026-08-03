@@ -65,6 +65,24 @@ function quantityUrlValue(value: number): string {
   return value.toFixed(2);
 }
 
+export function calculatorQuoteHref({
+  locale,
+  recommendedVolume,
+  quoteContext,
+}: {
+  locale: Locale;
+  recommendedVolume?: number;
+  quoteContext?: { cityName: string; landingPage: string };
+}): string {
+  const base = pathFor('quote', locale);
+  const params = new URLSearchParams();
+  if (recommendedVolume !== undefined) params.set('volume', quantityUrlValue(recommendedVolume));
+  if (quoteContext?.cityName) params.set('city', quoteContext.cityName);
+  if (quoteContext?.landingPage) params.set('landing_page', quoteContext.landingPage);
+  const query = params.toString();
+  return query ? `${base}?${query}` : base;
+}
+
 function unitFamily(state: FormState, geometry: GeometryType): string {
   const units = FIELDS[geometry].map((field) => state[field].unit);
   const hasMetric = units.some((unit) => unit === 'mm' || unit === 'cm' || unit === 'm');
@@ -76,9 +94,11 @@ function unitFamily(state: FormState, geometry: GeometryType): string {
 export function ConcreteCalculator({
   locale,
   strings,
+  quoteContext,
 }: {
   locale: Locale;
   strings: CalculatorStrings;
+  quoteContext?: { cityName: string; landingPage: string };
 }) {
   const [geometry, setGeometry] = useState<GeometryType>('rectangular');
   const [state, setState] = useState<FormState>(INITIAL);
@@ -88,8 +108,12 @@ export function ConcreteCalculator({
   const resultRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    track('concrete_calculator_viewed', { locale });
-  }, [locale]);
+    track('concrete_calculator_viewed', {
+      locale,
+      city: quoteContext?.cityName,
+      landing_page: quoteContext?.landingPage,
+    });
+  }, [locale, quoteContext?.cityName, quoteContext?.landingPage]);
 
   useEffect(() => {
     if (calculationCount === 0) return;
@@ -147,9 +171,13 @@ export function ConcreteCalculator({
 
   const active = strings.geometries[geometry];
   const recommendedLabel = result ? `${formatNumber(locale, result.recommended)} m³` : null;
-  const quoteHref = result
-    ? `${pathFor('quote', locale)}?volume=${encodeURIComponent(quantityUrlValue(result.recommended))}`
-    : pathFor('quote', locale);
+  const quoteHref = useMemo(() => {
+    return calculatorQuoteHref({
+      locale,
+      recommendedVolume: result?.recommended,
+      quoteContext,
+    });
+  }, [locale, quoteContext, result]);
 
   function updateDimension(field: DimensionKey, patch: Partial<FormState[DimensionKey]>) {
     setState((prev) => ({ ...prev, [field]: { ...prev[field], ...patch } }));
@@ -164,6 +192,8 @@ export function ConcreteCalculator({
         geometryType: geometry,
         unitsType: unitFamily(state, geometry),
         wastePercentage: state.wastePercent,
+        city: quoteContext?.cityName,
+        landing_page: quoteContext?.landingPage,
         errorCount: Object.keys(errors).length,
       });
       return;
@@ -175,6 +205,8 @@ export function ConcreteCalculator({
       geometryType: geometry,
       unitsType: unitFamily(state, geometry),
       wastePercentage: state.wastePercent,
+      city: quoteContext?.cityName,
+      landing_page: quoteContext?.landingPage,
     });
   }
 
@@ -376,6 +408,8 @@ export function ConcreteCalculator({
                       geometryType: geometry,
                       unitsType: unitFamily(state, geometry),
                       wastePercentage: state.wastePercent,
+                      city: quoteContext?.cityName,
+                      landing_page: quoteContext?.landingPage,
                     })
                   }
                   className={buttonClass('primary', 'lg', 'mt-3 w-full')}

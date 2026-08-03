@@ -119,6 +119,12 @@ function readPrefilledVolume(value: string | null): string {
   return parsed.toFixed(2);
 }
 
+function readPrefilledCity(value: string | null): string {
+  const trimmed = value?.trim();
+  if (!trimmed || trimmed.length < 2 || trimmed.length > 120) return '';
+  return trimmed;
+}
+
 function formatVolume(locale: Locale, value: string): string {
   const parsed = Number(value.replace(',', '.'));
   return new Intl.NumberFormat(locale === 'fr' ? 'fr-CA' : 'en-CA', {
@@ -147,9 +153,11 @@ export function QuoteForm({
 }) {
   const searchParams = useSearchParams();
   const prefilledVolume = readPrefilledVolume(searchParams.get('volume'));
+  const prefilledCity = readPrefilledCity(searchParams.get('city'));
   const [step, setStep] = useState<StepIndex>(prefilledVolume ? 1 : 0);
   const [values, setValues] = useState<Values>(() => ({
     ...INITIAL,
+    city: prefilledCity,
     estimatedVolumeM3: prefilledVolume,
     volumeUnknown: false,
     formIssuedAt: formToken.issuedAt,
@@ -174,8 +182,9 @@ export function QuoteForm({
       step: step + 1,
       stepName: STEP_NAMES[step],
       hasPrefilledVolume: prefilledVolume ? 'yes' : 'no',
+      city: prefilledCity || undefined,
     });
-  }, [locale, prefilledVolume, step]);
+  }, [locale, prefilledCity, prefilledVolume, step]);
 
   useEffect(() => {
     if (!prefilledVolume || prefilledTrackedRef.current) return;
@@ -184,8 +193,9 @@ export function QuoteForm({
       locale,
       source: 'calculator',
       volumeBucket: volumeBucket(Number(prefilledVolume)),
+      city: prefilledCity || undefined,
     });
-  }, [locale, prefilledVolume]);
+  }, [locale, prefilledCity, prefilledVolume]);
 
   function set<K extends keyof Values>(field: K, value: Values[K]) {
     // The visitor is fixing something; drop that field's error as they type.

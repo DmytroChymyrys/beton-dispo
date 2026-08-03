@@ -3,6 +3,12 @@ import { defaultLocale, localeTags, locales } from '@/i18n/config';
 import { pathFor, routes, type RouteKey } from '@/i18n/routes';
 import { absoluteUrl } from '@/lib/site';
 import { cityAlternates, cityPath, citySlugs } from '@/lib/city-pages';
+import {
+  LOCAL_CALCULATOR_LAST_MODIFIED,
+  localCalculatorAlternates,
+  localCalculatorPath,
+  localCalculatorSlugs,
+} from '@/lib/local-calculator-pages';
 
 /** Relative crawl priority. The home page and the quote form are the goal. */
 const priorities: Record<RouteKey, number> = {
@@ -57,5 +63,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   );
 
-  return [...staticPages, ...cityPages];
+  const localCalculatorPages = localCalculatorSlugs.flatMap((city) =>
+    locales.map((locale) => ({
+      url: absoluteUrl(localCalculatorPath(city, locale)),
+      lastModified: LOCAL_CALCULATOR_LAST_MODIFIED,
+      changeFrequency: 'monthly' as const,
+      priority: 0.82,
+      alternates: { languages: localCalculatorAlternates(city) },
+    })),
+  );
+
+  return [...staticPages, ...cityPages, ...localCalculatorPages];
 }
