@@ -6,6 +6,8 @@ declare global {
   }
 }
 
+type Nullable<T> = T | null | undefined;
+
 /**
  * Phase-1 funnel events.
  *
@@ -25,6 +27,7 @@ export type QuoteEvent =
   | 'quote_step_completed'
   | 'quote_step_validation_failed'
   | 'quote_step_back_clicked'
+  | 'quote_submit'
   | 'quote_submitted'
   | 'quote_submit_failed'
   | 'concrete_calculator_viewed'
@@ -52,6 +55,14 @@ export type QuoteEventProps = {
   step?: number;
   stepName?: string;
   projectType?: string;
+  project_type?: string;
+  request_id?: string;
+  source_page?: string;
+  calculated_volume_m3?: number;
+  unit?: string;
+  margin_percent?: number;
+  form_variant?: string;
+  currency?: string;
   customerType?: string;
   pumpRequired?: string;
   /** Bucketed, never the exact figure a customer typed. */
@@ -64,6 +75,7 @@ export type QuoteEventProps = {
   source?: string;
   area?: string;
   city?: string;
+  value?: number;
   landing_page?: string;
   targetPath?: string;
   linkText?: string;
@@ -86,6 +98,52 @@ export function track(event: QuoteEvent, props: QuoteEventProps = {}): void {
   } catch {
     // Analytics must never break a submission.
   }
+}
+
+export type QuoteSubmitAnalyticsPayload = {
+  locale: 'fr' | 'en';
+  requestId: string;
+  projectType?: Nullable<string>;
+  sourcePage?: Nullable<string>;
+  calculatedVolumeM3?: Nullable<number>;
+  unit?: Nullable<string>;
+  marginPercent?: Nullable<number>;
+  city?: Nullable<string>;
+  volumeBucket?: Nullable<string>;
+  leadTimeBucket?: Nullable<string>;
+};
+
+function validNumber(value: Nullable<number>): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
+export function trackQuoteSubmit(payload: QuoteSubmitAnalyticsPayload): void {
+  const requestId = payload.requestId.trim();
+  if (!requestId) return;
+
+  const trackingKey = `quote_submit_tracked:${requestId}`;
+  try {
+    if (window.sessionStorage.getItem(trackingKey)) return;
+    window.sessionStorage.setItem(trackingKey, '1');
+  } catch {
+    // Storage can be unavailable in strict privacy modes; still send the event once per call.
+  }
+
+  track('quote_submit', {
+    locale: payload.locale,
+    request_id: requestId,
+    project_type: payload.projectType?.trim().toLowerCase(),
+    source_page: payload.sourcePage?.trim(),
+    calculated_volume_m3: validNumber(payload.calculatedVolumeM3),
+    unit: payload.unit?.trim().toLowerCase(),
+    margin_percent: validNumber(payload.marginPercent),
+    city: payload.city?.trim().toLowerCase(),
+    form_variant: 'website_quote',
+    currency: 'CAD',
+    value: 1,
+    volumeBucket: payload.volumeBucket ?? undefined,
+    leadTimeBucket: payload.leadTimeBucket ?? undefined,
+  });
 }
 
 /** Coarse volume buckets — enough to see demand shape, not a customer's figure. */

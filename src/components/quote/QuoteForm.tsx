@@ -25,7 +25,7 @@ import {
   TRI_STATES,
 } from '@/lib/quote-options';
 import { STEP_SCHEMAS, fieldErrors, type StepIndex } from '@/lib/quote-schema';
-import { leadTimeBucket, track, volumeBucket } from '@/lib/analytics';
+import { leadTimeBucket, track, trackQuoteSubmit, volumeBucket } from '@/lib/analytics';
 import { readAttribution } from '@/lib/attribution';
 import { cn } from '@/lib/cn';
 
@@ -131,6 +131,31 @@ function readPrefilledProject(value: string | null): string {
   return '';
 }
 
+function readAnalyticsProject(value: string | null, fallback: string): string {
+  const normalized = value?.trim().toLowerCase();
+  if (normalized === 'terrasse' || normalized === 'patio') return normalized;
+  return fallback.trim().toLowerCase();
+}
+
+function readAnalyticsCity(value: string): string | undefined {
+  const normalized = value.trim().toLowerCase();
+  return normalized.length >= 2 && normalized.length <= 120 ? normalized : undefined;
+}
+
+function readSafeSourcePage(value: string | null): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed || !trimmed.startsWith('/') || trimmed.startsWith('//') || trimmed.length > 180) {
+    return undefined;
+  }
+  return trimmed.split('?')[0];
+}
+
+function readAnalyticsNumber(value: string | null): number | undefined {
+  if (!value) return undefined;
+  const parsed = Number(value.replace(',', '.'));
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
+}
+
 function formatVolume(locale: Locale, value: string): string {
   const parsed = Number(value.replace(',', '.'));
   return new Intl.NumberFormat(locale === 'fr' ? 'fr-CA' : 'en-CA', {
@@ -160,7 +185,11 @@ export function QuoteForm({
   const searchParams = useSearchParams();
   const prefilledVolume = readPrefilledVolume(searchParams.get('volume'));
   const prefilledCity = readPrefilledCity(searchParams.get('city'));
+  const projectParam = searchParams.get('project');
   const prefilledProject = readPrefilledProject(searchParams.get('project'));
+  const sourcePage = readSafeSourcePage(searchParams.get('source_page') ?? searchParams.get('landing_page'));
+  const calculatorUnit = searchParams.get('unit');
+  const calculatorMargin = readAnalyticsNumber(searchParams.get('margin') ?? searchParams.get('margin_percent'));
   const [step, setStep] = useState<StepIndex>(prefilledVolume ? 1 : 0);
   const [values, setValues] = useState<Values>(() => ({
     ...INITIAL,
@@ -324,14 +353,29 @@ export function QuoteForm({
       }
 
       if (result.ok) {
+        const numericVolume = values.volumeUnknown
+          ? null
+          : Number(values.estimatedVolumeM3.replace(',', '.'));
+        const quoteVolumeBucket = volumeBucket(numericVolume);
+
         track('quote_submitted', {
           locale,
           projectType: values.projectType,
           customerType: values.customerType,
           pumpRequired: values.pumpRequired,
-          volumeBucket: volumeBucket(
-            values.volumeUnknown ? null : Number(values.estimatedVolumeM3.replace(',', '.')),
-          ),
+          volumeBucket: quoteVolumeBucket,
+          leadTimeBucket: leadTimeBucket(values.desiredDate),
+        });
+        trackQuoteSubmit({
+          locale,
+          requestId: result.publicId,
+          projectType: readAnalyticsProject(projectParam, values.projectType),
+          sourcePage,
+          calculatedVolumeM3: numericVolume,
+          unit: calculatorUnit,
+          marginPercent: calculatorMargin,
+          city: readAnalyticsCity(values.city),
+          volumeBucket: quoteVolumeBucket,
           leadTimeBucket: leadTimeBucket(values.desiredDate),
         });
         setConfirmedId(result.publicId);

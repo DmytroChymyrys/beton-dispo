@@ -1,5 +1,28 @@
-import { describe, expect, it } from 'vitest';
-import { leadTimeBucket, volumeBucket } from '@/lib/analytics';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { leadTimeBucket, trackQuoteSubmit, volumeBucket } from '@/lib/analytics';
+
+const mocks = vi.hoisted(() => ({
+  vercelTrack: vi.fn(),
+}));
+
+vi.mock('@vercel/analytics', () => ({
+  track: mocks.vercelTrack,
+}));
+
+beforeEach(() => {
+  mocks.vercelTrack.mockClear();
+  const storage = new Map<string, string>();
+  vi.stubGlobal('window', {
+    sessionStorage: {
+      getItem: (key: string) => storage.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        storage.set(key, value);
+      },
+      clear: () => storage.clear(),
+    },
+    gtag: vi.fn(),
+  });
+});
 
 function daysFromNow(days: number): string {
   const d = new Date();
@@ -41,5 +64,56 @@ describe('leadTimeBucket', () => {
 
   it('handles a malformed date without throwing', () => {
     expect(leadTimeBucket('not-a-date')).toBe('unknown');
+  });
+});
+
+describe('trackQuoteSubmit', () => {
+  it('emits quote_submit once per request id with safe GA4 parameters', () => {
+    trackQuoteSubmit({
+      locale: 'fr',
+      requestId: 'BD-000002',
+      projectType: 'Terrasse',
+      sourcePage: '/fr/beton-terrasse-exterieure?project=terrasse',
+      calculatedVolumeM3: 2.2,
+      unit: 'M',
+      marginPercent: 10,
+      city: 'Montréal',
+      volumeBucket: '0-3',
+      leadTimeBucket: '8-14d',
+    });
+    trackQuoteSubmit({
+      locale: 'fr',
+      requestId: 'BD-000002',
+      projectType: 'terrasse',
+    });
+
+    expect(mocks.vercelTrack).toHaveBeenCalledTimes(1);
+    expect(mocks.vercelTrack).toHaveBeenCalledWith('quote_submit', {
+      locale: 'fr',
+      request_id: 'BD-000002',
+      project_type: 'terrasse',
+      source_page: '/fr/beton-terrasse-exterieure?project=terrasse',
+      calculated_volume_m3: 2.2,
+      unit: 'm',
+      margin_percent: 10,
+      city: 'montréal',
+      form_variant: 'website_quote',
+      currency: 'CAD',
+      value: 1,
+      volumeBucket: '0-3',
+      leadTimeBucket: '8-14d',
+    });
+    expect(window.gtag).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not emit without a request id', () => {
+    trackQuoteSubmit({
+      locale: 'en',
+      requestId: '',
+      projectType: 'garage',
+    });
+
+    expect(mocks.vercelTrack).not.toHaveBeenCalled();
+    expect(window.gtag).not.toHaveBeenCalled();
   });
 });
