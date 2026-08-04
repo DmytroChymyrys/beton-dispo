@@ -33,7 +33,11 @@ export type QuoteEvent =
   | 'concrete_calculator_validation_failed'
   | 'concrete_calculator_calculated'
   | 'calculator_quote_clicked'
-  | 'local_calculator_page_view';
+  | 'local_calculator_page_view'
+  | 'patio_calculator_used'
+  | 'patio_calculator_margin_changed'
+  | 'patio_calculator_quote_clicked'
+  | 'patio_full_calculator_clicked';
 
 /**
  * Properties allowed on analytics events.

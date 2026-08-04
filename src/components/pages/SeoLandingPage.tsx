@@ -5,15 +5,18 @@ import { pathFor } from '@/i18n/routes';
 import { buttonClass } from '@/components/ui/button-styles';
 import { Breadcrumbs, type BreadcrumbItem } from '@/components/ui/Breadcrumbs';
 import { JsonLd } from '@/components/JsonLd';
+import { RelatedServices, ServicePrevNext } from '@/components/RelatedServices';
 import { Section, SectionTitle } from '@/components/ui/Section';
 import { absoluteUrl } from '@/lib/site';
 import { breadcrumbSchema, cityServiceSchema } from '@/lib/structured-data';
 import { relatedSeoLinks, seoLandingPages, type SeoLandingKey } from '@/lib/seo-landing-pages';
+import type { ServiceNetworkKey } from '@/lib/service-network';
 
 export function SeoLandingPage({ locale, pageKey }: { locale: Locale; pageKey: SeoLandingKey }) {
   const dict = getDictionary(locale);
   const page = seoLandingPages[pageKey];
   const copy = page.copy[locale];
+  const serviceKey: ServiceNetworkKey = pageKey;
   const pageUrl = absoluteUrl(pathFor(page.routeKey, locale));
   const homeLabel = locale === 'fr' ? 'Accueil' : 'Home';
   const breadcrumbs: BreadcrumbItem[] = [
@@ -113,7 +116,14 @@ export function SeoLandingPage({ locale, pageKey }: { locale: Locale; pageKey: S
         </div>
       </Section>
 
-      <Section tone="surface" labelledBy="seo-final-cta" className="py-12 md:py-16">
+      <Section tone="surface" className="py-12 md:py-16">
+        <div className="space-y-6">
+          <RelatedServices locale={locale} current={serviceKey} />
+          <ServicePrevNext locale={locale} current={serviceKey} />
+        </div>
+      </Section>
+
+      <Section tone="ground" labelledBy="seo-final-cta" className="py-12 md:py-16">
         <div className="rounded-card border-line bg-ground grid items-center gap-6 border p-8 md:grid-cols-[1.2fr_auto]">
           <div>
             <SectionTitle id="seo-final-cta" className="mt-0 text-3xl">

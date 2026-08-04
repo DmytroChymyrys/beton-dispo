@@ -18,6 +18,7 @@ export const routes = {
   calculator: { fr: 'calculateur-beton', en: 'concrete-calculator' },
   concreteSlab: { fr: 'dalle-beton', en: 'concrete-slab' },
   concreteDelivery: { fr: 'livraison-beton', en: 'concrete-delivery' },
+  concretePatio: { fr: 'beton-terrasse-exterieure', en: 'concrete-patio' },
   howItWorks: { fr: 'comment-ca-marche', en: 'how-it-works' },
   services: { fr: 'services', en: 'services' },
   faq: { fr: 'faq', en: 'faq' },

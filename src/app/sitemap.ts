@@ -17,6 +17,7 @@ const priorities: Record<RouteKey, number> = {
   calculator: 0.95,
   concreteSlab: 0.86,
   concreteDelivery: 0.86,
+  concretePatio: 0.87,
   services: 0.8,
   howItWorks: 0.7,
   faq: 0.6,

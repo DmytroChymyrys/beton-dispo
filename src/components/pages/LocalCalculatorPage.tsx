@@ -5,6 +5,7 @@ import { pathFor } from '@/i18n/routes';
 import { ConcreteCalculator } from '@/components/concrete-calculator/ConcreteCalculator';
 import { JsonLd } from '@/components/JsonLd';
 import { LocalCalculatorTracker } from '@/components/pages/LocalCalculatorTracker';
+import { RelatedServices, ServicePrevNext } from '@/components/RelatedServices';
 import { Breadcrumbs, type BreadcrumbItem } from '@/components/ui/Breadcrumbs';
 import { Section, SectionTitle } from '@/components/ui/Section';
 import { buttonClass } from '@/components/ui/button-styles';
@@ -230,7 +231,11 @@ export function LocalCalculatorPage({
       </Section>
 
       <Section tone="ground" labelledBy="local-related-guides" className="py-12 md:py-16">
-        <div className="rounded-card border-line bg-surface border p-6">
+        <div className="space-y-6">
+          <RelatedServices locale={locale} current="calculator" />
+          <ServicePrevNext locale={locale} current="calculator" />
+        </div>
+        <div className="rounded-card border-line bg-surface mt-6 border p-6">
           <h2 id="local-related-guides" className="font-display text-lg font-bold">
             {locale === 'fr' ? 'Guides connexes' : 'Related guides'}
           </h2>

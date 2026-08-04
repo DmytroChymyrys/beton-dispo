@@ -7,6 +7,7 @@ import { pathFor } from '@/i18n/routes';
 import { buttonClass } from '@/components/ui/button-styles';
 import { cn } from '@/lib/cn';
 import { track } from '@/lib/analytics';
+import { calculatorSuggestions, serviceHref } from '@/lib/service-network';
 import {
   addWasteFactor,
   calculateCircularSlabVolume,
@@ -170,6 +171,7 @@ export function ConcreteCalculator({
   }, [errors, geometry, state]);
 
   const active = strings.geometries[geometry];
+  const suggestions = calculatorSuggestions();
   const recommendedLabel = result ? `${formatNumber(locale, result.recommended)} m³` : null;
   const quoteHref = useMemo(() => {
     return calculatorQuoteHref({
@@ -416,6 +418,23 @@ export function ConcreteCalculator({
                 >
                   {strings.result.quoteButton.replace('{volume}', recommendedLabel ?? '')}
                 </Link>
+                <div className="border-line mt-5 border-t pt-4">
+                  <h4 className="font-display text-sm font-bold">
+                    {locale === 'fr' ? 'Prochaines étapes suggérées' : 'Suggested next steps'}
+                  </h4>
+                  <ul className="mt-2 space-y-1">
+                    {suggestions.map((item) => (
+                      <li key={item.key}>
+                        <Link
+                          href={serviceHref(item, locale)}
+                          className="text-ink-soft hover:text-accent inline-flex min-h-9 items-center text-sm font-semibold"
+                        >
+                          {item.copy[locale].title}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </>
             ) : (
               <p className="text-ink-muted mt-3 text-sm leading-relaxed">{strings.result.empty}</p>

@@ -125,6 +125,12 @@ function readPrefilledCity(value: string | null): string {
   return trimmed;
 }
 
+function readPrefilledProject(value: string | null): string {
+  const normalized = value?.trim().toLowerCase();
+  if (normalized === 'terrasse' || normalized === 'patio') return 'LANDSCAPING';
+  return '';
+}
+
 function formatVolume(locale: Locale, value: string): string {
   const parsed = Number(value.replace(',', '.'));
   return new Intl.NumberFormat(locale === 'fr' ? 'fr-CA' : 'en-CA', {
@@ -154,10 +160,12 @@ export function QuoteForm({
   const searchParams = useSearchParams();
   const prefilledVolume = readPrefilledVolume(searchParams.get('volume'));
   const prefilledCity = readPrefilledCity(searchParams.get('city'));
+  const prefilledProject = readPrefilledProject(searchParams.get('project'));
   const [step, setStep] = useState<StepIndex>(prefilledVolume ? 1 : 0);
   const [values, setValues] = useState<Values>(() => ({
     ...INITIAL,
     city: prefilledCity,
+    projectType: prefilledProject,
     estimatedVolumeM3: prefilledVolume,
     volumeUnknown: false,
     formIssuedAt: formToken.issuedAt,
@@ -182,9 +190,10 @@ export function QuoteForm({
       step: step + 1,
       stepName: STEP_NAMES[step],
       hasPrefilledVolume: prefilledVolume ? 'yes' : 'no',
+      projectType: prefilledProject || undefined,
       city: prefilledCity || undefined,
     });
-  }, [locale, prefilledCity, prefilledVolume, step]);
+  }, [locale, prefilledCity, prefilledProject, prefilledVolume, step]);
 
   useEffect(() => {
     if (!prefilledVolume || prefilledTrackedRef.current) return;
@@ -192,10 +201,11 @@ export function QuoteForm({
     track('quote_form_prefilled', {
       locale,
       source: 'calculator',
+      projectType: prefilledProject || undefined,
       volumeBucket: volumeBucket(Number(prefilledVolume)),
       city: prefilledCity || undefined,
     });
-  }, [locale, prefilledCity, prefilledVolume]);
+  }, [locale, prefilledCity, prefilledProject, prefilledVolume]);
 
   function set<K extends keyof Values>(field: K, value: Values[K]) {
     // The visitor is fixing something; drop that field's error as they type.

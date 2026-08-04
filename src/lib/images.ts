@@ -14,6 +14,7 @@
 export type PhotoKey =
   | 'heroPour'
   | 'slabFinishing'
+  | 'patioPour'
   | 'boomPump'
   | 'mixerTruck'
   | 'volumetricMixer'
@@ -40,6 +41,11 @@ export const photos: Record<PhotoKey, PhotoAsset> = {
     src: '/images/betondispo/betondispo-concrete-slab-finishing.webp',
     width: 357,
     height: 309,
+  },
+  patioPour: {
+    src: '/images/betondispo/beton-terrasse-coulee.jpg',
+    width: 1536,
+    height: 1024,
   },
   boomPump: {
     src: '/images/betondispo/betondispo-concrete-pump-foundation.webp',

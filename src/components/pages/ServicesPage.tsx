@@ -9,6 +9,7 @@ import { JsonLd } from '@/components/JsonLd';
 import { Photo } from '@/components/Photo';
 import { servicesSchema } from '@/lib/structured-data';
 import type { PhotoKey } from '@/lib/images';
+import { serviceHref, serviceNetwork, type ServiceCategory } from '@/lib/service-network';
 
 /**
  * Service `key` (stable across locales) -> photography slot. JSON imports widen
@@ -24,6 +25,18 @@ const FALLBACK_SERVICE_PHOTO: PhotoKey = 'mixerTruck';
 export function ServicesPage({ locale }: { locale: Locale }) {
   const dict = getDictionary(locale);
   const page = dict.servicesPage;
+  const categories: { key: ServiceCategory; title: string }[] = [
+    {
+      key: 'residential',
+      title: locale === 'fr' ? 'Construction résidentielle' : 'Residential construction',
+    },
+    {
+      key: 'delivery',
+      title: locale === 'fr' ? 'Livraison et chantier' : 'Delivery and job site',
+    },
+    { key: 'calculator', title: locale === 'fr' ? 'Estimation' : 'Estimating' },
+    { key: 'support', title: locale === 'fr' ? 'Ressources' : 'Resources' },
+  ];
 
   return (
     <>
@@ -71,6 +84,35 @@ export function ServicesPage({ locale }: { locale: Locale }) {
         <div className="rounded-card border-accent-bright bg-surface-sunken mt-10 border-l-4 p-6">
           <h2 className="font-display text-lg font-bold">{page.disclosureTitle}</h2>
           <p className="text-ink-muted mt-2 max-w-3xl leading-relaxed">{page.disclosure}</p>
+        </div>
+      </Section>
+
+      <Section tone="surface" labelledBy="service-hub" className="py-12 md:py-16">
+        <SectionTitle id="service-hub" className="mt-0">
+          {locale === 'fr' ? 'Explorer les services' : 'Explore services'}
+        </SectionTitle>
+        <div className="mt-8 grid gap-6 md:grid-cols-2">
+          {categories.map((category) => {
+            const items = serviceNetwork.filter((item) => item.category === category.key);
+            return (
+              <section key={category.key} className="rounded-card border-line bg-ground border p-6">
+                <h2 className="text-2xl">{category.title}</h2>
+                <ul className="mt-4 space-y-3">
+                  {items.map((item) => (
+                    <li key={item.key}>
+                      <Link
+                        href={serviceHref(item, locale)}
+                        className="text-ink-soft hover:text-accent font-semibold"
+                      >
+                        {item.copy[locale].title}
+                      </Link>
+                      <p className="text-ink-muted mt-1 text-sm">{item.copy[locale].description}</p>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            );
+          })}
         </div>
       </Section>
 

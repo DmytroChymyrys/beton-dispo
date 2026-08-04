@@ -4,6 +4,7 @@ import { pathFor, type RouteKey } from '@/i18n/routes';
 import { Logo } from '@/components/Logo';
 import type { Dictionary } from '@/i18n/dictionaries';
 import { siteConfig } from '@/lib/site';
+import { popularServices, serviceHref } from '@/lib/service-network';
 
 const NAV_KEYS: RouteKey[] = ['calculator', 'howItWorks', 'services', 'faq', 'quote'];
 const LEGAL_KEYS: RouteKey[] = ['privacy', 'terms'];
@@ -17,6 +18,7 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
     calculator: nav.links.calculator,
     concreteSlab: locale === 'fr' ? 'Dalle de béton' : 'Concrete slab',
     concreteDelivery: locale === 'fr' ? 'Livraison de béton' : 'Concrete delivery',
+    concretePatio: locale === 'fr' ? 'Béton pour terrasse' : 'Concrete patio',
     howItWorks: nav.links.howItWorks,
     services: nav.links.services,
     faq: nav.links.faq,
@@ -27,7 +29,7 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
 
   return (
     <footer className="bg-steel mt-auto text-white/75">
-      <div className="container-page grid gap-10 py-14 md:grid-cols-4 md:gap-8">
+      <div className="container-page grid gap-10 py-14 md:grid-cols-5 md:gap-8">
         <div className="md:col-span-2">
           <Logo locale={locale} lead={meta.logoLead} accent={meta.logoAccent} onDark />
           <p className="mt-4 max-w-sm text-sm leading-relaxed">{footer.tagline}</p>
@@ -48,6 +50,24 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
                   className="inline-flex min-h-10 items-center text-sm hover:text-white"
                 >
                   {navLabels[key]}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <nav aria-label={locale === 'fr' ? 'Services populaires' : 'Popular services'}>
+          <h2 className="font-display text-sm font-bold tracking-wider text-white uppercase">
+            {locale === 'fr' ? 'Services populaires' : 'Popular services'}
+          </h2>
+          <ul className="mt-4 space-y-1">
+            {popularServices(locale).map((item) => (
+              <li key={item.key}>
+                <Link
+                  href={serviceHref(item, locale)}
+                  className="inline-flex min-h-10 items-center text-sm hover:text-white"
+                >
+                  {item.copy[locale].title}
                 </Link>
               </li>
             ))}

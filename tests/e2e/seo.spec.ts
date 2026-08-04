@@ -13,6 +13,7 @@ const PAGE_PAIRS: [string, string][] = [
   ['/fr/calculateur-beton', '/en/concrete-calculator'],
   ['/fr/dalle-beton', '/en/concrete-slab'],
   ['/fr/livraison-beton', '/en/concrete-delivery'],
+  ['/fr/beton-terrasse-exterieure', '/en/concrete-patio'],
   ['/fr/comment-ca-marche', '/en/how-it-works'],
   ['/fr/services', '/en/services'],
   ['/fr/faq', '/en/faq'],

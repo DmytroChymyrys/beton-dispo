@@ -167,6 +167,10 @@ export const seoLandingPages: Record<SeoLandingKey, SeoLandingPage> = {
 export function relatedSeoLinks(locale: Locale) {
   return [
     {
+      href: pathFor('concretePatio', locale),
+      label: locale === 'fr' ? 'Béton pour terrasse extérieure' : 'Concrete patio',
+    },
+    {
       href: pathFor('concreteDelivery', locale),
       label: seoLandingPages.concreteDelivery.copy[locale].h1,
     },
