@@ -135,60 +135,66 @@ export async function updateQuoteRequest(
   patch: { status?: QuoteStatus; internalNotes?: string | null; lostReason?: string | null },
 ): Promise<void> {
   const db = await getDb();
-  await db.transaction(async (tx) => {
-    const [before] = await tx.select().from(quoteRequests).where(eq(quoteRequests.id, id)).limit(1);
-    if (!before) return;
+  const [before] = await db.select().from(quoteRequests).where(eq(quoteRequests.id, id)).limit(1);
+  if (!before) return;
 
-    const [after] = await tx
-      .update(quoteRequests)
-      .set({ ...patch, updatedAt: new Date() })
-      .where(eq(quoteRequests.id, id))
-      .returning();
+  const [after] = await db
+    .update(quoteRequests)
+    .set({ ...patch, updatedAt: new Date() })
+    .where(eq(quoteRequests.id, id))
+    .returning();
 
-    if (!after) return;
+  if (!after) return;
 
-    const events: {
-      type: string;
-      message: string;
-      metadata?: Record<string, unknown>;
-    }[] = [];
+  const events: {
+    type: string;
+    message: string;
+    metadata?: Record<string, unknown>;
+  }[] = [];
 
-    if (patch.status && patch.status !== before.status) {
-      events.push({
-        type: 'status_changed',
-        message: `Status changed from ${before.status} to ${patch.status}.`,
-        metadata: { from: before.status, to: patch.status },
-      });
-    }
+  if (patch.status && patch.status !== before.status) {
+    events.push({
+      type: 'status_changed',
+      message: `Status changed from ${before.status} to ${patch.status}.`,
+      metadata: { from: before.status, to: patch.status },
+    });
+  }
 
-    if (patch.lostReason !== undefined && patch.lostReason !== before.lostReason) {
-      events.push({
-        type: patch.lostReason ? 'lost_reason_updated' : 'lost_reason_cleared',
-        message: patch.lostReason ? 'Lost reason updated.' : 'Lost reason cleared.',
-        metadata: { hasLostReason: Boolean(patch.lostReason) },
-      });
-    }
+  if (patch.lostReason !== undefined && patch.lostReason !== before.lostReason) {
+    events.push({
+      type: patch.lostReason ? 'lost_reason_updated' : 'lost_reason_cleared',
+      message: patch.lostReason ? 'Lost reason updated.' : 'Lost reason cleared.',
+      metadata: { hasLostReason: Boolean(patch.lostReason) },
+    });
+  }
 
-    if (patch.internalNotes !== undefined && patch.internalNotes !== before.internalNotes) {
-      events.push({
-        type: patch.internalNotes ? 'internal_notes_updated' : 'internal_notes_cleared',
-        message: patch.internalNotes ? 'Internal notes updated.' : 'Internal notes cleared.',
-        metadata: { hasInternalNotes: Boolean(patch.internalNotes) },
-      });
-    }
+  if (patch.internalNotes !== undefined && patch.internalNotes !== before.internalNotes) {
+    events.push({
+      type: patch.internalNotes ? 'internal_notes_updated' : 'internal_notes_cleared',
+      message: patch.internalNotes ? 'Internal notes updated.' : 'Internal notes cleared.',
+      metadata: { hasInternalNotes: Boolean(patch.internalNotes) },
+    });
+  }
 
-    if (events.length > 0) {
-      await tx.insert(quoteRequestEvents).values(
-        events.map((event) => ({
-          quoteRequestId: id,
-          actor: 'admin',
-          type: event.type,
-          message: event.message,
-          metadata: event.metadata,
-        })),
-      );
-    }
-  });
+  if (events.length === 0) return;
+
+  try {
+    await db.insert(quoteRequestEvents).values(
+      events.map((event) => ({
+        quoteRequestId: id,
+        actor: 'admin',
+        type: event.type,
+        message: event.message,
+        metadata: event.metadata,
+      })),
+    );
+  } catch (error) {
+    console.warn('[admin] failed to record quote request event', {
+      quoteRequestId: id,
+      eventCount: events.length,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
 }
 
 /** Distinct cities, for the filter dropdown. */

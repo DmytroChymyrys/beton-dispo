@@ -68,71 +68,75 @@ export async function createQuoteRequest(
 
   if (duplicate) return { row: duplicate, duplicate: true };
 
-  const row = await db.transaction(async (tx) => {
-    const [inserted] = await tx
-      .insert(quoteRequests)
-      .values({
-        locale: input.locale,
+  const [row] = await db
+    .insert(quoteRequests)
+    .values({
+      locale: input.locale,
 
-        customerType: input.customerType,
-        name: input.name,
-        // A company name only means something for a business request.
-        companyName: input.customerType === 'BUSINESS' ? nullIfBlank(input.companyName) : null,
-        email: normalizedEmail(input.email),
-        phone: normalizePhone(input.phone),
-        preferredContactMethod: input.preferredContactMethod,
+      customerType: input.customerType,
+      name: input.name,
+      // A company name only means something for a business request.
+      companyName: input.customerType === 'BUSINESS' ? nullIfBlank(input.companyName) : null,
+      email: normalizedEmail(input.email),
+      phone: normalizePhone(input.phone),
+      preferredContactMethod: input.preferredContactMethod,
 
-        address: input.address,
-        city: input.city,
-        postalCode: normalizePostalCode(input.postalCode),
-        accessNotes: nullIfBlank(input.accessNotes),
+      address: input.address,
+      city: input.city,
+      postalCode: normalizePostalCode(input.postalCode),
+      accessNotes: nullIfBlank(input.accessNotes),
 
-        projectType: input.projectType,
-        estimatedVolumeM3: input.estimatedVolumeM3,
-        volumeUnknown: input.volumeUnknown,
-        concreteStrength: input.concreteStrength,
-        pumpRequired: input.pumpRequired,
-        // Pump notes are meaningless unless a pump is actually in play.
-        pumpNotes: input.pumpRequired === 'NO' ? null : nullIfBlank(input.pumpNotes),
+      projectType: input.projectType,
+      estimatedVolumeM3: input.estimatedVolumeM3,
+      volumeUnknown: input.volumeUnknown,
+      concreteStrength: input.concreteStrength,
+      pumpRequired: input.pumpRequired,
+      // Pump notes are meaningless unless a pump is actually in play.
+      pumpNotes: input.pumpRequired === 'NO' ? null : nullIfBlank(input.pumpNotes),
 
-        desiredDate: input.desiredDate,
-        preferredTime: input.preferredTime ? input.preferredTime : null,
-        scheduleFlexible: input.scheduleFlexible,
+      desiredDate: input.desiredDate,
+      preferredTime: input.preferredTime ? input.preferredTime : null,
+      scheduleFlexible: input.scheduleFlexible,
 
-        additionalNotes: nullIfBlank(input.additionalNotes),
+      additionalNotes: nullIfBlank(input.additionalNotes),
 
-        utmSource: nullIfBlank(input.utmSource),
-        utmMedium: nullIfBlank(input.utmMedium),
-        utmCampaign: nullIfBlank(input.utmCampaign),
-        utmTerm: nullIfBlank(input.utmTerm),
-        utmContent: nullIfBlank(input.utmContent),
-        referrer: nullIfBlank(input.referrer),
-        landingPage: nullIfBlank(input.landingPage),
+      utmSource: nullIfBlank(input.utmSource),
+      utmMedium: nullIfBlank(input.utmMedium),
+      utmCampaign: nullIfBlank(input.utmCampaign),
+      utmTerm: nullIfBlank(input.utmTerm),
+      utmContent: nullIfBlank(input.utmContent),
+      referrer: nullIfBlank(input.referrer),
+      landingPage: nullIfBlank(input.landingPage),
 
-        abuseStatus: metadata.abuseStatus ?? 'clean',
-        sourceIpHash: metadata.sourceIpHash,
-        duplicateFingerprint: fingerprint,
-      })
-      .returning();
+      abuseStatus: metadata.abuseStatus ?? 'clean',
+      sourceIpHash: metadata.sourceIpHash,
+      duplicateFingerprint: fingerprint,
+    })
+    .returning();
 
-    if (!inserted) throw new Error('Insert returned no row.');
+  if (!row) throw new Error('Insert returned no row.');
 
-    await tx.insert(quoteRequestEvents).values({
-      quoteRequestId: inserted.id,
+  try {
+    await db.insert(quoteRequestEvents).values({
+      quoteRequestId: row.id,
       actor: 'customer',
       type: 'quote_created',
-      message: `Quote request ${inserted.publicId} submitted.`,
+      message: `Quote request ${row.publicId} submitted.`,
       metadata: {
-        locale: inserted.locale,
-        city: inserted.city,
-        projectType: inserted.projectType,
-        customerType: inserted.customerType,
-        estimatedVolumeM3: inserted.estimatedVolumeM3,
+        locale: row.locale,
+        city: row.city,
+        projectType: row.projectType,
+        customerType: row.customerType,
+        estimatedVolumeM3: row.estimatedVolumeM3,
       },
     });
-
-    return inserted;
-  });
+  } catch (error) {
+    console.warn('[quote] failed to record creation event', {
+      quoteRequestId: row.id,
+      publicId: row.publicId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
 
   return { row, duplicate: false };
 }
