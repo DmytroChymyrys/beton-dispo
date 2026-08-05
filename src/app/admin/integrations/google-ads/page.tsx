@@ -7,6 +7,7 @@ import {
   syncGoogleAdsAction,
   testGoogleAdsConnectionAction,
 } from './actions';
+import { SubmitButton } from './SubmitButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,7 +46,7 @@ export default async function GoogleAdsIntegrationPage() {
             <p className="text-ink-muted mt-2 text-xs leading-relaxed">{connection.errorMessage}</p>
           ) : null}
           <form action={testGoogleAdsConnectionAction} className="mt-4">
-            <Button>Test connection</Button>
+            <SubmitButton pendingLabel="Testing...">Test connection</SubmitButton>
           </form>
         </Card>
 
@@ -80,7 +81,7 @@ export default async function GoogleAdsIntegrationPage() {
               <option value="7d">Refresh last 7 days</option>
               <option value="30d">Backfill last 30 days</option>
             </select>
-            <Button>Sync now</Button>
+            <SubmitButton pendingLabel="Syncing...">Sync now</SubmitButton>
           </form>
         </Card>
 
@@ -105,7 +106,7 @@ export default async function GoogleAdsIntegrationPage() {
             ))}
           </div>
           <form action={processOfflineConversionsAction} className="mt-4">
-            <Button>Process queue</Button>
+            <SubmitButton pendingLabel="Processing...">Process queue</SubmitButton>
           </form>
         </Card>
       </section>
@@ -172,14 +173,6 @@ function StatusLine({ label, value }: { label: string; value: string }) {
       <span className="text-ink-muted">{label}</span>
       <span className="text-right font-semibold">{value}</span>
     </div>
-  );
-}
-
-function Button({ children }: { children: React.ReactNode }) {
-  return (
-    <button className="bg-accent hover:bg-accent-hover inline-flex min-h-10 items-center justify-center rounded-lg px-4 text-sm font-semibold text-white">
-      {children}
-    </button>
   );
 }
 
