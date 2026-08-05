@@ -43,6 +43,13 @@
       "when": 1785937703763,
       "tag": "0005_whole_the_phantom",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1785942642133,
+      "tag": "0006_rapid_galactus",
+      "breakpoints": true
     }
   ]
 }

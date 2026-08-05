@@ -62,6 +62,18 @@ export default async function AdminLayout({ children }: { children: ReactNode })
                   >
                     {t.analytics}
                   </Link>
+                  <Link
+                    href="/admin/suppliers"
+                    className="text-ink-soft hover:bg-surface-sunken hover:text-ink inline-flex min-h-10 items-center rounded-lg px-3 text-sm font-medium"
+                  >
+                    {t.suppliers}
+                  </Link>
+                  <Link
+                    href="/admin/integrations/google-ads"
+                    className="text-ink-soft hover:bg-surface-sunken hover:text-ink inline-flex min-h-10 items-center rounded-lg px-3 text-sm font-medium"
+                  >
+                    {t.integrations}
+                  </Link>
                 </nav>
               </div>
 

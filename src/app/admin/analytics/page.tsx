@@ -161,6 +161,26 @@ export default async function AdminAnalyticsPage({ searchParams }: { searchParam
         <Kpi label={t.withinHour} value={ratioLabel(report.kpis.respondedWithin60, locale)} quiet note={responseSample(report.kpis.contacted, t.respondedSample)} />
       </section>
 
+      <section className="rounded-card border-line bg-surface border p-5">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-bold">{t.advertising}</h2>
+            <p className="text-ink-muted mt-1 text-sm">{t.advertisingNote}</p>
+          </div>
+          <Link href="/admin/integrations/google-ads" className="text-accent text-sm font-semibold hover:underline">
+            {t.googleAdsSettings}
+          </Link>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
+          <MiniKpi label={t.adSpend} value={moneyValue(report.advertising.spendCad, locale)} />
+          <MiniKpi label={t.clicks} value={report.advertising.clicks} note={formatNullablePercent(report.advertising.ctr, locale)} />
+          <MiniKpi label={t.avgCpc} value={moneyNullable(report.advertising.averageCpcCad, locale)} />
+          <MiniKpi label={t.costPerQuote} value={moneyNullable(report.advertising.costPerQuoteCad, locale)} note={`${report.advertising.gclidQuotes} ${t.gclidQuotes}`} />
+          <MiniKpi label={t.costPerQualified} value={moneyNullable(report.advertising.costPerQualifiedLeadCad, locale)} note={`${report.advertising.gclidQualifiedLeads} ${t.qualifiedLeadCount}`} />
+          <MiniKpi label={t.roas} value={ratioNullable(report.advertising.betondispoRevenueRoas, locale)} note={t.roasBasis} />
+        </div>
+      </section>
+
       <AnalyticsCharts
         trend={report.quotesOverTime}
         funnel={report.funnel}
@@ -191,6 +211,13 @@ export default async function AdminAnalyticsPage({ searchParams }: { searchParam
           noData: t.noData,
           notEnoughActivity: t.notEnoughActivity,
         }}
+      />
+
+      <CampaignTable
+        title={t.campaignPerformance}
+        rows={report.advertising.campaigns}
+        locale={locale}
+        empty={t.noData}
       />
 
       <LeadTable
@@ -378,6 +405,90 @@ function Kpi({
   );
 }
 
+function MiniKpi({ label, value, note }: { label: string; value: string | number; note?: string }) {
+  return (
+    <div className="bg-surface-sunken rounded-lg p-4">
+      <p className="text-ink-muted text-xs font-bold tracking-wide uppercase">{label}</p>
+      <p className="mt-2 text-xl font-extrabold tabular-nums">{value}</p>
+      {note ? <p className="text-ink-muted mt-1 text-xs">{note}</p> : null}
+    </div>
+  );
+}
+
+function CampaignTable({
+  title,
+  rows,
+  locale,
+  empty,
+}: {
+  title: string;
+  rows: {
+    campaignId: string;
+    campaignName: string;
+    campaignStatus: string | null;
+    campaignType: string | null;
+    spendCad: number;
+    impressions: number;
+    clicks: number;
+    ctr: number | null;
+    averageCpcCad: number | null;
+    googleReportedConversions: number;
+    googleReportedConversionValue: number;
+  }[];
+  locale: 'fr' | 'en';
+  empty: string;
+}) {
+  return (
+    <section className="rounded-card border-line bg-surface overflow-x-auto border">
+      <h2 className="border-line bg-surface-sunken border-b px-5 py-4 text-lg">{title}</h2>
+      <table className="w-full min-w-[70rem] text-sm">
+        <thead className="text-ink-muted text-left">
+          <tr>
+            <Th>Campaign</Th>
+            <Th>Status</Th>
+            <Th>Spend</Th>
+            <Th>Impressions</Th>
+            <Th>Clicks</Th>
+            <Th>CTR</Th>
+            <Th>Avg CPC</Th>
+            <Th>Google conv.</Th>
+            <Th>Google value</Th>
+          </tr>
+        </thead>
+        <tbody className="divide-line divide-y">
+          {rows.length ? (
+            rows.map((row) => (
+              <tr key={row.campaignId} className="hover:bg-surface-sunken">
+                <td className="px-4 py-3">
+                  <span className="block font-bold">{row.campaignName}</span>
+                  <span className="text-ink-muted text-xs">{row.campaignId}</span>
+                </td>
+                <td className="px-4 py-3">{row.campaignStatus ?? '—'}</td>
+                <td className="px-4 py-3 text-right tabular-nums">{moneyValue(row.spendCad, locale)}</td>
+                <td className="px-4 py-3 text-right tabular-nums">{row.impressions.toLocaleString()}</td>
+                <td className="px-4 py-3 text-right tabular-nums">{row.clicks.toLocaleString()}</td>
+                <td className="px-4 py-3 text-right tabular-nums">{formatNullablePercent(row.ctr, locale)}</td>
+                <td className="px-4 py-3 text-right tabular-nums">{moneyNullable(row.averageCpcCad, locale)}</td>
+                <td className="px-4 py-3 text-right tabular-nums">{row.googleReportedConversions.toFixed(2)}</td>
+                <td className="px-4 py-3 text-right tabular-nums">{moneyValue(row.googleReportedConversionValue, locale)}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td className="text-ink-muted px-4 py-6 text-center" colSpan={9}>
+                {empty}
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+      <p className="text-ink-muted border-line border-t px-5 py-3 text-xs">
+        Internal CRM leads are account-level unless Google Ads provides a reliable campaign-to-lead join.
+      </p>
+    </section>
+  );
+}
+
 function LeadTable({
   title,
   rows,
@@ -486,10 +597,29 @@ function responseSample(count: number, label: (count: number) => string): string
 
 function money(value: number, locale: 'fr' | 'en'): string {
   if (!value) return '—';
+  return moneyValue(value, locale);
+}
+
+function moneyValue(value: number, locale: 'fr' | 'en'): string {
   return new Intl.NumberFormat(locale === 'fr' ? 'fr-CA' : 'en-CA', {
     style: 'currency',
     currency: 'CAD',
   }).format(value);
+}
+
+function moneyNullable(value: number | null, locale: 'fr' | 'en'): string {
+  return value == null ? (locale === 'fr' ? 'Données insuffisantes' : 'Not enough data') : moneyValue(value, locale);
+}
+
+function formatNullablePercent(value: number | null, locale: 'fr' | 'en'): string {
+  return value == null ? '—' : formatPercent(value, locale);
+}
+
+function ratioNullable(value: number | null, locale: 'fr' | 'en'): string {
+  if (value == null) return locale === 'fr' ? 'Données insuffisantes' : 'Not enough data';
+  return `${new Intl.NumberFormat(locale === 'fr' ? 'fr-CA' : 'en-CA', {
+    maximumFractionDigits: 1,
+  }).format(value)}×`;
 }
 
 function labelProjectRows(
@@ -535,6 +665,20 @@ const copy = {
     noRevenue: 'Aucun revenu enregistré',
     filteredPeriod: 'Période filtrée',
     respondedSample: (count: number) => `Basé sur ${count} demande${count === 1 ? '' : 's'} avec suivi`,
+    advertising: 'Performance publicitaire',
+    advertisingNote:
+      'Dépenses Google Ads synchronisées séparément des demandes CRM avec GCLID.',
+    googleAdsSettings: 'Paramètres Google Ads →',
+    adSpend: 'Dépense',
+    clicks: 'Clics',
+    avgCpc: 'CPC moyen',
+    costPerQuote: 'Coût / demande',
+    costPerQualified: 'Coût / qualifiée',
+    qualifiedLeadCount: 'qualifiées',
+    roas: 'ROAS',
+    roasBasis: 'Revenu BétonDispo',
+    gclidQuotes: 'avec GCLID',
+    campaignPerformance: 'Performance par campagne',
     trend: 'Demandes dans le temps',
     funnel: 'Entonnoir',
     statusBreakdown: 'Répartition des statuts',
@@ -604,6 +748,20 @@ const copy = {
     noRevenue: 'No revenue recorded',
     filteredPeriod: 'Filtered period',
     respondedSample: (count: number) => `Based on ${count} responded lead${count === 1 ? '' : 's'}`,
+    advertising: 'Advertising performance',
+    advertisingNote:
+      'Google Ads spend is synced separately from CRM requests with GCLID attribution.',
+    googleAdsSettings: 'Google Ads settings →',
+    adSpend: 'Spend',
+    clicks: 'Clicks',
+    avgCpc: 'Avg CPC',
+    costPerQuote: 'Cost / quote',
+    costPerQualified: 'Cost / qualified',
+    qualifiedLeadCount: 'qualified',
+    roas: 'ROAS',
+    roasBasis: 'BétonDispo revenue',
+    gclidQuotes: 'with GCLID',
+    campaignPerformance: 'Campaign performance',
     trend: 'Quotes over time',
     funnel: 'Funnel',
     statusBreakdown: 'Status breakdown',

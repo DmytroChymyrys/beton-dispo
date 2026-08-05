@@ -15,6 +15,8 @@ export const adminText = {
     dashboard: 'Tableau de bord',
     requests: 'Demandes',
     analytics: 'Analytics',
+    suppliers: 'Fournisseurs',
+    integrations: 'Intégrations',
     signOut: 'Se déconnecter',
     login: {
       subtitle: 'Accès interne',
@@ -178,6 +180,8 @@ export const adminText = {
     dashboard: 'Dashboard',
     requests: 'Requests',
     analytics: 'Analytics',
+    suppliers: 'Suppliers',
+    integrations: 'Integrations',
     signOut: 'Sign out',
     login: {
       subtitle: 'Internal access',

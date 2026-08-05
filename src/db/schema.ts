@@ -13,6 +13,7 @@ import {
   bigint,
   boolean,
   date,
+  integer,
   index,
   jsonb,
   numeric,
@@ -21,6 +22,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
@@ -50,6 +52,58 @@ export const triStateEnum = pgEnum('tri_state', TRI_STATES);
 export const preferredTimeEnum = pgEnum('preferred_time', PREFERRED_TIMES);
 
 export const quoteStatusEnum = pgEnum('quote_status', QUOTE_STATUSES);
+
+export const qualificationStatusEnum = pgEnum('qualification_status', [
+  'PENDING',
+  'QUALIFIED',
+  'DISQUALIFIED',
+]);
+
+export const googleAdsGranularityEnum = pgEnum('google_ads_granularity', ['CAMPAIGN', 'AD_GROUP']);
+
+export const googleAdsSyncStatusEnum = pgEnum('google_ads_sync_status', [
+  'PENDING',
+  'RUNNING',
+  'SUCCEEDED',
+  'PARTIALLY_FAILED',
+  'FAILED',
+]);
+
+export const offlineConversionStageEnum = pgEnum('offline_conversion_stage', [
+  'QUALIFIED_LEAD',
+  'WON_JOB',
+]);
+
+export const offlineConversionStatusEnum = pgEnum('offline_conversion_status', [
+  'PENDING',
+  'PROCESSING',
+  'UPLOADED',
+  'RETRY',
+  'PERMANENTLY_FAILED',
+  'SKIPPED',
+]);
+
+export const supplierStatusEnum = pgEnum('supplier_status', [
+  'PROSPECT',
+  'ONBOARDING',
+  'ACTIVE',
+  'PAUSED',
+  'INACTIVE',
+]);
+
+export const supplierAssignmentStatusEnum = pgEnum('supplier_assignment_status', [
+  'PENDING',
+  'VIEWED',
+  'INTERESTED',
+  'QUOTED',
+  'ACCEPTED',
+  'DECLINED',
+  'EXPIRED',
+  'WON',
+  'LOST',
+]);
+
+export const adConsentEnum = pgEnum('ad_consent', ['GRANTED', 'DENIED', 'UNKNOWN']);
 
 /* -------------------------------------------------------------------------- */
 /* Human-readable reference                                                    */
@@ -166,6 +220,11 @@ export const quoteRequests = pgTable(
     sourceIpHash: varchar('source_ip_hash', { length: 64 }),
     duplicateFingerprint: varchar('duplicate_fingerprint', { length: 64 }),
     status: quoteStatusEnum('status').notNull().default('NEW'),
+    qualificationStatus: qualificationStatusEnum('qualification_status').notNull().default('PENDING'),
+    qualifiedAt: timestamp('qualified_at', { withTimezone: true }),
+    qualifiedBy: varchar('qualified_by', { length: 120 }),
+    qualificationReason: text('qualification_reason'),
+    disqualificationReason: varchar('disqualification_reason', { length: 80 }),
     firstResponseAt: timestamp('first_response_at', { withTimezone: true }),
     firstContactAt: timestamp('first_contact_at', { withTimezone: true }),
     resolvedAt: timestamp('resolved_at', { withTimezone: true }),
@@ -176,12 +235,20 @@ export const quoteRequests = pgTable(
     betondispoRevenueCad: numeric('betondispo_revenue_cad', { precision: 12, scale: 2 }),
     supplierSelected: varchar('supplier_selected', { length: 160 }),
     serviceDate: date('service_date'),
+    adUserDataConsent: adConsentEnum('ad_user_data_consent').notNull().default('UNKNOWN'),
+    adPersonalizationConsent: adConsentEnum('ad_personalization_consent')
+      .notNull()
+      .default('UNKNOWN'),
+    consentCapturedAt: timestamp('consent_captured_at', { withTimezone: true }),
+    consentSource: varchar('consent_source', { length: 80 }),
     internalNotes: text('internal_notes'),
     lostReason: text('lost_reason'),
   },
   (table) => [
     index('quote_requests_created_at_idx').on(table.createdAt.desc()),
     index('quote_requests_status_idx').on(table.status),
+    index('quote_requests_qualification_status_idx').on(table.qualificationStatus),
+    index('quote_requests_qualified_at_idx').on(table.qualifiedAt),
     index('quote_requests_city_idx').on(table.city),
     index('quote_requests_desired_date_idx').on(table.desiredDate),
     index('quote_requests_customer_type_idx').on(table.customerType),
@@ -225,3 +292,202 @@ export const quoteRequestEvents = pgTable(
 
 export type QuoteRequestEvent = typeof quoteRequestEvents.$inferSelect;
 export type NewQuoteRequestEvent = typeof quoteRequestEvents.$inferInsert;
+
+/* -------------------------------------------------------------------------- */
+/* Google Ads reporting                                                        */
+/* -------------------------------------------------------------------------- */
+
+export const googleAdsDailyPerformance = pgTable(
+  'google_ads_daily_performance',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    customerId: varchar('customer_id', { length: 32 }).notNull(),
+    reportDate: date('report_date').notNull(),
+    granularity: googleAdsGranularityEnum('granularity').notNull().default('CAMPAIGN'),
+    performanceKey: text('performance_key')
+      .notNull()
+      .generatedAlwaysAs(
+        sql`customer_id || ':' || report_date::text || ':' || granularity || ':' || campaign_id || ':' || coalesce(ad_group_id, 'campaign')`,
+      ),
+    campaignId: varchar('campaign_id', { length: 32 }).notNull(),
+    campaignName: varchar('campaign_name', { length: 255 }).notNull(),
+    campaignStatus: varchar('campaign_status', { length: 40 }),
+    campaignType: varchar('campaign_type', { length: 80 }),
+    adGroupId: varchar('ad_group_id', { length: 32 }),
+    adGroupName: varchar('ad_group_name', { length: 255 }),
+    currencyCode: varchar('currency_code', { length: 8 }).notNull().default('CAD'),
+    impressions: integer('impressions').notNull().default(0),
+    clicks: integer('clicks').notNull().default(0),
+    costMicros: bigint('cost_micros', { mode: 'number' }).notNull().default(0),
+    conversions: numeric('conversions', { precision: 12, scale: 4 }).notNull().default('0'),
+    conversionValue: numeric('conversion_value', { precision: 14, scale: 4 }).notNull().default('0'),
+    allConversions: numeric('all_conversions', { precision: 12, scale: 4 })
+      .notNull()
+      .default('0'),
+    allConversionValue: numeric('all_conversion_value', { precision: 14, scale: 4 })
+      .notNull()
+      .default('0'),
+    interactions: integer('interactions'),
+    syncedAt: timestamp('synced_at', { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    uniqueIndex('google_ads_daily_unique_idx').on(table.performanceKey),
+    index('google_ads_daily_report_date_idx').on(table.reportDate),
+    index('google_ads_daily_campaign_idx').on(table.campaignId),
+    index('google_ads_daily_customer_date_idx').on(table.customerId, table.reportDate),
+  ],
+);
+
+export const googleAdsSyncRuns = pgTable(
+  'google_ads_sync_runs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    startDate: date('start_date').notNull(),
+    endDate: date('end_date').notNull(),
+    status: googleAdsSyncStatusEnum('status').notNull().default('PENDING'),
+    rowsReceived: integer('rows_received').notNull().default(0),
+    rowsUpserted: integer('rows_upserted').notNull().default(0),
+    apiCalls: integer('api_calls').notNull().default(0),
+    errorCode: varchar('error_code', { length: 120 }),
+    sanitizedError: text('sanitized_error'),
+    initiatedBy: varchar('initiated_by', { length: 80 }).notNull().default('admin'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('google_ads_sync_runs_started_idx').on(table.startedAt.desc()),
+    index('google_ads_sync_runs_status_idx').on(table.status),
+  ],
+);
+
+export const googleAdsOfflineConversions = pgTable(
+  'google_ads_offline_conversions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    quoteRequestId: uuid('quote_request_id')
+      .notNull()
+      .references(() => quoteRequests.id, { onDelete: 'cascade' }),
+    requestNumber: varchar('request_number', { length: 32 }).notNull(),
+    conversionStage: offlineConversionStageEnum('conversion_stage').notNull(),
+    conversionActionId: varchar('conversion_action_id', { length: 64 }),
+    conversionActionResourceName: varchar('conversion_action_resource_name', { length: 255 }),
+    gclid: varchar('gclid', { length: 256 }),
+    gbraid: varchar('gbraid', { length: 256 }),
+    wbraid: varchar('wbraid', { length: 256 }),
+    orderId: varchar('order_id', { length: 80 }).notNull(),
+    conversionDateTime: timestamp('conversion_date_time', { withTimezone: true }).notNull(),
+    conversionValue: numeric('conversion_value', { precision: 12, scale: 2 }).notNull().default('0'),
+    currencyCode: varchar('currency_code', { length: 8 }).notNull().default('CAD'),
+    valueStrategy: varchar('value_strategy', { length: 80 }).notNull().default('fixed'),
+    consentAdUserData: adConsentEnum('consent_ad_user_data').notNull().default('UNKNOWN'),
+    consentAdPersonalization: adConsentEnum('consent_ad_personalization')
+      .notNull()
+      .default('UNKNOWN'),
+    uploadStatus: offlineConversionStatusEnum('upload_status').notNull().default('PENDING'),
+    attemptCount: integer('attempt_count').notNull().default(0),
+    nextAttemptAt: timestamp('next_attempt_at', { withTimezone: true }),
+    googleJobId: varchar('google_job_id', { length: 120 }),
+    googleErrorCode: varchar('google_error_code', { length: 120 }),
+    sanitizedError: text('sanitized_error'),
+    uploadedAt: timestamp('uploaded_at', { withTimezone: true }),
+    lastAttemptAt: timestamp('last_attempt_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    uniqueIndex('google_ads_offline_order_id_idx').on(table.orderId),
+    uniqueIndex('google_ads_offline_stage_request_idx').on(
+      table.conversionStage,
+      table.quoteRequestId,
+    ),
+    index('google_ads_offline_status_next_idx').on(table.uploadStatus, table.nextAttemptAt),
+    index('google_ads_offline_quote_idx').on(table.quoteRequestId),
+  ],
+);
+
+export type GoogleAdsDailyPerformance = typeof googleAdsDailyPerformance.$inferSelect;
+export type NewGoogleAdsDailyPerformance = typeof googleAdsDailyPerformance.$inferInsert;
+export type GoogleAdsSyncRun = typeof googleAdsSyncRuns.$inferSelect;
+export type NewGoogleAdsSyncRun = typeof googleAdsSyncRuns.$inferInsert;
+export type GoogleAdsOfflineConversion = typeof googleAdsOfflineConversions.$inferSelect;
+export type NewGoogleAdsOfflineConversion = typeof googleAdsOfflineConversions.$inferInsert;
+
+/* -------------------------------------------------------------------------- */
+/* Suppliers                                                                   */
+/* -------------------------------------------------------------------------- */
+
+export const suppliers = pgTable(
+  'suppliers',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    name: varchar('name', { length: 160 }).notNull(),
+    legalName: varchar('legal_name', { length: 200 }),
+    email: varchar('email', { length: 254 }).notNull(),
+    phone: varchar('phone', { length: 32 }),
+    status: supplierStatusEnum('status').notNull().default('PROSPECT'),
+    serviceAreas: jsonb('service_areas').$type<string[]>(),
+    projectCapabilities: jsonb('project_capabilities').$type<string[]>(),
+    minimumVolumeM3: numeric('minimum_volume_m3', { precision: 7, scale: 2 }),
+    maximumVolumeM3: numeric('maximum_volume_m3', { precision: 7, scale: 2 }),
+    pumpAvailable: boolean('pump_available'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index('suppliers_status_idx').on(table.status),
+    uniqueIndex('suppliers_email_idx').on(table.email),
+  ],
+);
+
+export const supplierAssignments = pgTable(
+  'supplier_assignments',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    quoteRequestId: uuid('quote_request_id')
+      .notNull()
+      .references(() => quoteRequests.id, { onDelete: 'cascade' }),
+    supplierId: uuid('supplier_id')
+      .notNull()
+      .references(() => suppliers.id, { onDelete: 'cascade' }),
+    assignedAt: timestamp('assigned_at', { withTimezone: true }).notNull().defaultNow(),
+    sentAt: timestamp('sent_at', { withTimezone: true }),
+    viewedAt: timestamp('viewed_at', { withTimezone: true }),
+    respondedAt: timestamp('responded_at', { withTimezone: true }),
+    responseStatus: supplierAssignmentStatusEnum('response_status').notNull().default('PENDING'),
+    quotedAmount: numeric('quoted_amount', { precision: 12, scale: 2 }),
+    supplierMessage: text('supplier_message'),
+    acceptedAt: timestamp('accepted_at', { withTimezone: true }),
+    declinedAt: timestamp('declined_at', { withTimezone: true }),
+    declineReason: varchar('decline_reason', { length: 255 }),
+    wonAt: timestamp('won_at', { withTimezone: true }),
+    lostAt: timestamp('lost_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    uniqueIndex('supplier_assignments_unique_idx').on(table.quoteRequestId, table.supplierId),
+    index('supplier_assignments_supplier_idx').on(table.supplierId),
+    index('supplier_assignments_quote_idx').on(table.quoteRequestId),
+    index('supplier_assignments_status_idx').on(table.responseStatus),
+  ],
+);
+
+export type Supplier = typeof suppliers.$inferSelect;
+export type NewSupplier = typeof suppliers.$inferInsert;
+export type SupplierAssignment = typeof supplierAssignments.$inferSelect;
+export type NewSupplierAssignment = typeof supplierAssignments.$inferInsert;

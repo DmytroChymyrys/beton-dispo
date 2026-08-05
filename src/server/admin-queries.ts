@@ -3,13 +3,19 @@ import 'server-only';
 import { and, asc, count, desc, eq, gte, ilike, lte, sql, type SQL } from 'drizzle-orm';
 import { getDb } from '@/db/client';
 import {
+  googleAdsDailyPerformance,
+  googleAdsOfflineConversions,
+  googleAdsSyncRuns,
   quoteRequestEvents,
   quoteRequests,
+  supplierAssignments,
+  suppliers,
   type NewQuoteRequest,
   type QuoteRequest,
   type QuoteRequestEvent,
 } from '@/db/schema';
 import { QUALIFIED_STATUSES, type CustomerType, type QuoteStatus } from '@/lib/quote-options';
+import { enqueueOfflineConversionForQuote } from '@/lib/google-ads/conversions';
 
 export const PAGE_SIZE = 50;
 
@@ -172,10 +178,24 @@ export async function updateQuoteRequest(
     if (patch.status === 'WON') {
       timestampPatch.wonAt = before.wonAt ?? now;
       timestampPatch.resolvedAt = before.resolvedAt ?? now;
+      if (before.qualificationStatus === 'PENDING') {
+        timestampPatch.qualificationStatus = 'QUALIFIED';
+        timestampPatch.qualifiedAt = before.qualifiedAt ?? now;
+        timestampPatch.qualifiedBy = before.qualifiedBy ?? 'admin';
+      }
     }
     if (patch.status === 'LOST' || patch.status === 'INVALID') {
       timestampPatch.lostAt = before.lostAt ?? now;
       timestampPatch.resolvedAt = before.resolvedAt ?? now;
+      if (patch.status === 'INVALID' && before.qualificationStatus === 'PENDING') {
+        timestampPatch.qualificationStatus = 'DISQUALIFIED';
+        timestampPatch.disqualificationReason = before.disqualificationReason ?? 'other';
+      }
+    }
+    if (patch.status === 'QUALIFIED' && before.qualificationStatus !== 'QUALIFIED') {
+      timestampPatch.qualificationStatus = 'QUALIFIED';
+      timestampPatch.qualifiedAt = before.qualifiedAt ?? now;
+      timestampPatch.qualifiedBy = before.qualifiedBy ?? 'admin';
     }
   }
 
@@ -199,6 +219,40 @@ export async function updateQuoteRequest(
       message: `Status changed from ${before.status} to ${patch.status}.`,
       metadata: { from: before.status, to: patch.status },
     });
+  }
+
+  if (
+    after.qualificationStatus === 'QUALIFIED' &&
+    before.qualificationStatus !== 'QUALIFIED'
+  ) {
+    events.push({
+      type: 'lead_qualified',
+      message: 'Lead marked qualified.',
+      metadata: { qualificationStatus: after.qualificationStatus },
+    });
+    try {
+      await enqueueOfflineConversionForQuote(after, 'QUALIFIED_LEAD');
+    } catch (error) {
+      console.warn('google_ads.conversion.queue_failed', {
+        quoteRequestId: id,
+        requestNumber: after.publicId,
+        stage: 'QUALIFIED_LEAD',
+        error: error instanceof Error ? error.message : 'unknown',
+      });
+    }
+  }
+
+  if (after.status === 'WON' && before.status !== 'WON') {
+    try {
+      await enqueueOfflineConversionForQuote(after, 'WON_JOB');
+    } catch (error) {
+      console.warn('google_ads.conversion.queue_failed', {
+        quoteRequestId: id,
+        requestNumber: after.publicId,
+        stage: 'WON_JOB',
+        error: error instanceof Error ? error.message : 'unknown',
+      });
+    }
   }
 
   if (patch.lostReason !== undefined && patch.lostReason !== before.lostReason) {
@@ -397,6 +451,27 @@ export type AnalyticsLeadRow = {
   revenueCad: string | null;
 };
 
+export type AdvertisingCampaignRow = {
+  campaignId: string;
+  campaignName: string;
+  campaignStatus: string | null;
+  campaignType: string | null;
+  spendCad: number;
+  impressions: number;
+  clicks: number;
+  ctr: number | null;
+  averageCpcCad: number | null;
+  googleReportedConversions: number;
+  googleReportedConversionValue: number;
+};
+
+export type AdvertisingTimeRow = {
+  date: string;
+  spendCad: number;
+  clicks: number;
+  googleReportedConversions: number;
+};
+
 export type AnalyticsReport = {
   kpis: {
     total: number;
@@ -417,6 +492,23 @@ export type AnalyticsReport = {
     finalJobValueCad: number;
     betondispoRevenueCad: number;
     averageLeadValueCad: number | null;
+  };
+  advertising: {
+    spendCad: number;
+    impressions: number;
+    clicks: number;
+    ctr: number | null;
+    averageCpcCad: number | null;
+    gclidQuotes: number;
+    gclidQualifiedLeads: number;
+    gclidWonJobs: number;
+    gclidRevenueCad: number;
+    costPerQuoteCad: number | null;
+    costPerQualifiedLeadCad: number | null;
+    costPerWonJobCad: number | null;
+    betondispoRevenueRoas: number | null;
+    campaigns: AdvertisingCampaignRow[];
+    overTime: AdvertisingTimeRow[];
   };
   funnel: { stage: string; count: number; rateFromPrevious: number | null; rateFromSubmitted: number }[];
   quotesOverTime: { date: string; quotes: number; won: number }[];
@@ -500,6 +592,28 @@ async function groupedAnalytics(
 
 function percent(numerator: number, denominator: number): number {
   return denominator > 0 ? numerator / denominator : 0;
+}
+
+function ratio(numerator: number, denominator: number): number | null {
+  return denominator > 0 ? numerator / denominator : null;
+}
+
+function isoDateInToronto(date: Date): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Toronto',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+  const get = (type: string) => parts.find((part) => part.type === type)?.value ?? '01';
+  return `${get('year')}-${get('month')}-${get('day')}`;
+}
+
+function adsWhere(filters: AnalyticsFilters): SQL | undefined {
+  const clauses: SQL[] = [eq(googleAdsDailyPerformance.granularity, 'CAMPAIGN')];
+  if (filters.from) clauses.push(gte(googleAdsDailyPerformance.reportDate, isoDateInToronto(filters.from)));
+  if (filters.to) clauses.push(lte(googleAdsDailyPerformance.reportDate, isoDateInToronto(filters.to)));
+  return and(...clauses);
 }
 
 export async function getAnalyticsReport(filters: AnalyticsFilters): Promise<AnalyticsReport> {
@@ -589,7 +703,14 @@ export async function getAnalyticsReport(filters: AnalyticsFilters): Promise<Ana
     .orderBy(desc(quoteRequests.createdAt))
     .limit(50);
 
+  const adsDateWhere = adsWhere(filters);
+  const googleAdsLeadWhere = and(...[where, sql`${quoteRequests.gclid} is not null`].filter(Boolean) as SQL[]);
+
   const [
+    [adsTotals],
+    [googleAdsInternalTotals],
+    adCampaigns,
+    adsOverTime,
     quotesOverTime,
     byStatus,
     bySource,
@@ -604,6 +725,73 @@ export async function getAnalyticsReport(filters: AnalyticsFilters): Promise<Ana
     googleAdsLeads,
     requestRows,
   ] = await Promise.all([
+    db
+      .select({
+        spendCad: sql<number>`coalesce(sum(${googleAdsDailyPerformance.costMicros}) / 1000000.0, 0)`.mapWith(Number),
+        impressions: sql<number>`coalesce(sum(${googleAdsDailyPerformance.impressions}), 0)`.mapWith(Number),
+        clicks: sql<number>`coalesce(sum(${googleAdsDailyPerformance.clicks}), 0)`.mapWith(Number),
+        googleReportedConversions:
+          sql<number>`coalesce(sum(${googleAdsDailyPerformance.conversions}::numeric), 0)`.mapWith(Number),
+        googleReportedConversionValue:
+          sql<number>`coalesce(sum(${googleAdsDailyPerformance.conversionValue}::numeric), 0)`.mapWith(Number),
+      })
+      .from(googleAdsDailyPerformance)
+      .where(adsDateWhere),
+    db
+      .select({
+        gclidQuotes: sql<number>`count(*) filter (where ${quoteRequests.gclid} is not null)`.mapWith(Number),
+        gclidQualifiedLeads:
+          sql<number>`count(*) filter (where ${quoteRequests.gclid} is not null and ${quoteRequests.qualificationStatus} = 'QUALIFIED')`.mapWith(
+            Number,
+          ),
+        gclidWonJobs:
+          sql<number>`count(*) filter (where ${quoteRequests.gclid} is not null and ${quoteRequests.status} = 'WON')`.mapWith(
+            Number,
+          ),
+        gclidRevenueCad:
+          sql<number>`coalesce(sum(${quoteRequests.betondispoRevenueCad}::numeric) filter (where ${quoteRequests.gclid} is not null), 0)`.mapWith(
+            Number,
+          ),
+      })
+      .from(quoteRequests)
+      .where(where),
+    db
+      .select({
+        campaignId: googleAdsDailyPerformance.campaignId,
+        campaignName: sql<string>`max(${googleAdsDailyPerformance.campaignName})`,
+        campaignStatus: sql<string | null>`max(${googleAdsDailyPerformance.campaignStatus})`,
+        campaignType: sql<string | null>`max(${googleAdsDailyPerformance.campaignType})`,
+        spendCad:
+          sql<number>`coalesce(sum(${googleAdsDailyPerformance.costMicros}) / 1000000.0, 0)`.mapWith(
+            Number,
+          ),
+        impressions: sql<number>`coalesce(sum(${googleAdsDailyPerformance.impressions}), 0)`.mapWith(Number),
+        clicks: sql<number>`coalesce(sum(${googleAdsDailyPerformance.clicks}), 0)`.mapWith(Number),
+        googleReportedConversions:
+          sql<number>`coalesce(sum(${googleAdsDailyPerformance.conversions}::numeric), 0)`.mapWith(Number),
+        googleReportedConversionValue:
+          sql<number>`coalesce(sum(${googleAdsDailyPerformance.conversionValue}::numeric), 0)`.mapWith(Number),
+      })
+      .from(googleAdsDailyPerformance)
+      .where(adsDateWhere)
+      .groupBy(googleAdsDailyPerformance.campaignId)
+      .orderBy(desc(sql`sum(${googleAdsDailyPerformance.costMicros})`))
+      .limit(25),
+    db
+      .select({
+        date: googleAdsDailyPerformance.reportDate,
+        spendCad:
+          sql<number>`coalesce(sum(${googleAdsDailyPerformance.costMicros}) / 1000000.0, 0)`.mapWith(
+            Number,
+          ),
+        clicks: sql<number>`coalesce(sum(${googleAdsDailyPerformance.clicks}), 0)`.mapWith(Number),
+        googleReportedConversions:
+          sql<number>`coalesce(sum(${googleAdsDailyPerformance.conversions}::numeric), 0)`.mapWith(Number),
+      })
+      .from(googleAdsDailyPerformance)
+      .where(adsDateWhere)
+      .groupBy(googleAdsDailyPerformance.reportDate)
+      .orderBy(googleAdsDailyPerformance.reportDate),
     db
       .select({
         date: sql<string>`to_char(${quoteRequests.createdAt} at time zone 'America/Toronto', 'YYYY-MM-DD')`,
@@ -651,7 +839,7 @@ export async function getAnalyticsReport(filters: AnalyticsFilters): Promise<Ana
         revenueCad: quoteRequests.finalJobValueCad,
       })
       .from(quoteRequests)
-      .where(and(...[where, sql`${quoteRequests.gclid} is not null`].filter(Boolean) as SQL[]))
+      .where(googleAdsLeadWhere)
       .orderBy(desc(quoteRequests.createdAt))
       .limit(25),
     requestRowsPromise,
@@ -677,6 +865,19 @@ export async function getAnalyticsReport(filters: AnalyticsFilters): Promise<Ana
   };
 
   const submitted = kpis.total;
+  const ads = adsTotals ?? {
+    spendCad: 0,
+    impressions: 0,
+    clicks: 0,
+    googleReportedConversions: 0,
+    googleReportedConversionValue: 0,
+  };
+  const adsInternal = googleAdsInternalTotals ?? {
+    gclidQuotes: 0,
+    gclidQualifiedLeads: 0,
+    gclidWonJobs: 0,
+    gclidRevenueCad: 0,
+  };
   const funnelCounts = [
     { stage: 'Submitted', count: submitted },
     { stage: 'Contacted', count: kpis.contacted },
@@ -689,6 +890,27 @@ export async function getAnalyticsReport(filters: AnalyticsFilters): Promise<Ana
       ...kpis,
       winRate: percent(kpis.won, kpis.total),
       averageLeadValueCad: kpis.won > 0 ? kpis.finalJobValueCad / kpis.won : null,
+    },
+    advertising: {
+      spendCad: ads.spendCad,
+      impressions: ads.impressions,
+      clicks: ads.clicks,
+      ctr: ratio(ads.clicks, ads.impressions),
+      averageCpcCad: ratio(ads.spendCad, ads.clicks),
+      gclidQuotes: adsInternal.gclidQuotes,
+      gclidQualifiedLeads: adsInternal.gclidQualifiedLeads,
+      gclidWonJobs: adsInternal.gclidWonJobs,
+      gclidRevenueCad: adsInternal.gclidRevenueCad,
+      costPerQuoteCad: ratio(ads.spendCad, adsInternal.gclidQuotes),
+      costPerQualifiedLeadCad: ratio(ads.spendCad, adsInternal.gclidQualifiedLeads),
+      costPerWonJobCad: ratio(ads.spendCad, adsInternal.gclidWonJobs),
+      betondispoRevenueRoas: ratio(adsInternal.gclidRevenueCad, ads.spendCad),
+      campaigns: adCampaigns.map((row) => ({
+        ...row,
+        ctr: ratio(row.clicks, row.impressions),
+        averageCpcCad: ratio(row.spendCad, row.clicks),
+      })),
+      overTime: adsOverTime,
     },
     funnel: funnelCounts.map((stage, index) => ({
       ...stage,
@@ -710,4 +932,162 @@ export async function getAnalyticsReport(filters: AnalyticsFilters): Promise<Ana
     googleAdsLeads,
     requestRows,
   };
+}
+
+export type GoogleAdsIntegrationDashboard = {
+  lastSync: {
+    startedAt: Date;
+    completedAt: Date | null;
+    status: string;
+    startDate: string;
+    endDate: string;
+    rowsReceived: number;
+    rowsUpserted: number;
+    errorCode: string | null;
+  } | null;
+  queue: { status: string; count: number }[];
+  recentFailures: {
+    id: string;
+    requestNumber: string;
+    conversionStage: string;
+    attemptCount: number;
+    googleErrorCode: string | null;
+    sanitizedError: string | null;
+    createdAt: Date;
+  }[];
+};
+
+export async function getGoogleAdsIntegrationDashboard(): Promise<GoogleAdsIntegrationDashboard> {
+  const db = await getDb();
+  const [lastSync, queue, recentFailures] = await Promise.all([
+    db
+      .select({
+        startedAt: googleAdsSyncRuns.startedAt,
+        completedAt: googleAdsSyncRuns.completedAt,
+        status: googleAdsSyncRuns.status,
+        startDate: googleAdsSyncRuns.startDate,
+        endDate: googleAdsSyncRuns.endDate,
+        rowsReceived: googleAdsSyncRuns.rowsReceived,
+        rowsUpserted: googleAdsSyncRuns.rowsUpserted,
+        errorCode: googleAdsSyncRuns.errorCode,
+      })
+      .from(googleAdsSyncRuns)
+      .orderBy(desc(googleAdsSyncRuns.startedAt))
+      .limit(1),
+    db
+      .select({
+        status: sql<string>`${googleAdsOfflineConversions.uploadStatus}::text`,
+        count: sql<number>`count(*)`.mapWith(Number),
+      })
+      .from(googleAdsOfflineConversions)
+      .groupBy(googleAdsOfflineConversions.uploadStatus),
+    db
+      .select({
+        id: googleAdsOfflineConversions.id,
+        requestNumber: googleAdsOfflineConversions.requestNumber,
+        conversionStage: sql<string>`${googleAdsOfflineConversions.conversionStage}::text`,
+        attemptCount: googleAdsOfflineConversions.attemptCount,
+        googleErrorCode: googleAdsOfflineConversions.googleErrorCode,
+        sanitizedError: googleAdsOfflineConversions.sanitizedError,
+        createdAt: googleAdsOfflineConversions.createdAt,
+      })
+      .from(googleAdsOfflineConversions)
+      .where(
+        sql`${googleAdsOfflineConversions.uploadStatus} in ('RETRY', 'PERMANENTLY_FAILED', 'SKIPPED')`,
+      )
+      .orderBy(desc(googleAdsOfflineConversions.createdAt))
+      .limit(10),
+  ]);
+
+  return {
+    lastSync: lastSync[0] ?? null,
+    queue,
+    recentFailures,
+  };
+}
+
+export type SupplierAnalyticsRow = {
+  id: string;
+  name: string;
+  status: string;
+  leadsSent: number;
+  viewed: number;
+  responded: number;
+  responseRate: number | null;
+  medianResponseMinutes: number | null;
+  quotesSupplied: number;
+  acceptedJobs: number;
+  wonJobs: number;
+  declined: number;
+  declineRate: number | null;
+  winRate: number | null;
+  totalJobValueCad: number;
+  betondispoRevenueCad: number;
+};
+
+export async function getSupplierAnalytics(): Promise<SupplierAnalyticsRow[]> {
+  const db = await getDb();
+  return db
+    .select({
+      id: suppliers.id,
+      name: suppliers.name,
+      status: sql<string>`${suppliers.status}::text`,
+      leadsSent:
+        sql<number>`count(${supplierAssignments.id}) filter (where ${supplierAssignments.sentAt} is not null)`.mapWith(
+          Number,
+        ),
+      viewed:
+        sql<number>`count(${supplierAssignments.id}) filter (where ${supplierAssignments.viewedAt} is not null)`.mapWith(
+          Number,
+        ),
+      responded:
+        sql<number>`count(${supplierAssignments.id}) filter (where ${supplierAssignments.respondedAt} is not null)`.mapWith(
+          Number,
+        ),
+      responseRate:
+        sql<number | null>`count(${supplierAssignments.id}) filter (where ${supplierAssignments.respondedAt} is not null)::numeric / nullif(count(${supplierAssignments.id}) filter (where ${supplierAssignments.sentAt} is not null), 0)`.mapWith(
+          (v) => (v == null ? null : Number(v)),
+        ),
+      medianResponseMinutes:
+        sql<number | null>`percentile_cont(0.5) within group (order by extract(epoch from (${supplierAssignments.respondedAt} - ${supplierAssignments.sentAt})) / 60) filter (where ${supplierAssignments.sentAt} is not null and ${supplierAssignments.respondedAt} is not null)`.mapWith(
+          (v) => (v == null ? null : Number(v)),
+        ),
+      quotesSupplied:
+        sql<number>`count(${supplierAssignments.id}) filter (where ${supplierAssignments.responseStatus} in ('QUOTED', 'ACCEPTED', 'WON'))`.mapWith(
+          Number,
+        ),
+      acceptedJobs:
+        sql<number>`count(${supplierAssignments.id}) filter (where ${supplierAssignments.responseStatus} in ('ACCEPTED', 'WON'))`.mapWith(
+          Number,
+        ),
+      wonJobs:
+        sql<number>`count(${supplierAssignments.id}) filter (where ${supplierAssignments.responseStatus} = 'WON')`.mapWith(
+          Number,
+        ),
+      declined:
+        sql<number>`count(${supplierAssignments.id}) filter (where ${supplierAssignments.responseStatus} = 'DECLINED')`.mapWith(
+          Number,
+        ),
+      declineRate:
+        sql<number | null>`count(${supplierAssignments.id}) filter (where ${supplierAssignments.responseStatus} = 'DECLINED')::numeric / nullif(count(${supplierAssignments.id}) filter (where ${supplierAssignments.responseStatus} in ('DECLINED', 'LOST', 'WON')), 0)`.mapWith(
+          (v) => (v == null ? null : Number(v)),
+        ),
+      winRate:
+        sql<number | null>`count(${supplierAssignments.id}) filter (where ${supplierAssignments.responseStatus} = 'WON')::numeric / nullif(count(${supplierAssignments.id}) filter (where ${supplierAssignments.responseStatus} in ('DECLINED', 'LOST', 'WON')), 0)`.mapWith(
+          (v) => (v == null ? null : Number(v)),
+        ),
+      totalJobValueCad:
+        sql<number>`coalesce(sum(${quoteRequests.finalJobValueCad}::numeric) filter (where ${supplierAssignments.responseStatus} = 'WON'), 0)`.mapWith(
+          Number,
+        ),
+      betondispoRevenueCad:
+        sql<number>`coalesce(sum(${quoteRequests.betondispoRevenueCad}::numeric) filter (where ${supplierAssignments.responseStatus} = 'WON'), 0)`.mapWith(
+          Number,
+        ),
+    })
+    .from(suppliers)
+    .leftJoin(supplierAssignments, eq(supplierAssignments.supplierId, suppliers.id))
+    .leftJoin(quoteRequests, eq(quoteRequests.id, supplierAssignments.quoteRequestId))
+    .groupBy(suppliers.id)
+    .orderBy(desc(sql`count(${supplierAssignments.id})`), asc(suppliers.name));
 }
