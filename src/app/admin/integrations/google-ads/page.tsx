@@ -34,6 +34,9 @@ export default async function GoogleAdsIntegrationPage() {
           <StatusLine label="Configured" value={connection.configured ? 'Yes' : 'No'} />
           <StatusLine label="Connected" value={connection.connected ? 'Yes' : 'No'} />
           <StatusLine label="Customer ID" value={connection.customerId ?? '—'} />
+          {!config.configured && config.missing.length ? (
+            <StatusLine label="Missing vars" value={config.missing.join(', ')} />
+          ) : null}
           <StatusLine label="Account" value={connection.descriptiveName ?? '—'} />
           <StatusLine label="Currency" value={connection.currencyCode ?? '—'} />
           <StatusLine label="Timezone" value={connection.timeZone ?? '—'} />
