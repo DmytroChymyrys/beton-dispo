@@ -46,14 +46,24 @@ function googleAdsFailureMessage(body: GoogleAdsErrorBody | null, fallback: stri
   return detailError?.message ?? body?.error?.message ?? fallback;
 }
 
+function normalizeSnippet(snippet: string | null): string | null {
+  const normalized = snippet?.replace(/\s+/g, ' ').trim();
+  if (!normalized) return null;
+  return normalized.slice(0, 500);
+}
+
 export function googleAdsApiErrorFromBody(
   body: GoogleAdsErrorBody | null,
   fallbackCode: string,
   fallbackMessage: string,
+  rawBodySnippet?: string | null,
 ): GoogleAdsApiError {
+  const message = googleAdsFailureMessage(body, fallbackMessage);
+  const snippet = normalizeSnippet(rawBodySnippet ?? null);
+
   return new GoogleAdsApiError(
     googleAdsFailureCode(body, fallbackCode),
-    googleAdsFailureMessage(body, fallbackMessage),
+    message === fallbackMessage && snippet ? `${fallbackMessage} Response: ${snippet}` : message,
   );
 }
 

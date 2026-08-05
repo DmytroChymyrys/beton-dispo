@@ -10,6 +10,17 @@ type GoogleAdsSearchStreamChunk = {
 
 type GoogleAdsErrorBody = Parameters<typeof googleAdsApiErrorFromBody>[0];
 
+async function readJsonResponse<T>(response: Response): Promise<{ body: T | null; raw: string }> {
+  const raw = await response.text();
+  if (!raw) return { body: null, raw };
+
+  try {
+    return { body: JSON.parse(raw) as T, raw };
+  } catch {
+    return { body: null, raw };
+  }
+}
+
 async function refreshAccessToken(config: GoogleAdsPrivateConfig): Promise<string> {
   const response = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
@@ -23,9 +34,13 @@ async function refreshAccessToken(config: GoogleAdsPrivateConfig): Promise<strin
     cache: 'no-store',
   });
 
-  const body = (await response.json().catch(() => null)) as { access_token?: string; error?: string } | null;
+  const { body, raw } = await readJsonResponse<{ access_token?: string; error?: string }>(response);
   if (!response.ok || !body?.access_token) {
-    throw new GoogleAdsApiError(body?.error ?? 'oauth_refresh_failed', 'Unable to refresh Google Ads access token.');
+    const fallbackMessage = raw.slice(0, 500) || 'Unable to refresh Google Ads access token.';
+    throw new GoogleAdsApiError(
+      body?.error ?? 'oauth_refresh_failed',
+      body?.error ?? fallbackMessage,
+    );
   }
   return body.access_token;
 }
@@ -53,15 +68,15 @@ export async function googleAdsSearchStream(query: string): Promise<{
     },
   );
 
-  const body = (await response.json().catch(() => null)) as
-    | GoogleAdsSearchStreamChunk[]
-    | GoogleAdsErrorBody
-    | null;
+  const { body, raw } = await readJsonResponse<GoogleAdsSearchStreamChunk[] | GoogleAdsErrorBody>(
+    response,
+  );
   if (!response.ok) {
     throw googleAdsApiErrorFromBody(
       Array.isArray(body) ? null : body,
       `http_${response.status}`,
       'Google Ads API request failed.',
+      raw,
     );
   }
 
@@ -162,15 +177,16 @@ export async function googleAdsUploadClickConversions(
       cache: 'no-store',
     },
   );
-  const body = (await response.json().catch(() => null)) as
-    | ({ requestId?: string; partialFailureError?: unknown } & NonNullable<GoogleAdsErrorBody>)
-    | null;
+  const { body, raw } = await readJsonResponse<
+    { requestId?: string; partialFailureError?: unknown } & NonNullable<GoogleAdsErrorBody>
+  >(response);
 
   if (!response.ok) {
     throw googleAdsApiErrorFromBody(
       body,
       `http_${response.status}`,
       'Google Ads conversion upload failed.',
+      raw,
     );
   }
 
