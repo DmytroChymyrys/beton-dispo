@@ -2,7 +2,13 @@ import Link from 'next/link';
 import { requireAdmin } from '@/server/auth';
 import { getDashboardStats, listQuoteRequests } from '@/server/admin-queries';
 import { StatusBadge } from '@/app/admin/StatusBadge';
-import { adminOptions, formatDateTime, formatPercent, formatVolume } from '@/app/admin/labels';
+import {
+  adminOptions,
+  formatDateTime,
+  formatPercent,
+  formatRelativeDateTime,
+  formatVolume,
+} from '@/app/admin/labels';
 import { adminText } from '@/app/admin/i18n';
 import { getAdminLocale } from '@/app/admin/locale';
 
@@ -101,8 +107,11 @@ export default async function AdminDashboardPage() {
                   <span className="text-ink-muted min-w-20 text-sm tabular-nums">
                     {formatVolume(row.estimatedVolumeM3, row.volumeUnknown, locale)}
                   </span>
-                  <span className="text-ink-muted min-w-28 text-sm tabular-nums">
-                    {formatDateTime(row.createdAt, locale)}
+                  <span className="text-ink-muted min-w-36 text-sm tabular-nums">
+                    <time dateTime={row.createdAt.toISOString()}>
+                      <span className="block">{formatRelativeDateTime(row.createdAt, locale)}</span>
+                      <span className="block text-xs">{formatDateTime(row.createdAt, locale)}</span>
+                    </time>
                   </span>
                   <StatusBadge status={row.status} locale={locale} />
                 </Link>

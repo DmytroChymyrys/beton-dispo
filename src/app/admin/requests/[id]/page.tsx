@@ -3,7 +3,13 @@ import { notFound } from 'next/navigation';
 import { requireAdmin } from '@/server/auth';
 import { getQuoteRequest, listQuoteRequestEvents } from '@/server/admin-queries';
 import { StatusBadge } from '@/app/admin/StatusBadge';
-import { adminOptions, formatDateTime, formatVolume, STATUS_LABELS } from '@/app/admin/labels';
+import {
+  adminOptions,
+  formatDateTime,
+  formatRelativeDateTime,
+  formatVolume,
+  STATUS_LABELS,
+} from '@/app/admin/labels';
 import { adminText } from '@/app/admin/i18n';
 import { getAdminLocale } from '@/app/admin/locale';
 import type { QuoteRequestEvent } from '@/db/schema';
@@ -42,7 +48,10 @@ export default async function AdminRequestPage({ params }: { params: Promise<{ i
         </div>
         <p className="text-ink-muted mt-1 text-sm">
           {t.receivedMeta(
-            formatDateTime(request.createdAt, locale),
+            `${formatDateTime(request.createdAt, locale)} (${formatRelativeDateTime(
+              request.createdAt,
+              locale,
+            )})`,
             formatDateTime(request.updatedAt, locale),
             request.locale === 'fr' ? t.french : t.english,
           )}
@@ -117,13 +126,66 @@ export default async function AdminRequestPage({ params }: { params: Promise<{ i
           ) : null}
 
           <Card title={t.acquisition}>
+            <Subhead>{t.firstTouch}</Subhead>
+            <Row label={t.source} value={request.firstTouchSource || '—'} />
+            <Row label={t.medium} value={request.firstTouchMedium || '—'} />
+            <Row label={t.campaign} value={request.firstTouchCampaign || '—'} />
+            <Row
+              label={t.termContent}
+              value={
+                [request.firstTouchTerm, request.firstTouchContent].filter(Boolean).join(' / ') ||
+                '—'
+              }
+            />
+            <Row label={t.landingPage} value={request.firstTouchLandingPage || '—'} />
+            <Row label={t.referrer} value={request.firstTouchReferrer || '—'} />
+            <Row
+              label={t.timestamp}
+              value={
+                request.firstTouchTimestamp
+                  ? formatDateTime(request.firstTouchTimestamp, locale)
+                  : '—'
+              }
+            />
+
+            <Subhead>{t.lastTouch}</Subhead>
+            <Row label={t.source} value={request.lastTouchSource || source || '—'} />
+            <Row label={t.medium} value={request.lastTouchMedium || request.utmMedium || '—'} />
+            <Row label={t.campaign} value={request.lastTouchCampaign || request.utmCampaign || '—'} />
+            <Row
+              label={t.termContent}
+              value={
+                [request.lastTouchTerm ?? request.utmTerm, request.lastTouchContent ?? request.utmContent]
+                  .filter(Boolean)
+                  .join(' / ') || '—'
+              }
+            />
+            <Row label={t.landingPage} value={request.lastTouchLandingPage || request.landingPage || '—'} />
+            <Row label={t.referrer} value={request.lastTouchReferrer || request.referrer || '—'} />
+            <Row
+              label={t.timestamp}
+              value={
+                request.lastTouchTimestamp
+                  ? formatDateTime(request.lastTouchTimestamp, locale)
+                  : '—'
+              }
+            />
+
+            <Subhead>{t.technicalAttribution}</Subhead>
             <Row label={t.source} value={source || '—'} />
+            <Row label={t.gclid} value={request.gclid || '—'} />
+            <Row label={t.msclkid} value={request.msclkid || '—'} />
+            <Row label={t.fbclid} value={request.fbclid || '—'} />
             <Row
               label={t.termContent}
               value={[request.utmTerm, request.utmContent].filter(Boolean).join(' / ') || '—'}
             />
             <Row label={t.referrer} value={request.referrer || '—'} />
             <Row label={t.landingPage} value={request.landingPage || '—'} />
+            <Row label={t.quoteEntryPage} value={request.quoteEntryPage || '—'} />
+            <Row label={t.submissionPage} value={request.submissionPage || '—'} />
+            <Row label={t.device} value={request.deviceCategory || '—'} />
+            <Row label={t.browserLanguage} value={request.browserLanguage || '—'} />
           </Card>
 
           <Card title={t.timeline}>
@@ -176,7 +238,8 @@ function Timeline({
                 {t.eventTypes[event.type as keyof typeof t.eventTypes] ?? event.type}
               </p>
               <time className="text-ink-muted text-xs tabular-nums">
-                {formatDateTime(event.createdAt, locale)}
+                <span className="block">{formatRelativeDateTime(event.createdAt, locale)}</span>
+                <span className="block">{formatDateTime(event.createdAt, locale)}</span>
               </time>
             </div>
             <p className="text-ink-muted mt-1 text-sm">{detail}</p>
@@ -198,6 +261,12 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
       </h2>
       <dl className="mt-3 space-y-2">{children}</dl>
     </section>
+  );
+}
+
+function Subhead({ children }: { children: React.ReactNode }) {
+  return (
+    <dt className="text-ink mt-4 text-sm font-bold first:mt-0 sm:col-span-2">{children}</dt>
   );
 }
 

@@ -12,6 +12,13 @@ function nullIfBlank(value: string | undefined): string | null {
   return trimmed ? trimmed : null;
 }
 
+function nullDateIfInvalid(value: string | undefined): Date | null {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+  const date = new Date(trimmed);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 export type QuoteRequestMetadata = {
   sourceIpHash: string | null;
   abuseStatus?: 'clean' | 'suspect';
@@ -100,6 +107,9 @@ export async function createQuoteRequest(
 
       additionalNotes: nullIfBlank(input.additionalNotes),
 
+      gclid: nullIfBlank(input.gclid),
+      msclkid: nullIfBlank(input.msclkid),
+      fbclid: nullIfBlank(input.fbclid),
       utmSource: nullIfBlank(input.utmSource),
       utmMedium: nullIfBlank(input.utmMedium),
       utmCampaign: nullIfBlank(input.utmCampaign),
@@ -107,6 +117,26 @@ export async function createQuoteRequest(
       utmContent: nullIfBlank(input.utmContent),
       referrer: nullIfBlank(input.referrer),
       landingPage: nullIfBlank(input.landingPage),
+      firstTouchSource: nullIfBlank(input.firstTouchSource),
+      firstTouchMedium: nullIfBlank(input.firstTouchMedium),
+      firstTouchCampaign: nullIfBlank(input.firstTouchCampaign),
+      firstTouchTerm: nullIfBlank(input.firstTouchTerm),
+      firstTouchContent: nullIfBlank(input.firstTouchContent),
+      firstTouchLandingPage: nullIfBlank(input.firstTouchLandingPage),
+      firstTouchReferrer: nullIfBlank(input.firstTouchReferrer),
+      firstTouchTimestamp: nullDateIfInvalid(input.firstTouchTimestamp),
+      lastTouchSource: nullIfBlank(input.lastTouchSource),
+      lastTouchMedium: nullIfBlank(input.lastTouchMedium),
+      lastTouchCampaign: nullIfBlank(input.lastTouchCampaign),
+      lastTouchTerm: nullIfBlank(input.lastTouchTerm),
+      lastTouchContent: nullIfBlank(input.lastTouchContent),
+      lastTouchLandingPage: nullIfBlank(input.lastTouchLandingPage),
+      lastTouchReferrer: nullIfBlank(input.lastTouchReferrer),
+      lastTouchTimestamp: nullDateIfInvalid(input.lastTouchTimestamp),
+      quoteEntryPage: nullIfBlank(input.quoteEntryPage),
+      submissionPage: nullIfBlank(input.submissionPage),
+      deviceCategory: nullIfBlank(input.deviceCategory),
+      browserLanguage: nullIfBlank(input.browserLanguage),
 
       abuseStatus: metadata.abuseStatus ?? 'clean',
       sourceIpHash: metadata.sourceIpHash,

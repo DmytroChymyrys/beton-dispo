@@ -87,6 +87,7 @@ function buildRows(request: QuoteRequest): Row[] {
     .filter(Boolean)
     .join(' / ');
   rows.push({ label: 'Source', value: source || request.referrer || dash });
+  if (request.gclid) rows.push({ label: 'GCLID', value: request.gclid });
 
   return rows;
 }

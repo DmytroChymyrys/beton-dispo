@@ -2,7 +2,13 @@ import 'server-only';
 
 import { and, asc, count, desc, eq, gte, ilike, lte, sql, type SQL } from 'drizzle-orm';
 import { getDb } from '@/db/client';
-import { quoteRequestEvents, quoteRequests, type QuoteRequest, type QuoteRequestEvent } from '@/db/schema';
+import {
+  quoteRequestEvents,
+  quoteRequests,
+  type NewQuoteRequest,
+  type QuoteRequest,
+  type QuoteRequestEvent,
+} from '@/db/schema';
 import { QUALIFIED_STATUSES, type CustomerType, type QuoteStatus } from '@/lib/quote-options';
 
 export const PAGE_SIZE = 50;
@@ -138,9 +144,35 @@ export async function updateQuoteRequest(
   const [before] = await db.select().from(quoteRequests).where(eq(quoteRequests.id, id)).limit(1);
   if (!before) return;
 
+  const now = new Date();
+  const timestampPatch: Partial<NewQuoteRequest> = {};
+
+  if (patch.status && patch.status !== before.status) {
+    if (
+      !before.firstContactAt &&
+      ['CONTACTED', 'QUALIFIED', 'QUOTING', 'OFFER_SENT', 'WON', 'LOST'].includes(patch.status)
+    ) {
+      timestampPatch.firstContactAt = now;
+    }
+    if (
+      !before.firstResponseAt &&
+      ['CONTACTED', 'QUALIFIED', 'QUOTING', 'OFFER_SENT', 'WON', 'LOST'].includes(patch.status)
+    ) {
+      timestampPatch.firstResponseAt = now;
+    }
+    if (patch.status === 'WON') {
+      timestampPatch.wonAt = before.wonAt ?? now;
+      timestampPatch.resolvedAt = before.resolvedAt ?? now;
+    }
+    if (patch.status === 'LOST' || patch.status === 'INVALID') {
+      timestampPatch.lostAt = before.lostAt ?? now;
+      timestampPatch.resolvedAt = before.resolvedAt ?? now;
+    }
+  }
+
   const [after] = await db
     .update(quoteRequests)
-    .set({ ...patch, updatedAt: new Date() })
+    .set({ ...patch, ...timestampPatch, updatedAt: now })
     .where(eq(quoteRequests.id, id))
     .returning();
 
@@ -286,5 +318,348 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     wonRate: base.total > 0 ? base.won / base.total : 0,
     qualifiedRate: base.total > 0 ? base.qualified / base.total : 0,
     topCities,
+  };
+}
+
+export type AnalyticsFilters = {
+  from?: Date;
+  to?: Date;
+  source?: string;
+  medium?: string;
+  campaign?: string;
+  gclidPresent?: boolean;
+  locale?: 'fr' | 'en';
+  projectType?: string;
+  city?: string;
+  status?: QuoteStatus;
+  customerType?: CustomerType;
+  deviceCategory?: string;
+  landingPage?: string;
+};
+
+export type AnalyticsGroupRow = {
+  label: string;
+  leads: number;
+  contacted: number;
+  won: number;
+  volumeM3: number;
+  revenueCad: number;
+};
+
+export type AnalyticsLeadRow = {
+  id: string;
+  publicId: string;
+  createdAt: Date;
+  customerType: CustomerType;
+  projectType: string;
+  city: string;
+  estimatedVolumeM3: string | null;
+  volumeUnknown: boolean;
+  desiredDate: string;
+  source: string | null;
+  medium: string | null;
+  campaign: string | null;
+  landingPage: string | null;
+  hasGclid: boolean;
+  status: QuoteStatus;
+  responseMinutes: number | null;
+  revenueCad: string | null;
+};
+
+export type AnalyticsReport = {
+  kpis: {
+    total: number;
+    newLeads: number;
+    contacted: number;
+    quoted: number;
+    won: number;
+    lost: number;
+    open: number;
+    winRate: number;
+    totalVolumeM3: number;
+    averageResponseMinutes: number | null;
+    medianResponseMinutes: number | null;
+    respondedWithin15: number | null;
+    respondedWithin60: number | null;
+    respondedWithin24h: number | null;
+    estimatedJobValueCad: number;
+    finalJobValueCad: number;
+    betondispoRevenueCad: number;
+    averageLeadValueCad: number | null;
+  };
+  funnel: { stage: string; count: number; rateFromPrevious: number | null; rateFromSubmitted: number }[];
+  bySource: AnalyticsGroupRow[];
+  byCampaign: AnalyticsGroupRow[];
+  byLandingPage: AnalyticsGroupRow[];
+  byQuoteEntryPage: AnalyticsGroupRow[];
+  byProjectType: AnalyticsGroupRow[];
+  byCity: AnalyticsGroupRow[];
+  byDevice: AnalyticsGroupRow[];
+  byLocale: AnalyticsGroupRow[];
+  gclidSplit: AnalyticsGroupRow[];
+  googleAdsLeads: AnalyticsLeadRow[];
+  requestRows: AnalyticsLeadRow[];
+};
+
+function analyticsWhere(filters: AnalyticsFilters): SQL | undefined {
+  const clauses: SQL[] = [];
+  const source = sql<string>`coalesce(${quoteRequests.firstTouchSource}, ${quoteRequests.utmSource})`;
+  const medium = sql<string>`coalesce(${quoteRequests.firstTouchMedium}, ${quoteRequests.utmMedium})`;
+  const campaign = sql<string>`coalesce(${quoteRequests.firstTouchCampaign}, ${quoteRequests.utmCampaign})`;
+  const landing = sql<string>`coalesce(${quoteRequests.firstTouchLandingPage}, ${quoteRequests.landingPage})`;
+
+  if (filters.from) clauses.push(gte(quoteRequests.createdAt, filters.from));
+  if (filters.to) clauses.push(lte(quoteRequests.createdAt, filters.to));
+  if (filters.source) clauses.push(ilike(source, `${filters.source}%`));
+  if (filters.medium) clauses.push(ilike(medium, `${filters.medium}%`));
+  if (filters.campaign) clauses.push(ilike(campaign, `${filters.campaign}%`));
+  if (filters.gclidPresent === true) clauses.push(sql`${quoteRequests.gclid} is not null`);
+  if (filters.gclidPresent === false) clauses.push(sql`${quoteRequests.gclid} is null`);
+  if (filters.locale) clauses.push(eq(quoteRequests.locale, filters.locale));
+  if (filters.projectType) clauses.push(eq(quoteRequests.projectType, filters.projectType as never));
+  if (filters.city) clauses.push(ilike(quoteRequests.city, `${filters.city}%`));
+  if (filters.status) clauses.push(eq(quoteRequests.status, filters.status));
+  if (filters.customerType) clauses.push(eq(quoteRequests.customerType, filters.customerType));
+  if (filters.deviceCategory) clauses.push(eq(quoteRequests.deviceCategory, filters.deviceCategory));
+  if (filters.landingPage) clauses.push(ilike(landing, `${filters.landingPage}%`));
+
+  return clauses.length ? and(...clauses) : undefined;
+}
+
+const contactedStatuses = sql.raw(
+  ['CONTACTED', 'QUALIFIED', 'QUOTING', 'OFFER_SENT', 'WON', 'LOST'].map((s) => `'${s}'`).join(', '),
+);
+
+function groupSelect(label: SQL<string>) {
+  return {
+    label,
+    leads: sql<number>`count(*)`.mapWith(Number),
+    contacted:
+      sql<number>`count(*) filter (where ${quoteRequests.status} in (${contactedStatuses}))`.mapWith(
+        Number,
+      ),
+    won: sql<number>`count(*) filter (where ${quoteRequests.status} = 'WON')`.mapWith(Number),
+    volumeM3:
+      sql<number>`coalesce(sum(${quoteRequests.estimatedVolumeM3}::numeric) filter (where ${quoteRequests.volumeUnknown} = false), 0)`.mapWith(
+        Number,
+      ),
+    revenueCad:
+      sql<number>`coalesce(sum(${quoteRequests.finalJobValueCad}::numeric), 0)`.mapWith(Number),
+  };
+}
+
+async function groupedAnalytics(
+  label: SQL<string>,
+  filters: AnalyticsFilters,
+  limit = 10,
+): Promise<AnalyticsGroupRow[]> {
+  const db = await getDb();
+  const where = analyticsWhere(filters);
+  const rows = await db
+    .select(groupSelect(label))
+    .from(quoteRequests)
+    .where(where)
+    .groupBy(label)
+    .orderBy(desc(count()))
+    .limit(limit);
+  return rows.map((row) => ({ ...row, label: row.label || 'Unknown' }));
+}
+
+function percent(numerator: number, denominator: number): number {
+  return denominator > 0 ? numerator / denominator : 0;
+}
+
+export async function getAnalyticsReport(filters: AnalyticsFilters): Promise<AnalyticsReport> {
+  const db = await getDb();
+  const where = analyticsWhere(filters);
+  const source = sql<string>`coalesce(${quoteRequests.firstTouchSource}, ${quoteRequests.utmSource}, 'Unknown')`;
+  const medium = sql<string>`coalesce(${quoteRequests.firstTouchMedium}, ${quoteRequests.utmMedium}, 'Unknown')`;
+  const campaign = sql<string>`coalesce(${quoteRequests.firstTouchCampaign}, ${quoteRequests.utmCampaign}, 'Unknown')`;
+  const landing = sql<string>`coalesce(${quoteRequests.firstTouchLandingPage}, ${quoteRequests.landingPage}, 'Unknown')`;
+  const responseMinutes = sql<number>`extract(epoch from (${quoteRequests.firstResponseAt} - ${quoteRequests.createdAt})) / 60`;
+
+  const [kpiRow] = await db
+    .select({
+      total: sql<number>`count(*)`.mapWith(Number),
+      newLeads: sql<number>`count(*) filter (where ${quoteRequests.status} = 'NEW')`.mapWith(Number),
+      contacted:
+        sql<number>`count(*) filter (where ${quoteRequests.status} in (${contactedStatuses}))`.mapWith(
+          Number,
+        ),
+      quoted:
+        sql<number>`count(*) filter (where ${quoteRequests.status} in ('OFFER_SENT', 'WON'))`.mapWith(
+          Number,
+        ),
+      won: sql<number>`count(*) filter (where ${quoteRequests.status} = 'WON')`.mapWith(Number),
+      lost: sql<number>`count(*) filter (where ${quoteRequests.status} in ('LOST', 'INVALID'))`.mapWith(Number),
+      open:
+        sql<number>`count(*) filter (where ${quoteRequests.status} not in ('WON', 'LOST', 'INVALID'))`.mapWith(
+          Number,
+        ),
+      totalVolumeM3:
+        sql<number>`coalesce(sum(${quoteRequests.estimatedVolumeM3}::numeric) filter (where ${quoteRequests.volumeUnknown} = false), 0)`.mapWith(
+          Number,
+        ),
+      averageResponseMinutes: sql<number | null>`avg(${responseMinutes})`.mapWith((v) =>
+        v == null ? null : Number(v),
+      ),
+      medianResponseMinutes:
+        sql<number | null>`percentile_cont(0.5) within group (order by ${responseMinutes}) filter (where ${quoteRequests.firstResponseAt} is not null)`.mapWith(
+          (v) => (v == null ? null : Number(v)),
+        ),
+      respondedWithin15:
+        sql<number | null>`avg(case when ${quoteRequests.firstResponseAt} is null then null when ${responseMinutes} <= 15 then 1 else 0 end)`.mapWith(
+          (v) => (v == null ? null : Number(v)),
+        ),
+      respondedWithin60:
+        sql<number | null>`avg(case when ${quoteRequests.firstResponseAt} is null then null when ${responseMinutes} <= 60 then 1 else 0 end)`.mapWith(
+          (v) => (v == null ? null : Number(v)),
+        ),
+      respondedWithin24h:
+        sql<number | null>`avg(case when ${quoteRequests.firstResponseAt} is null then null when ${responseMinutes} <= 1440 then 1 else 0 end)`.mapWith(
+          (v) => (v == null ? null : Number(v)),
+        ),
+      estimatedJobValueCad:
+        sql<number>`coalesce(sum(${quoteRequests.estimatedJobValueCad}::numeric), 0)`.mapWith(Number),
+      finalJobValueCad:
+        sql<number>`coalesce(sum(${quoteRequests.finalJobValueCad}::numeric), 0)`.mapWith(Number),
+      betondispoRevenueCad:
+        sql<number>`coalesce(sum(${quoteRequests.betondispoRevenueCad}::numeric), 0)`.mapWith(Number),
+    })
+    .from(quoteRequests)
+    .where(where);
+
+  const requestRowsPromise = db
+    .select({
+      id: quoteRequests.id,
+      publicId: quoteRequests.publicId,
+      createdAt: quoteRequests.createdAt,
+      customerType: quoteRequests.customerType,
+      projectType: quoteRequests.projectType,
+      city: quoteRequests.city,
+      estimatedVolumeM3: quoteRequests.estimatedVolumeM3,
+      volumeUnknown: quoteRequests.volumeUnknown,
+      desiredDate: quoteRequests.desiredDate,
+      source,
+      medium,
+      campaign,
+      landingPage: landing,
+      hasGclid: sql<boolean>`${quoteRequests.gclid} is not null`.mapWith(Boolean),
+      status: quoteRequests.status,
+      responseMinutes: sql<number | null>`${responseMinutes}`.mapWith((v) =>
+        v == null ? null : Number(v),
+      ),
+      revenueCad: quoteRequests.finalJobValueCad,
+    })
+    .from(quoteRequests)
+    .where(where)
+    .orderBy(desc(quoteRequests.createdAt))
+    .limit(50);
+
+  const [
+    bySource,
+    byCampaign,
+    byLandingPage,
+    byQuoteEntryPage,
+    byProjectType,
+    byCity,
+    byDevice,
+    byLocale,
+    gclidSplit,
+    googleAdsLeads,
+    requestRows,
+  ] = await Promise.all([
+    groupedAnalytics(sql<string>`coalesce(${source} || ' / ' || ${medium}, 'Unknown')`, filters),
+    groupedAnalytics(campaign, filters),
+    groupedAnalytics(landing, filters),
+    groupedAnalytics(sql<string>`coalesce(${quoteRequests.quoteEntryPage}, 'Unknown')`, filters),
+    groupedAnalytics(sql<string>`${quoteRequests.projectType}::text`, filters),
+    groupedAnalytics(sql<string>`${quoteRequests.city}`, filters),
+    groupedAnalytics(sql<string>`coalesce(${quoteRequests.deviceCategory}, 'Unknown')`, filters),
+    groupedAnalytics(sql<string>`${quoteRequests.locale}::text`, filters),
+    groupedAnalytics(
+      sql<string>`case when ${quoteRequests.gclid} is not null then 'Google Ads click identified' else 'No GCLID' end`,
+      filters,
+      2,
+    ),
+    db
+      .select({
+        id: quoteRequests.id,
+        publicId: quoteRequests.publicId,
+        createdAt: quoteRequests.createdAt,
+        customerType: quoteRequests.customerType,
+        projectType: quoteRequests.projectType,
+        city: quoteRequests.city,
+        estimatedVolumeM3: quoteRequests.estimatedVolumeM3,
+        volumeUnknown: quoteRequests.volumeUnknown,
+        desiredDate: quoteRequests.desiredDate,
+        source,
+        medium,
+        campaign,
+        landingPage: landing,
+        hasGclid: sql<boolean>`true`.mapWith(Boolean),
+        status: quoteRequests.status,
+        responseMinutes: sql<number | null>`${responseMinutes}`.mapWith((v) =>
+          v == null ? null : Number(v),
+        ),
+        revenueCad: quoteRequests.finalJobValueCad,
+      })
+      .from(quoteRequests)
+      .where(and(...[where, sql`${quoteRequests.gclid} is not null`].filter(Boolean) as SQL[]))
+      .orderBy(desc(quoteRequests.createdAt))
+      .limit(25),
+    requestRowsPromise,
+  ]);
+
+  const kpis = kpiRow ?? {
+    total: 0,
+    newLeads: 0,
+    contacted: 0,
+    quoted: 0,
+    won: 0,
+    lost: 0,
+    open: 0,
+    totalVolumeM3: 0,
+    averageResponseMinutes: null,
+    medianResponseMinutes: null,
+    respondedWithin15: null,
+    respondedWithin60: null,
+    respondedWithin24h: null,
+    estimatedJobValueCad: 0,
+    finalJobValueCad: 0,
+    betondispoRevenueCad: 0,
+  };
+
+  const submitted = kpis.total;
+  const funnelCounts = [
+    { stage: 'Submitted', count: submitted },
+    { stage: 'Contacted', count: kpis.contacted },
+    { stage: 'Quoted', count: kpis.quoted },
+    { stage: 'Won', count: kpis.won },
+  ];
+
+  return {
+    kpis: {
+      ...kpis,
+      winRate: percent(kpis.won, kpis.total),
+      averageLeadValueCad: kpis.won > 0 ? kpis.finalJobValueCad / kpis.won : null,
+    },
+    funnel: funnelCounts.map((stage, index) => ({
+      ...stage,
+      rateFromPrevious:
+        index === 0 ? null : percent(stage.count, funnelCounts[index - 1]?.count ?? 0),
+      rateFromSubmitted: percent(stage.count, submitted),
+    })),
+    bySource,
+    byCampaign,
+    byLandingPage,
+    byQuoteEntryPage,
+    byProjectType,
+    byCity,
+    byDevice,
+    byLocale,
+    gclidSplit,
+    googleAdsLeads,
+    requestRows,
   };
 }

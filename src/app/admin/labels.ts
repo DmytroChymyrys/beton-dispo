@@ -51,6 +51,8 @@ export const STATUS_CLASSES: Record<QuoteStatus, string> = {
   INVALID: 'bg-surface-sunken text-ink-muted border-line-strong',
 };
 
+const ADMIN_TIME_ZONE = 'America/Toronto';
+
 export function formatVolume(value: string | null, unknown: boolean, locale: AdminLocale): string {
   if (unknown || !value) return locale === 'en' ? 'Unknown' : 'Inconnu';
   const n = Number(value);
@@ -65,12 +67,43 @@ export function formatVolume(value: string | null, unknown: boolean, locale: Adm
 
 export function formatDateTime(value: Date, locale: AdminLocale): string {
   return value.toLocaleString(locale === 'en' ? 'en-CA' : 'fr-CA', {
+    timeZone: ADMIN_TIME_ZONE,
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
+    timeZoneName: 'short',
   });
+}
+
+export function formatRelativeDateTime(
+  value: Date,
+  locale: AdminLocale,
+  now = new Date(),
+): string {
+  const diffMs = now.getTime() - value.getTime();
+  const future = diffMs < 0;
+  const totalMinutes = Math.max(0, Math.round(Math.abs(diffMs) / 60000));
+
+  if (totalMinutes < 1) return locale === 'en' ? 'just now' : 'à l’instant';
+
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
+
+  const parts: string[] = [];
+  if (days > 0) parts.push(locale === 'en' ? `${days} day${days === 1 ? '' : 's'}` : `${days} j`);
+  if (hours > 0 && parts.length < 2) {
+    parts.push(locale === 'en' ? `${hours} hour${hours === 1 ? '' : 's'}` : `${hours} h`);
+  }
+  if (minutes > 0 && parts.length < 2 && days === 0) {
+    parts.push(locale === 'en' ? `${minutes} min` : `${minutes} min`);
+  }
+
+  const label = parts.join(' ');
+  if (future) return locale === 'en' ? `in ${label}` : `dans ${label}`;
+  return locale === 'en' ? `${label} ago` : `il y a ${label}`;
 }
 
 export function formatPercent(fraction: number, locale: AdminLocale): string {

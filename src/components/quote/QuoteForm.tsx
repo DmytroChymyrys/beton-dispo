@@ -150,6 +150,11 @@ function readSafeSourcePage(value: string | null): string | undefined {
   return trimmed.split('?')[0];
 }
 
+function readCurrentPath(): string {
+  if (typeof window === 'undefined') return '';
+  return window.location.pathname.slice(0, 512);
+}
+
 function readAnalyticsNumber(value: string | null): number | undefined {
   if (!value) return undefined;
   const parsed = Number(value.replace(',', '.'));
@@ -332,10 +337,13 @@ export function QuoteForm({
 
     track('quote_step_completed', { locale, step: TOTAL_STEPS, stepName: STEP_NAMES[3] });
 
+    const attribution = readAttribution();
     const payload = {
       ...values,
       locale,
-      ...readAttribution(),
+      ...attribution,
+      quoteEntryPage: sourcePage ?? attribution.quoteEntryPage,
+      submissionPage: attribution.submissionPage || readCurrentPath(),
     };
 
     startTransition(async () => {

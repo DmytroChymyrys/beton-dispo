@@ -12,7 +12,13 @@ import {
 import { CUSTOMER_TYPES, QUOTE_STATUSES } from '@/lib/quote-options';
 import type { CustomerType, QuoteStatus } from '@/lib/quote-options';
 import { StatusBadge } from '@/app/admin/StatusBadge';
-import { adminOptions, formatDateTime, formatVolume, STATUS_LABELS } from '@/app/admin/labels';
+import {
+  adminOptions,
+  formatDateTime,
+  formatRelativeDateTime,
+  formatVolume,
+  STATUS_LABELS,
+} from '@/app/admin/labels';
 import { adminText } from '@/app/admin/i18n';
 import { getAdminLocale } from '@/app/admin/locale';
 
@@ -256,7 +262,10 @@ export default async function AdminRequestsPage({ searchParams }: { searchParams
                     </Link>
                   </td>
                   <td className="text-ink-muted px-4 py-3 whitespace-nowrap tabular-nums">
-                    {formatDateTime(row.createdAt, locale)}
+                    <time dateTime={row.createdAt.toISOString()}>
+                      <span className="block">{formatRelativeDateTime(row.createdAt, locale)}</span>
+                      <span className="block text-xs">{formatDateTime(row.createdAt, locale)}</span>
+                    </time>
                   </td>
                   <td className="px-4 py-3">
                     <span className="font-medium">{row.name}</span>

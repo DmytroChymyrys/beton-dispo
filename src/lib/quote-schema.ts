@@ -150,6 +150,9 @@ export const contactStepSchema = z.object(contactShape).superRefine((value, ctx)
 /* -------------------------------------------------------------------------- */
 
 const attributionShape = {
+  gclid: trimmed(256).optional().or(z.literal('')),
+  msclkid: trimmed(256).optional().or(z.literal('')),
+  fbclid: trimmed(256).optional().or(z.literal('')),
   utmSource: trimmed(120).optional().or(z.literal('')),
   utmMedium: trimmed(120).optional().or(z.literal('')),
   utmCampaign: trimmed(160).optional().or(z.literal('')),
@@ -157,6 +160,26 @@ const attributionShape = {
   utmContent: trimmed(160).optional().or(z.literal('')),
   referrer: trimmed(512).optional().or(z.literal('')),
   landingPage: trimmed(512).optional().or(z.literal('')),
+  firstTouchSource: trimmed(120).optional().or(z.literal('')),
+  firstTouchMedium: trimmed(120).optional().or(z.literal('')),
+  firstTouchCampaign: trimmed(160).optional().or(z.literal('')),
+  firstTouchTerm: trimmed(160).optional().or(z.literal('')),
+  firstTouchContent: trimmed(160).optional().or(z.literal('')),
+  firstTouchLandingPage: trimmed(512).optional().or(z.literal('')),
+  firstTouchReferrer: trimmed(512).optional().or(z.literal('')),
+  firstTouchTimestamp: trimmed(40).optional().or(z.literal('')),
+  lastTouchSource: trimmed(120).optional().or(z.literal('')),
+  lastTouchMedium: trimmed(120).optional().or(z.literal('')),
+  lastTouchCampaign: trimmed(160).optional().or(z.literal('')),
+  lastTouchTerm: trimmed(160).optional().or(z.literal('')),
+  lastTouchContent: trimmed(160).optional().or(z.literal('')),
+  lastTouchLandingPage: trimmed(512).optional().or(z.literal('')),
+  lastTouchReferrer: trimmed(512).optional().or(z.literal('')),
+  lastTouchTimestamp: trimmed(40).optional().or(z.literal('')),
+  quoteEntryPage: trimmed(512).optional().or(z.literal('')),
+  submissionPage: trimmed(512).optional().or(z.literal('')),
+  deviceCategory: z.enum(['mobile', 'tablet', 'desktop']).optional().or(z.literal('')),
+  browserLanguage: trimmed(80).optional().or(z.literal('')),
 };
 
 /* -------------------------------------------------------------------------- */

@@ -22,6 +22,20 @@
       "when": 1785700622244,
       "tag": "0002_huge_captain_britain",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1785877124380,
+      "tag": "0003_cold_silver_sable",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1785888479012,
+      "tag": "0004_milky_chamber",
+      "breakpoints": true
     }
   ]
 }
