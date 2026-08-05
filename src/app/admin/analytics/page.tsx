@@ -6,6 +6,7 @@ import type { CustomerType, ProjectType, QuoteStatus } from '@/lib/quote-options
 import { adminOptions, formatDateTime, formatPercent, formatVolume } from '@/app/admin/labels';
 import { getAdminLocale } from '@/app/admin/locale';
 import { StatusBadge } from '@/app/admin/StatusBadge';
+import { AnalyticsCharts } from './AnalyticsCharts';
 
 export const dynamic = 'force-dynamic';
 
@@ -156,31 +157,26 @@ export default async function AdminAnalyticsPage({ searchParams }: { searchParam
         <Kpi label={t.revenue} value={money(report.kpis.betondispoRevenueCad, locale)} />
       </section>
 
-      <section className="rounded-card border-line bg-surface border p-5">
-        <h2 className="text-xl">{t.funnel}</h2>
-        <div className="mt-4 grid gap-3 md:grid-cols-4">
-          {report.funnel.map((stage) => (
-            <div key={stage.stage} className="bg-surface-sunken rounded-lg p-4">
-              <p className="text-ink-muted text-sm">{stage.stage}</p>
-              <p className="mt-2 text-3xl font-extrabold tabular-nums">{stage.count}</p>
-              <p className="text-ink-muted mt-1 text-xs">
-                {formatPercent(stage.rateFromSubmitted, locale)} {t.ofSubmitted}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <div className="grid gap-6 xl:grid-cols-2">
-        <GroupTable title={t.bySource} rows={report.bySource} locale={locale} />
-        <GroupTable title={t.byCampaign} rows={report.byCampaign} locale={locale} />
-        <GroupTable title={t.byLandingPage} rows={report.byLandingPage} locale={locale} linkLabels />
-        <GroupTable title={t.byQuoteEntryPage} rows={report.byQuoteEntryPage} locale={locale} linkLabels />
-        <GroupTable title={t.byProject} rows={labelProjectRows(report.byProjectType, options.projectType)} locale={locale} />
-        <GroupTable title={t.byCity} rows={report.byCity} locale={locale} />
-        <GroupTable title={t.byDevice} rows={report.byDevice} locale={locale} />
-        <GroupTable title={t.gclidSplit} rows={report.gclidSplit} locale={locale} />
-      </div>
+      <AnalyticsCharts
+        funnel={report.funnel}
+        bySource={report.bySource}
+        byLandingPage={report.byLandingPage}
+        byProject={labelProjectRows(report.byProjectType, options.projectType)}
+        byCity={report.byCity}
+        gclidSplit={report.gclidSplit}
+        labels={{
+          funnel: t.funnel,
+          sources: t.bySource,
+          landingPages: t.byLandingPage,
+          projectsCities: t.projectsCities,
+          projects: t.byProject,
+          cities: t.byCity,
+          googleAds: t.gclidSplit,
+          leads: t.leads,
+          won: t.won,
+          noData: t.noData,
+        }}
+      />
 
       <LeadTable
         title={t.googleAds}
@@ -300,52 +296,6 @@ function Kpi({ label, value, note }: { label: string; value: string | number; no
       <p className="mt-2 text-3xl font-extrabold tabular-nums">{value}</p>
       {note ? <p className="text-ink-muted mt-1 text-xs">{note}</p> : null}
     </div>
-  );
-}
-
-function GroupTable({
-  title,
-  rows,
-  locale,
-  linkLabels = false,
-}: {
-  title: string;
-  rows: AnalyticsGroupRow[];
-  locale: 'fr' | 'en';
-  linkLabels?: boolean;
-}) {
-  return (
-    <section className="rounded-card border-line bg-surface overflow-hidden border">
-      <h2 className="border-line bg-surface-sunken border-b px-5 py-4 text-lg">{title}</h2>
-      <table className="w-full text-sm">
-        <thead className="text-ink-muted text-left">
-          <tr>
-            <Th>Label</Th>
-            <Th>Leads</Th>
-            <Th>Won</Th>
-            <Th>Win</Th>
-            <Th>m³</Th>
-          </tr>
-        </thead>
-        <tbody className="divide-line divide-y">
-          {rows.length === 0 ? (
-            <tr><td colSpan={5} className="text-ink-muted px-4 py-6 text-center">No data</td></tr>
-          ) : rows.map((row) => (
-            <tr key={row.label}>
-              <td className="max-w-80 px-4 py-3">
-                {linkLabels && row.label.startsWith('/') ? (
-                  <Link href={row.label} className="text-accent hover:underline">{row.label}</Link>
-                ) : row.label}
-              </td>
-              <td className="px-4 py-3 tabular-nums">{row.leads}</td>
-              <td className="px-4 py-3 tabular-nums">{row.won}</td>
-              <td className="px-4 py-3 tabular-nums">{formatPercent(row.won / Math.max(1, row.leads), locale)}</td>
-              <td className="px-4 py-3 tabular-nums">{row.volumeM3.toFixed(2)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </section>
   );
 }
 
@@ -483,6 +433,8 @@ const copy = {
     byProject: 'Demandes par projet',
     byCity: 'Demandes par ville',
     byDevice: 'Demandes par appareil',
+    projectsCities: 'Projets et villes',
+    leads: 'Demandes',
     gclidSplit: 'Google Ads identifié',
     googleAds: 'Demandes attribuées Google Ads',
     requests: 'Table analytique des demandes',
@@ -536,6 +488,8 @@ const copy = {
     byProject: 'Leads by project',
     byCity: 'Leads by city',
     byDevice: 'Leads by device',
+    projectsCities: 'Projects and cities',
+    leads: 'Leads',
     gclidSplit: 'Google Ads identified',
     googleAds: 'Google Ads-attributed leads',
     requests: 'Analytics request table',
