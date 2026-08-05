@@ -130,11 +130,12 @@ export default async function AdminAnalyticsPage({ searchParams }: { searchParam
   const t = copy[locale];
 
   return (
-    <div className="container-page space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="container-page max-w-[1500px] space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl">{t.title}</h1>
           <p className="text-ink-muted mt-1 max-w-2xl">{t.intro}</p>
+          <p className="text-ink-muted mt-1 text-xs">{t.updated(formatDateTime(new Date(), locale))}</p>
         </div>
         <Link
           href={`/admin/analytics/export?${new URLSearchParams(params as Record<string, string>).toString()}`}
@@ -147,18 +148,23 @@ export default async function AdminAnalyticsPage({ searchParams }: { searchParam
       <Filters t={t} parsed={parsed} />
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Kpi label={t.quotes} value={report.kpis.total} />
+        <Kpi label={t.quotes} value={report.kpis.total} tone="accent" note={t.filteredPeriod} />
         <Kpi label={t.open} value={report.kpis.open} />
-        <Kpi label={t.won} value={report.kpis.won} note={formatPercent(report.kpis.winRate, locale)} />
-        <Kpi label={t.volume} value={`${report.kpis.totalVolumeM3.toFixed(2)} m³`} />
-        <Kpi label={t.avgResponse} value={formatMinutes(report.kpis.averageResponseMinutes, locale)} />
-        <Kpi label={t.medianResponse} value={formatMinutes(report.kpis.medianResponseMinutes, locale)} />
-        <Kpi label={t.withinHour} value={ratioLabel(report.kpis.respondedWithin60, locale)} />
-        <Kpi label={t.revenue} value={money(report.kpis.betondispoRevenueCad, locale)} />
+        <Kpi label={t.won} value={report.kpis.won} tone="success" note={formatPercent(report.kpis.winRate, locale)} />
+        <Kpi label={t.revenue} value={money(report.kpis.betondispoRevenueCad, locale)} tone="success" note={!report.kpis.betondispoRevenueCad ? t.noRevenue : undefined} />
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Kpi label={t.volume} value={`${report.kpis.totalVolumeM3.toFixed(2)} m³`} quiet />
+        <Kpi label={t.avgResponse} value={formatMinutes(report.kpis.averageResponseMinutes, locale)} quiet note={responseSample(report.kpis.contacted, t.respondedSample)} />
+        <Kpi label={t.medianResponse} value={formatMinutes(report.kpis.medianResponseMinutes, locale)} quiet />
+        <Kpi label={t.withinHour} value={ratioLabel(report.kpis.respondedWithin60, locale)} quiet note={responseSample(report.kpis.contacted, t.respondedSample)} />
       </section>
 
       <AnalyticsCharts
+        trend={report.quotesOverTime}
         funnel={report.funnel}
+        byStatus={report.byStatus}
         bySource={report.bySource}
         byLandingPage={report.byLandingPage}
         byProject={labelProjectRows(report.byProjectType, options.projectType)}
@@ -166,15 +172,24 @@ export default async function AdminAnalyticsPage({ searchParams }: { searchParam
         gclidSplit={report.gclidSplit}
         labels={{
           funnel: t.funnel,
-          sources: t.bySource,
+          status: t.statusBreakdown,
+          source: t.bySource,
           landingPages: t.byLandingPage,
-          projectsCities: t.projectsCities,
           projects: t.byProject,
           cities: t.byCity,
           googleAds: t.gclidSplit,
-          leads: t.leads,
+          googleAdsEmpty: t.googleAdsEmpty,
+          googleAdsHelp: t.googleAdsHelp,
+          trend: t.trend,
+          quotes: t.quotes,
+          winRate: t.winRate,
+          volume: t.volume,
+          attributed: t.attributed,
+          unattributed: t.unattributed,
+          ofLeads: t.ofLeads,
           won: t.won,
           noData: t.noData,
+          notEnoughActivity: t.notEnoughActivity,
         }}
       />
 
@@ -184,6 +199,7 @@ export default async function AdminAnalyticsPage({ searchParams }: { searchParam
         locale={locale}
         options={options}
         empty={t.noData}
+        googleAds
       />
 
       <LeadTable
@@ -204,81 +220,128 @@ function Filters({
   t: (typeof copy)[keyof typeof copy];
   parsed: ReturnType<typeof parseFilters>;
 }) {
+  const advancedCount = [
+    parsed.filters.medium,
+    parsed.filters.campaign,
+    parsed.filters.gclidPresent !== undefined,
+    parsed.filters.locale,
+    parsed.filters.landingPage,
+    parsed.filters.customerType,
+    parsed.filters.deviceCategory,
+  ].filter(Boolean).length;
+  const activeFilters = [
+    parsed.range !== '30d' ? [t.range, t.ranges[parsed.range]] : null,
+    parsed.filters.source ? [t.source, parsed.filters.source] : null,
+    parsed.filters.projectType ? [t.project, parsed.filters.projectType] : null,
+    parsed.filters.city ? [t.city, parsed.filters.city] : null,
+    parsed.filters.status ? [t.status, parsed.filters.status] : null,
+    parsed.filters.medium ? [t.medium, parsed.filters.medium] : null,
+    parsed.filters.campaign ? [t.campaign, parsed.filters.campaign] : null,
+    parsed.filters.gclidPresent !== undefined
+      ? [t.gclid, parsed.filters.gclidPresent ? t.gclidYes : t.gclidNo]
+      : null,
+    parsed.filters.locale ? [t.locale, parsed.filters.locale] : null,
+    parsed.filters.landingPage ? [t.landingPage, parsed.filters.landingPage] : null,
+  ].filter(Boolean) as [string, string][];
+
   return (
-    <form method="get" action="/admin/analytics" className="rounded-card border-line bg-surface grid gap-4 border p-5 md:grid-cols-3 xl:grid-cols-6">
-      <Field label={t.range}>
-        <select name="range" defaultValue={parsed.range} className={inputClass}>
-          {RANGES.map((range) => (
-            <option key={range} value={range}>
-              {t.ranges[range]}
-            </option>
-          ))}
-        </select>
-      </Field>
-      <Field label={t.from}>
-        <input type="date" name="from" defaultValue={parsed.from} className={inputClass} />
-      </Field>
-      <Field label={t.to}>
-        <input type="date" name="to" defaultValue={parsed.to} className={inputClass} />
-      </Field>
-      <Field label={t.source}>
-        <input name="source" defaultValue={parsed.filters.source ?? ''} className={inputClass} />
-      </Field>
-      <Field label={t.medium}>
-        <input name="medium" defaultValue={parsed.filters.medium ?? ''} className={inputClass} />
-      </Field>
-      <Field label={t.campaign}>
-        <input name="campaign" defaultValue={parsed.filters.campaign ?? ''} className={inputClass} />
-      </Field>
-      <Field label={t.gclid}>
-        <select name="gclid" defaultValue={parsed.filters.gclidPresent === true ? 'yes' : parsed.filters.gclidPresent === false ? 'no' : ''} className={inputClass}>
-          <option value="">{t.all}</option>
-          <option value="yes">{t.gclidYes}</option>
-          <option value="no">{t.gclidNo}</option>
-        </select>
-      </Field>
-      <Field label={t.locale}>
-        <select name="locale" defaultValue={parsed.filters.locale ?? ''} className={inputClass}>
-          <option value="">{t.all}</option>
-          <option value="fr">fr</option>
-          <option value="en">en</option>
-        </select>
-      </Field>
-      <Field label={t.project}>
-        <select name="projectType" defaultValue={parsed.filters.projectType ?? ''} className={inputClass}>
-          <option value="">{t.all}</option>
-          {PROJECT_TYPES.map((project) => (
-            <option key={project} value={project}>{project}</option>
-          ))}
-        </select>
-      </Field>
-      <Field label={t.city}>
-        <input name="city" defaultValue={parsed.filters.city ?? ''} className={inputClass} />
-      </Field>
-      <Field label={t.status}>
-        <select name="status" defaultValue={parsed.filters.status ?? ''} className={inputClass}>
-          <option value="">{t.all}</option>
-          {QUOTE_STATUSES.map((status) => (
-            <option key={status} value={status}>{status}</option>
-          ))}
-        </select>
-      </Field>
-      <Field label={t.landingPage}>
-        <input name="landingPage" defaultValue={parsed.filters.landingPage ?? ''} className={inputClass} />
-      </Field>
-      <div className="flex items-end gap-2 xl:col-span-6">
-        <button className="bg-accent hover:bg-accent-hover inline-flex min-h-11 items-center rounded-lg px-5 font-semibold text-white">
-          {t.apply}
-        </button>
-        <Link href="/admin/analytics" className="border-line-strong hover:bg-surface-sunken inline-flex min-h-11 items-center rounded-lg border px-5 font-semibold">
+    <form method="get" action="/admin/analytics" className="rounded-card border-line bg-surface border p-4">
+      <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-[1.1fr_1fr_1fr_1fr_1fr_auto_auto] xl:items-end">
+        <Field label={t.range}>
+          <select name="range" defaultValue={parsed.range} className={inputClass}>
+            {RANGES.map((range) => (
+              <option key={range} value={range}>
+                {t.ranges[range]}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label={t.source}>
+          <input name="source" defaultValue={parsed.filters.source ?? ''} className={inputClass} />
+        </Field>
+        <Field label={t.project}>
+          <select name="projectType" defaultValue={parsed.filters.projectType ?? ''} className={inputClass}>
+            <option value="">{t.all}</option>
+            {PROJECT_TYPES.map((project) => (
+              <option key={project} value={project}>{project}</option>
+            ))}
+          </select>
+        </Field>
+        <Field label={t.city}>
+          <input name="city" defaultValue={parsed.filters.city ?? ''} className={inputClass} />
+        </Field>
+        <Field label={t.status}>
+          <select name="status" defaultValue={parsed.filters.status ?? ''} className={inputClass}>
+            <option value="">{t.all}</option>
+            {QUOTE_STATUSES.map((status) => (
+              <option key={status} value={status}>{status}</option>
+            ))}
+          </select>
+        </Field>
+        <Link href="/admin/analytics" className="border-line-strong hover:bg-surface-sunken inline-flex min-h-10 items-center justify-center rounded-lg border px-4 text-sm font-semibold">
           {t.reset}
         </Link>
+        <button className="bg-accent hover:bg-accent-hover inline-flex min-h-10 items-center justify-center rounded-lg px-4 text-sm font-semibold text-white">
+          {t.apply}
+        </button>
       </div>
+
+      {parsed.range === 'custom' ? (
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:max-w-md">
+          <Field label={t.from}>
+            <input type="date" name="from" defaultValue={parsed.from} className={inputClass} />
+          </Field>
+          <Field label={t.to}>
+            <input type="date" name="to" defaultValue={parsed.to} className={inputClass} />
+          </Field>
+        </div>
+      ) : null}
+
+      <details className="mt-3">
+        <summary className="text-ink-soft hover:text-ink cursor-pointer text-sm font-semibold">
+          {t.moreFilters}{advancedCount ? ` (${advancedCount})` : ''}
+        </summary>
+        <div className="mt-3 grid gap-3 md:grid-cols-3 xl:grid-cols-6">
+          <Field label={t.medium}>
+            <input name="medium" defaultValue={parsed.filters.medium ?? ''} className={inputClass} />
+          </Field>
+          <Field label={t.campaign}>
+            <input name="campaign" defaultValue={parsed.filters.campaign ?? ''} className={inputClass} />
+          </Field>
+          <Field label={t.gclid}>
+            <select name="gclid" defaultValue={parsed.filters.gclidPresent === true ? 'yes' : parsed.filters.gclidPresent === false ? 'no' : ''} className={inputClass}>
+              <option value="">{t.all}</option>
+              <option value="yes">{t.gclidYes}</option>
+              <option value="no">{t.gclidNo}</option>
+            </select>
+          </Field>
+          <Field label={t.locale}>
+            <select name="locale" defaultValue={parsed.filters.locale ?? ''} className={inputClass}>
+              <option value="">{t.all}</option>
+              <option value="fr">fr</option>
+              <option value="en">en</option>
+            </select>
+          </Field>
+          <Field label={t.landingPage}>
+            <input name="landingPage" defaultValue={parsed.filters.landingPage ?? ''} className={inputClass} />
+          </Field>
+        </div>
+      </details>
+
+      {activeFilters.length ? (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {activeFilters.map(([label, value]) => (
+            <span key={`${label}:${value}`} className="border-line bg-surface-sunken text-ink-muted rounded-full border px-3 py-1 text-xs">
+              {label}: <span className="text-ink-soft">{value}</span>
+            </span>
+          ))}
+        </div>
+      ) : null}
     </form>
   );
 }
 
-const inputClass = 'min-h-11 w-full rounded-lg border border-line-strong bg-surface px-3 text-sm text-ink';
+const inputClass = 'min-h-10 w-full rounded-lg border border-line-strong bg-surface px-3 text-sm text-ink';
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -289,11 +352,27 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function Kpi({ label, value, note }: { label: string; value: string | number; note?: string }) {
+function Kpi({
+  label,
+  value,
+  note,
+  tone = 'neutral',
+  quiet = false,
+}: {
+  label: string;
+  value: string | number;
+  note?: string;
+  tone?: 'neutral' | 'accent' | 'success';
+  quiet?: boolean;
+}) {
+  const toneClass =
+    tone === 'accent' ? 'text-accent' : tone === 'success' ? 'text-success' : 'text-ink';
   return (
-    <div className="rounded-card border-line bg-surface border p-5">
+    <div className={`rounded-card border-line bg-surface border ${quiet ? 'p-4' : 'p-5'}`}>
       <p className="text-ink-muted text-sm">{label}</p>
-      <p className="mt-2 text-3xl font-extrabold tabular-nums">{value}</p>
+      <p className={`mt-2 font-extrabold tabular-nums ${quiet ? 'text-2xl' : 'text-3xl'} ${toneClass}`}>
+        {value}
+      </p>
       {note ? <p className="text-ink-muted mt-1 text-xs">{note}</p> : null}
     </div>
   );
@@ -305,29 +384,31 @@ function LeadTable({
   locale,
   options,
   empty,
+  googleAds = false,
 }: {
   title: string;
   rows: AnalyticsLeadRow[];
   locale: 'fr' | 'en';
   options: ReturnType<typeof adminOptions>;
   empty: string;
+  googleAds?: boolean;
 }) {
   return (
     <section className="rounded-card border-line bg-surface overflow-x-auto border">
       <h2 className="border-line bg-surface-sunken border-b px-5 py-4 text-lg">{title}</h2>
-      <table className="w-full min-w-[76rem] text-sm">
+      {googleAds && rows.length === 0 ? (
+        <p className="text-ink-muted px-5 py-6 text-sm">{empty}</p>
+      ) : null}
+      <table className="w-full min-w-[62rem] text-sm">
         <thead className="text-ink-muted text-left">
           <tr>
             <Th>Request</Th>
             <Th>Created</Th>
-            <Th>Customer</Th>
+            {!googleAds ? <Th>Customer</Th> : null}
             <Th>Project</Th>
             <Th>City</Th>
             <Th>Quantity</Th>
-            <Th>Desired</Th>
             <Th>Source</Th>
-            <Th>Landing</Th>
-            <Th>GCLID</Th>
             <Th>Status</Th>
             <Th>Response</Th>
             <Th>Revenue</Th>
@@ -335,32 +416,52 @@ function LeadTable({
         </thead>
         <tbody className="divide-line divide-y">
           {rows.length === 0 ? (
-            <tr><td colSpan={13} className="text-ink-muted px-4 py-6 text-center">{empty}</td></tr>
+            <tr><td colSpan={googleAds ? 9 : 10} className="text-ink-muted px-4 py-6 text-center">{empty}</td></tr>
           ) : rows.map((row) => (
-            <tr key={row.id}>
-              <td className="px-4 py-3">
+            <tr key={row.id} className="hover:bg-surface-sunken">
+              <td className="bg-surface sticky left-0 px-4 py-3">
                 <Link href={`/admin/requests/${row.id}`} className="text-accent font-bold hover:underline">
                   {row.publicId}
                 </Link>
               </td>
               <td className="text-ink-muted px-4 py-3 whitespace-nowrap tabular-nums">{formatDateTime(row.createdAt, locale)}</td>
-              <td className="px-4 py-3">{options.customerType[row.customerType]}</td>
+              {!googleAds ? <td className="px-4 py-3">{options.customerType[row.customerType]}</td> : null}
               <td className="px-4 py-3">{options.projectType[row.projectType as keyof typeof options.projectType] ?? row.projectType}</td>
               <td className="px-4 py-3">{row.city}</td>
-              <td className="px-4 py-3 whitespace-nowrap tabular-nums">{formatVolume(row.estimatedVolumeM3, row.volumeUnknown, locale)}</td>
-              <td className="px-4 py-3 whitespace-nowrap tabular-nums">{row.desiredDate}</td>
-              <td className="px-4 py-3">{[row.source, row.medium, row.campaign].filter(Boolean).join(' / ') || 'Unknown'}</td>
-              <td className="px-4 py-3">{row.landingPage}</td>
-              <td className="px-4 py-3">{row.hasGclid ? 'Google Ads' : '—'}</td>
+              <td className="px-4 py-3 text-right whitespace-nowrap tabular-nums">{formatVolume(row.estimatedVolumeM3, row.volumeUnknown, locale)}</td>
+              <td className="px-4 py-3"><SourceBadge row={row} /></td>
               <td className="px-4 py-3"><StatusBadge status={row.status} locale={locale} /></td>
               <td className="px-4 py-3 whitespace-nowrap tabular-nums">{formatMinutes(row.responseMinutes, locale)}</td>
-              <td className="px-4 py-3 whitespace-nowrap tabular-nums">{money(Number(row.revenueCad ?? 0), locale)}</td>
+              <td className="px-4 py-3 text-right whitespace-nowrap tabular-nums">{money(Number(row.revenueCad ?? 0), locale)}</td>
             </tr>
           ))}
         </tbody>
       </table>
     </section>
   );
+}
+
+function SourceBadge({ row }: { row: AnalyticsLeadRow }) {
+  const source = (row.source ?? '').toLowerCase();
+  const medium = (row.medium ?? '').toLowerCase();
+  let label = 'Unknown';
+  let cls = 'bg-surface-sunken text-ink-muted border-line-strong';
+  if (row.hasGclid) {
+    label = 'Google Ads';
+    cls = 'bg-success/10 text-success border-success/30';
+  } else if (medium === 'organic') {
+    label = 'Organic';
+    cls = 'bg-blue-50 text-blue-700 border-blue-200';
+  } else if (source === 'direct' || medium === 'none') {
+    label = 'Direct';
+  } else if (medium === 'referral') {
+    label = 'Referral';
+  } else if (source === 'test') {
+    label = 'Test';
+  } else if (source && source !== 'unknown') {
+    label = source;
+  }
+  return <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${cls}`}>{label}</span>;
 }
 
 function Th({ children }: { children: React.ReactNode }) {
@@ -377,6 +478,10 @@ function formatMinutes(value: number | null, locale: 'fr' | 'en'): string {
 
 function ratioLabel(value: number | null, locale: 'fr' | 'en'): string {
   return value == null ? '—' : formatPercent(value, locale);
+}
+
+function responseSample(count: number, label: (count: number) => string): string {
+  return count > 0 ? label(count) : '';
 }
 
 function money(value: number, locale: 'fr' | 'en'): string {
@@ -397,8 +502,9 @@ function labelProjectRows(
 const copy = {
   fr: {
     title: 'Analytics',
-    intro: 'Tableau interne basé sur Postgres pour comprendre les demandes, les sources, les pages et les résultats.',
+    intro: 'Suivez les demandes, les sources d’acquisition, les délais de réponse et les résultats.',
     export: 'Exporter CSV',
+    updated: (time: string) => `Mis à jour ${time}`,
     range: 'Période',
     from: 'Du',
     to: 'Au',
@@ -416,17 +522,24 @@ const copy = {
     all: 'Tous',
     apply: 'Appliquer',
     reset: 'Réinitialiser',
+    moreFilters: 'Plus de filtres',
     quotes: 'Demandes',
     open: 'Ouvertes',
     won: 'Gagnées',
+    winRate: 'Taux gagné',
     volume: 'Volume total',
     avgResponse: 'Réponse moyenne',
     medianResponse: 'Réponse médiane',
     withinHour: 'Répondu < 1 h',
     revenue: 'Revenu BétonDispo',
+    noRevenue: 'Aucun revenu enregistré',
+    filteredPeriod: 'Période filtrée',
+    respondedSample: (count: number) => `Basé sur ${count} demande${count === 1 ? '' : 's'} avec suivi`,
+    trend: 'Demandes dans le temps',
     funnel: 'Entonnoir',
+    statusBreakdown: 'Répartition des statuts',
     ofSubmitted: 'des demandes',
-    bySource: 'Demandes par source / médium',
+    bySource: 'Sources d’acquisition',
     byCampaign: 'Demandes par campagne',
     byLandingPage: 'Pages d’arrivée',
     byQuoteEntryPage: 'Pages d’entrée soumission',
@@ -435,10 +548,16 @@ const copy = {
     byDevice: 'Demandes par appareil',
     projectsCities: 'Projets et villes',
     leads: 'Demandes',
-    gclidSplit: 'Google Ads identifié',
-    googleAds: 'Demandes attribuées Google Ads',
-    requests: 'Table analytique des demandes',
-    noData: 'Aucune donnée.',
+    gclidSplit: 'Attribution Google Ads',
+    googleAds: 'Google Ads leads',
+    googleAdsEmpty: 'Aucune demande attribuée Google Ads pour le moment.',
+    googleAdsHelp: 'Les demandes avec GCLID apparaîtront ici après le déploiement du suivi.',
+    attributed: 'Demandes avec GCLID',
+    unattributed: 'Sans GCLID',
+    ofLeads: 'sur',
+    requests: 'Toutes les demandes',
+    noData: 'Aucune donnée disponible pour cette période.',
+    notEnoughActivity: 'Pas assez d’activité de statut pour construire l’entonnoir.',
     ranges: {
       today: 'Aujourd’hui',
       yesterday: 'Hier',
@@ -454,6 +573,7 @@ const copy = {
     title: 'Analytics',
     intro: 'Internal Postgres-backed reporting for quote volume, acquisition sources, landing pages, and outcomes.',
     export: 'Export CSV',
+    updated: (time: string) => `Updated ${time}`,
     range: 'Range',
     from: 'From',
     to: 'To',
@@ -471,17 +591,24 @@ const copy = {
     all: 'All',
     apply: 'Apply',
     reset: 'Reset',
+    moreFilters: 'More filters',
     quotes: 'Quotes',
     open: 'Open',
     won: 'Won',
+    winRate: 'Win rate',
     volume: 'Total volume',
     avgResponse: 'Avg response',
     medianResponse: 'Median response',
     withinHour: 'Responded < 1 h',
     revenue: 'BétonDispo revenue',
+    noRevenue: 'No revenue recorded',
+    filteredPeriod: 'Filtered period',
+    respondedSample: (count: number) => `Based on ${count} responded lead${count === 1 ? '' : 's'}`,
+    trend: 'Quotes over time',
     funnel: 'Funnel',
+    statusBreakdown: 'Status breakdown',
     ofSubmitted: 'of submitted',
-    bySource: 'Leads by source / medium',
+    bySource: 'Acquisition sources',
     byCampaign: 'Leads by campaign',
     byLandingPage: 'Landing pages',
     byQuoteEntryPage: 'Quote entry pages',
@@ -490,10 +617,16 @@ const copy = {
     byDevice: 'Leads by device',
     projectsCities: 'Projects and cities',
     leads: 'Leads',
-    gclidSplit: 'Google Ads identified',
-    googleAds: 'Google Ads-attributed leads',
-    requests: 'Analytics request table',
-    noData: 'No data.',
+    gclidSplit: 'Google Ads attribution',
+    googleAds: 'Google Ads leads',
+    googleAdsEmpty: 'No Google Ads-attributed leads yet.',
+    googleAdsHelp: 'Future quote requests containing a GCLID will appear here.',
+    attributed: 'Leads with GCLID',
+    unattributed: 'Without GCLID',
+    ofLeads: 'of',
+    requests: 'All quote requests',
+    noData: 'No data is available for this period.',
+    notEnoughActivity: 'Not enough status activity yet to build the funnel.',
     ranges: {
       today: 'Today',
       yesterday: 'Yesterday',

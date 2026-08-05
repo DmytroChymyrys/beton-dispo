@@ -388,6 +388,8 @@ export type AnalyticsReport = {
     averageLeadValueCad: number | null;
   };
   funnel: { stage: string; count: number; rateFromPrevious: number | null; rateFromSubmitted: number }[];
+  quotesOverTime: { date: string; quotes: number; won: number }[];
+  byStatus: AnalyticsGroupRow[];
   bySource: AnalyticsGroupRow[];
   byCampaign: AnalyticsGroupRow[];
   byLandingPage: AnalyticsGroupRow[];
@@ -557,6 +559,8 @@ export async function getAnalyticsReport(filters: AnalyticsFilters): Promise<Ana
     .limit(50);
 
   const [
+    quotesOverTime,
+    byStatus,
     bySource,
     byCampaign,
     byLandingPage,
@@ -569,6 +573,17 @@ export async function getAnalyticsReport(filters: AnalyticsFilters): Promise<Ana
     googleAdsLeads,
     requestRows,
   ] = await Promise.all([
+    db
+      .select({
+        date: sql<string>`to_char(${quoteRequests.createdAt} at time zone 'America/Toronto', 'YYYY-MM-DD')`,
+        quotes: sql<number>`count(*)`.mapWith(Number),
+        won: sql<number>`count(*) filter (where ${quoteRequests.status} = 'WON')`.mapWith(Number),
+      })
+      .from(quoteRequests)
+      .where(where)
+      .groupBy(sql`to_char(${quoteRequests.createdAt} at time zone 'America/Toronto', 'YYYY-MM-DD')`)
+      .orderBy(sql`to_char(${quoteRequests.createdAt} at time zone 'America/Toronto', 'YYYY-MM-DD')`),
+    groupedAnalytics(sql<string>`${quoteRequests.status}::text`, filters),
     groupedAnalytics(sql<string>`coalesce(${source} || ' / ' || ${medium}, 'Unknown')`, filters),
     groupedAnalytics(campaign, filters),
     groupedAnalytics(landing, filters),
@@ -650,6 +665,8 @@ export async function getAnalyticsReport(filters: AnalyticsFilters): Promise<Ana
         index === 0 ? null : percent(stage.count, funnelCounts[index - 1]?.count ?? 0),
       rateFromSubmitted: percent(stage.count, submitted),
     })),
+    quotesOverTime,
+    byStatus,
     bySource,
     byCampaign,
     byLandingPage,

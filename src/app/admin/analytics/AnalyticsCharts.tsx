@@ -1,73 +1,78 @@
 'use client';
 
+import Link from 'next/link';
 import {
-  Bar,
-  BarChart,
+  Area,
+  AreaChart,
   CartesianGrid,
-  Cell,
-  Funnel,
-  FunnelChart,
-  LabelList,
   Legend,
-  Pie,
-  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
 
-type ChartRow = {
+type GroupRow = {
   label: string;
   leads: number;
+  contacted: number;
   won: number;
   volumeM3: number;
+  revenueCad: number;
 };
 
 type FunnelRow = {
   stage: string;
   count: number;
+  rateFromPrevious: number | null;
   rateFromSubmitted: number;
 };
 
+type TrendRow = {
+  date: string;
+  quotes: number;
+  won: number;
+};
+
 type Props = {
+  trend: TrendRow[];
   funnel: FunnelRow[];
-  bySource: ChartRow[];
-  byLandingPage: ChartRow[];
-  byProject: ChartRow[];
-  byCity: ChartRow[];
-  gclidSplit: ChartRow[];
+  byStatus: GroupRow[];
+  bySource: GroupRow[];
+  byLandingPage: GroupRow[];
+  byProject: GroupRow[];
+  byCity: GroupRow[];
+  gclidSplit: GroupRow[];
   labels: {
+    trend: string;
+    source: string;
     funnel: string;
-    sources: string;
-    landingPages: string;
-    projectsCities: string;
+    status: string;
     projects: string;
     cities: string;
+    landingPages: string;
     googleAds: string;
-    leads: string;
+    googleAdsEmpty: string;
+    googleAdsHelp: string;
+    quotes: string;
     won: string;
+    winRate: string;
+    volume: string;
     noData: string;
+    notEnoughActivity: string;
+    attributed: string;
+    unattributed: string;
+    ofLeads: string;
   };
 };
 
-const COLORS = ['#c2410c', '#475569', '#0f766e', '#b45309', '#7c3aed', '#0369a1'];
-
-function shortLabel(value: string, max = 26): string {
-  if (value.length <= max) return value;
-  return `${value.slice(0, max - 1)}…`;
-}
-
-function chartRows(rows: ChartRow[], limit = 6): ChartRow[] {
-  return rows
-    .filter((row) => row.leads > 0)
-    .slice(0, limit)
-    .map((row) => ({ ...row, label: shortLabel(row.label) }));
-}
-
-function Empty({ label }: { label: string }) {
-  return <div className="text-ink-muted flex h-64 items-center justify-center text-sm">{label}</div>;
-}
+const ORANGE = '#c2410c';
+const GREEN = '#0f766e';
+const SLATE = '#475569';
+const BLUE = '#2563eb';
+const RED = '#b91c1c';
+const GRAY = '#9ca3af';
+const TRACK = '#ebe7e0';
 
 function tooltipStyle() {
   return {
@@ -78,8 +83,30 @@ function tooltipStyle() {
   };
 }
 
+function pct(value: number): string {
+  return `${Math.round(value * 100)}%`;
+}
+
+function topRows(rows: GroupRow[], limit = 5): GroupRow[] {
+  return rows.filter((row) => row.leads > 0).slice(0, limit);
+}
+
+function truncate(value: string, max = 42): string {
+  return value.length > max ? `${value.slice(0, max - 1)}…` : value;
+}
+
+function EmptyState({ title }: { title: string }) {
+  return (
+    <div className="border-line bg-surface-sunken text-ink-muted flex min-h-36 items-center justify-center rounded-lg border border-dashed px-4 text-center text-sm">
+      {title}
+    </div>
+  );
+}
+
 export function AnalyticsCharts({
+  trend,
   funnel,
+  byStatus,
   bySource,
   byLandingPage,
   byProject,
@@ -87,160 +114,308 @@ export function AnalyticsCharts({
   gclidSplit,
   labels,
 }: Props) {
-  const sourceRows = chartRows(bySource);
-  const landingRows = chartRows(byLandingPage, 7);
-  const projectRows = chartRows(byProject, 7);
-  const cityRows = chartRows(byCity, 7);
-  const gclidRows = chartRows(gclidSplit, 2);
-  const funnelRows = funnel.map((row) => ({
-    ...row,
-    value: row.count,
-    fill: COLORS[funnel.indexOf(row) % COLORS.length],
-  }));
-
   return (
-    <div className="grid gap-6">
-      <div className="grid gap-6 xl:grid-cols-[1fr_1.15fr]">
-        <section className="rounded-card border-line bg-surface border p-5">
-          <h2 className="text-xl">{labels.funnel}</h2>
-          {funnelRows.some((row) => row.value > 0) ? (
-            <div className="mt-4 h-72">
+    <div className="grid gap-5">
+      <div className="grid gap-5 xl:grid-cols-12">
+        <section className="rounded-card border-line bg-surface border p-5 xl:col-span-8">
+          <div className="flex items-baseline justify-between gap-4">
+            <h2 className="text-lg font-bold">{labels.trend}</h2>
+            <p className="text-ink-muted text-xs">{labels.quotes} / {labels.won}</p>
+          </div>
+          {trend.length ? (
+            <div className="mt-4 h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <FunnelChart>
-                  <Tooltip contentStyle={tooltipStyle()} />
-                  <Funnel dataKey="value" data={funnelRows} nameKey="stage" isAnimationActive>
-                    <LabelList
-                      position="right"
-                      fill="#17181c"
-                      stroke="none"
-                      dataKey="stage"
-                      fontSize={12}
-                    />
-                  </Funnel>
-                </FunnelChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <Empty label={labels.noData} />
-          )}
-        </section>
-
-        <section className="rounded-card border-line bg-surface border p-5">
-          <h2 className="text-xl">{labels.sources}</h2>
-          {sourceRows.length ? (
-            <div className="mt-4 h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={sourceRows} margin={{ top: 8, right: 12, left: -18, bottom: 0 }}>
-                  <CartesianGrid stroke="#e7e2dc" vertical={false} />
-                  <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
+                <AreaChart data={trend} margin={{ top: 8, right: 10, left: -22, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="quotesFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={ORANGE} stopOpacity={0.28} />
+                      <stop offset="95%" stopColor={ORANGE} stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid stroke="#ebe7e0" vertical={false} />
+                  <XAxis dataKey="date" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
                   <YAxis allowDecimals={false} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
                   <Tooltip contentStyle={tooltipStyle()} />
                   <Legend />
-                  <Bar dataKey="leads" name={labels.leads} fill="#c2410c" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="won" name={labels.won} fill="#0f766e" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <Empty label={labels.noData} />
-          )}
-        </section>
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-3">
-        <section className="rounded-card border-line bg-surface border p-5 xl:col-span-2">
-          <h2 className="text-xl">{labels.landingPages}</h2>
-          {landingRows.length ? (
-            <div className="mt-4 h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={landingRows}
-                  layout="vertical"
-                  margin={{ top: 8, right: 18, left: 80, bottom: 0 }}
-                >
-                  <CartesianGrid stroke="#e7e2dc" horizontal={false} />
-                  <XAxis type="number" allowDecimals={false} tickLine={false} axisLine={false} />
-                  <YAxis
-                    type="category"
-                    dataKey="label"
-                    tickLine={false}
-                    axisLine={false}
-                    width={120}
-                    tick={{ fontSize: 11 }}
+                  <Area
+                    type="monotone"
+                    dataKey="quotes"
+                    name={labels.quotes}
+                    stroke={ORANGE}
+                    fill="url(#quotesFill)"
+                    strokeWidth={2}
                   />
-                  <Tooltip contentStyle={tooltipStyle()} />
-                  <Bar dataKey="leads" name={labels.leads} fill="#c2410c" radius={[0, 4, 4, 0]} />
-                </BarChart>
+                  <Area
+                    type="monotone"
+                    dataKey="won"
+                    name={labels.won}
+                    stroke={GREEN}
+                    fill="transparent"
+                    strokeWidth={2}
+                  />
+                </AreaChart>
               </ResponsiveContainer>
             </div>
           ) : (
-            <Empty label={labels.noData} />
+            <div className="mt-4">
+              <EmptyState title={labels.noData} />
+            </div>
           )}
         </section>
 
-        <section className="rounded-card border-line bg-surface border p-5">
-          <h2 className="text-xl">{labels.googleAds}</h2>
-          {gclidRows.length ? (
-            <div className="mt-4 h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={gclidRows} dataKey="leads" nameKey="label" innerRadius={58} outerRadius={92}>
-                    {gclidRows.map((_, index) => (
-                      <Cell key={index} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip contentStyle={tooltipStyle()} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <Empty label={labels.noData} />
-          )}
-        </section>
+        <SourceSummary rows={topRows(bySource, 5)} labels={labels} />
       </div>
 
-      <section className="rounded-card border-line bg-surface border p-5">
-        <h2 className="text-xl">{labels.projectsCities}</h2>
-        <div className="mt-4 grid gap-6 xl:grid-cols-2">
-          <RankedBars title={labels.projects} rows={projectRows} noData={labels.noData} />
-          <RankedBars title={labels.cities} rows={cityRows} noData={labels.noData} />
-        </div>
-      </section>
+      <div className="grid gap-5 xl:grid-cols-12">
+        <FunnelCard rows={funnel} labels={labels} />
+        <StatusBreakdown rows={byStatus} labels={labels} />
+      </div>
+
+      <div className="grid gap-5 xl:grid-cols-2">
+        <RankingCard title={labels.projects} rows={topRows(byProject)} labels={labels} />
+        <RankingCard title={labels.cities} rows={topRows(byCity)} labels={labels} />
+      </div>
+
+      <LandingPageReport rows={topRows(byLandingPage, 8)} labels={labels} />
+      <GoogleAdsCard rows={gclidSplit} labels={labels} />
     </div>
   );
 }
 
-function RankedBars({ title, rows, noData }: { title: string; rows: ChartRow[]; noData: string }) {
+function SourceSummary({ rows, labels }: { rows: GroupRow[]; labels: Props['labels'] }) {
   return (
-    <div>
-      <h3 className="text-ink-muted text-sm font-bold tracking-wide uppercase">{title}</h3>
-      {rows.length ? (
-        <div className="mt-3 space-y-3">
-          {rows.map((row, index) => {
-            const max = Math.max(...rows.map((item) => item.leads), 1);
-            return (
-              <div key={row.label}>
-                <div className="flex items-center justify-between gap-3 text-sm">
-                  <span className="font-medium">{row.label}</span>
-                  <span className="text-ink-muted tabular-nums">{row.leads}</span>
-                </div>
-                <div className="bg-surface-sunken mt-1 h-2 rounded-full">
-                  <div
-                    className="h-2 rounded-full"
-                    style={{
-                      width: `${Math.max(6, (row.leads / max) * 100)}%`,
-                      backgroundColor: COLORS[index % COLORS.length],
-                    }}
-                  />
-                </div>
+    <section className="rounded-card border-line bg-surface border p-5 xl:col-span-4">
+      <h2 className="text-lg font-bold">{labels.source}</h2>
+      <div className="mt-4">
+        {rows.length ? (
+          <RankedRows rows={rows} labels={labels} showWinRate />
+        ) : (
+          <EmptyState title={labels.noData} />
+        )}
+      </div>
+    </section>
+  );
+}
+
+function FunnelCard({ rows, labels }: { rows: FunnelRow[]; labels: Props['labels'] }) {
+  const total = rows[0]?.count ?? 0;
+  return (
+    <section className="rounded-card border-line bg-surface border p-5 xl:col-span-7">
+      <h2 className="text-lg font-bold">{labels.funnel}</h2>
+      <div className="mt-4 space-y-3">
+        {total > 0 ? (
+          rows.map((row, index) => (
+            <div key={row.stage}>
+              <div className="flex items-center justify-between gap-4 text-sm">
+                <span className="font-medium">{row.stage}</span>
+                <span className="text-ink-muted tabular-nums">
+                  {row.count} · {pct(row.rateFromSubmitted)}
+                </span>
               </div>
-            );
-          })}
+              <div className="mt-1 h-2 rounded-full" style={{ backgroundColor: TRACK }}>
+                <div
+                  className="h-2 rounded-full"
+                  style={{
+                    width: `${Math.max(row.count ? 4 : 0, row.rateFromSubmitted * 100)}%`,
+                    backgroundColor: [ORANGE, SLATE, BLUE, GREEN][index] ?? SLATE,
+                  }}
+                />
+              </div>
+            </div>
+          ))
+        ) : (
+          <EmptyState title={labels.notEnoughActivity} />
+        )}
+      </div>
+    </section>
+  );
+}
+
+function StatusBreakdown({ rows, labels }: { rows: GroupRow[]; labels: Props['labels'] }) {
+  const total = rows.reduce((sum, row) => sum + row.leads, 0);
+  const colors: Record<string, string> = {
+    NEW: ORANGE,
+    CONTACTED: SLATE,
+    QUALIFIED: BLUE,
+    QUOTING: BLUE,
+    OFFER_SENT: BLUE,
+    WON: GREEN,
+    LOST: RED,
+    INVALID: GRAY,
+  };
+
+  return (
+    <section className="rounded-card border-line bg-surface border p-5 xl:col-span-5">
+      <h2 className="text-lg font-bold">{labels.status}</h2>
+      {total ? (
+        <div className="mt-4 space-y-3">
+          <div className="flex h-3 overflow-hidden rounded-full" style={{ backgroundColor: TRACK }}>
+            {rows.map((row) => (
+              <div
+                key={row.label}
+                style={{
+                  width: `${(row.leads / total) * 100}%`,
+                  backgroundColor: colors[row.label] ?? GRAY,
+                }}
+              />
+            ))}
+          </div>
+          <div className="space-y-2">
+            {rows.map((row) => (
+              <div key={row.label} className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-2">
+                  <span
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: colors[row.label] ?? GRAY }}
+                  />
+                  {row.label}
+                </span>
+                <span className="text-ink-muted tabular-nums">{row.leads}</span>
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
-        <Empty label={noData} />
+        <div className="mt-4">
+          <EmptyState title={labels.noData} />
+        </div>
       )}
+    </section>
+  );
+}
+
+function RankingCard({ title, rows, labels }: { title: string; rows: GroupRow[]; labels: Props['labels'] }) {
+  return (
+    <section className="rounded-card border-line bg-surface border p-5">
+      <h2 className="text-lg font-bold">{title}</h2>
+      <div className="mt-4">
+        {rows.length ? <RankedRows rows={rows} labels={labels} /> : <EmptyState title={labels.noData} />}
+      </div>
+    </section>
+  );
+}
+
+function LandingPageReport({ rows, labels }: { rows: GroupRow[]; labels: Props['labels'] }) {
+  return (
+    <section className="rounded-card border-line bg-surface border p-5">
+      <h2 className="text-lg font-bold">{labels.landingPages}</h2>
+      {rows.length ? (
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full min-w-[48rem] text-sm">
+            <thead className="text-ink-muted text-left">
+              <tr>
+                <th className="py-2 pr-4 font-semibold">{labels.landingPages}</th>
+                <th className="px-4 py-2 text-right font-semibold">{labels.quotes}</th>
+                <th className="px-4 py-2 text-right font-semibold">{labels.won}</th>
+                <th className="px-4 py-2 text-right font-semibold">{labels.winRate}</th>
+                <th className="py-2 pl-4 text-right font-semibold">{labels.volume}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-line divide-y">
+              {rows.map((row) => (
+                <tr key={row.label}>
+                  <td className="max-w-[28rem] py-3 pr-4">
+                    {row.label.startsWith('/') ? (
+                      <Link
+                        href={row.label}
+                        target="_blank"
+                        className="text-accent hover:underline"
+                        title={row.label}
+                      >
+                        {truncate(row.label, 58)}
+                      </Link>
+                    ) : (
+                      <span title={row.label}>{truncate(row.label, 58)}</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-right tabular-nums">{row.leads}</td>
+                  <td className="px-4 py-3 text-right tabular-nums">{row.won}</td>
+                  <td className="px-4 py-3 text-right tabular-nums">{pct(row.won / Math.max(1, row.leads))}</td>
+                  <td className="py-3 pl-4 text-right tabular-nums">{row.volumeM3.toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="mt-4">
+          <EmptyState title={labels.noData} />
+        </div>
+      )}
+    </section>
+  );
+}
+
+function GoogleAdsCard({ rows, labels }: { rows: GroupRow[]; labels: Props['labels'] }) {
+  const attributed = rows.find((row) => row.label === 'Google Ads click identified')?.leads ?? 0;
+  const total = rows.reduce((sum, row) => sum + row.leads, 0);
+  const share = total ? attributed / total : 0;
+
+  return (
+    <section className="rounded-card border-line bg-surface border p-5">
+      <div className="grid gap-5 md:grid-cols-[18rem_1fr] md:items-center">
+        <div>
+          <h2 className="text-lg font-bold">{labels.googleAds}</h2>
+          <p className="text-ink-muted mt-1 text-sm">{labels.googleAdsHelp}</p>
+        </div>
+        <div>
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="text-3xl font-extrabold tabular-nums">
+                {attributed} <span className="text-ink-muted text-base font-semibold">{labels.ofLeads} {total}</span>
+              </p>
+              <p className="text-ink-muted mt-1 text-sm">
+                {attributed ? labels.attributed : labels.googleAdsEmpty}
+              </p>
+            </div>
+            <p className="text-2xl font-extrabold tabular-nums">{pct(share)}</p>
+          </div>
+          <div className="mt-3 h-3 rounded-full" style={{ backgroundColor: TRACK }}>
+            <div
+              className="h-3 rounded-full"
+              style={{ width: `${share * 100}%`, backgroundColor: attributed ? GREEN : GRAY }}
+            />
+          </div>
+          <p className="text-ink-muted mt-2 text-xs">{labels.unattributed}: {Math.max(0, total - attributed)}</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function RankedRows({
+  rows,
+  labels,
+  showWinRate = false,
+}: {
+  rows: GroupRow[];
+  labels: Props['labels'];
+  showWinRate?: boolean;
+}) {
+  const max = Math.max(...rows.map((row) => row.leads), 1);
+  return (
+    <div className="space-y-3">
+      {rows.map((row) => (
+        <div key={row.label}>
+          <div className="flex items-center justify-between gap-4 text-sm">
+            <span className="truncate font-medium" title={row.label}>{truncate(row.label, 34)}</span>
+            <span className="text-ink-muted whitespace-nowrap tabular-nums">
+              {row.leads} {labels.quotes}
+              {row.won ? ` · ${row.won} ${labels.won}` : ''}
+              {showWinRate ? ` · ${pct(row.won / Math.max(1, row.leads))}` : ''}
+            </span>
+          </div>
+          <div className="mt-1 h-2 rounded-full" style={{ backgroundColor: TRACK }}>
+            <div
+              className="h-2 rounded-full"
+              style={{
+                width: `${Math.max(6, (row.leads / max) * 100)}%`,
+                backgroundColor: ORANGE,
+              }}
+            />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
