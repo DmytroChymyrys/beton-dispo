@@ -11,7 +11,7 @@ CREATE TABLE "google_ads_daily_performance" (
 	"customer_id" varchar(32) NOT NULL,
 	"report_date" date NOT NULL,
 	"granularity" "google_ads_granularity" DEFAULT 'CAMPAIGN' NOT NULL,
-	"performance_key" text GENERATED ALWAYS AS (customer_id || ':' || report_date::text || ':' || granularity || ':' || campaign_id || ':' || coalesce(ad_group_id, 'campaign')) STORED NOT NULL,
+	"performance_key" text NOT NULL,
 	"campaign_id" varchar(32) NOT NULL,
 	"campaign_name" varchar(255) NOT NULL,
 	"campaign_status" varchar(40),

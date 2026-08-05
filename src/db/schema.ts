@@ -304,11 +304,7 @@ export const googleAdsDailyPerformance = pgTable(
     customerId: varchar('customer_id', { length: 32 }).notNull(),
     reportDate: date('report_date').notNull(),
     granularity: googleAdsGranularityEnum('granularity').notNull().default('CAMPAIGN'),
-    performanceKey: text('performance_key')
-      .notNull()
-      .generatedAlwaysAs(
-        sql`customer_id || ':' || report_date::text || ':' || granularity || ':' || campaign_id || ':' || coalesce(ad_group_id, 'campaign')`,
-      ),
+    performanceKey: text('performance_key').notNull(),
     campaignId: varchar('campaign_id', { length: 32 }).notNull(),
     campaignName: varchar('campaign_name', { length: 255 }).notNull(),
     campaignStatus: varchar('campaign_status', { length: 40 }),

@@ -39,11 +39,7 @@
           "name": "performance_key",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "generated": {
-            "as": "customer_id || ':' || report_date::text || ':' || granularity || ':' || campaign_id || ':' || coalesce(ad_group_id, 'campaign')",
-            "type": "stored"
-          }
+          "notNull": true
         },
         "campaign_id": {
           "name": "campaign_id",

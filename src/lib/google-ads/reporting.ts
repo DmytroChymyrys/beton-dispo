@@ -47,6 +47,16 @@ function reportingQuery(startDate: string, endDate: string, granularity: GoogleA
   `;
 }
 
+function performanceKey(row: GoogleAdsPerformanceRow): string {
+  return [
+    row.customerId,
+    row.date,
+    row.granularity,
+    row.campaignId,
+    row.adGroupId ?? 'campaign',
+  ].join(':');
+}
+
 async function upsertPerformanceRows(rows: GoogleAdsPerformanceRow[]): Promise<number> {
   const db = await getDb();
   let upserted = 0;
@@ -59,6 +69,7 @@ async function upsertPerformanceRows(rows: GoogleAdsPerformanceRow[]): Promise<n
         customerId: row.customerId,
         reportDate: row.date,
         granularity: row.granularity,
+        performanceKey: performanceKey(row),
         campaignId: row.campaignId,
         campaignName: row.campaignName,
         campaignStatus: row.campaignStatus,
