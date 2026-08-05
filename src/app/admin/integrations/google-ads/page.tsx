@@ -41,6 +41,9 @@ export default async function GoogleAdsIntegrationPage() {
           <StatusLine label="Currency" value={connection.currencyCode ?? '—'} />
           <StatusLine label="Timezone" value={connection.timeZone ?? '—'} />
           {connection.errorCode ? <StatusLine label="Error" value={connection.errorCode} /> : null}
+          {connection.errorMessage ? (
+            <p className="text-ink-muted mt-2 text-xs leading-relaxed">{connection.errorMessage}</p>
+          ) : null}
           <form action={testGoogleAdsConnectionAction} className="mt-4">
             <Button>Test connection</Button>
           </form>
@@ -58,6 +61,11 @@ export default async function GoogleAdsIntegrationPage() {
               <StatusLine label="Rows" value={String(dashboard.lastSync.rowsUpserted)} />
               {dashboard.lastSync.errorCode ? (
                 <StatusLine label="Error" value={dashboard.lastSync.errorCode} />
+              ) : null}
+              {dashboard.lastSync.sanitizedError ? (
+                <p className="text-ink-muted mt-2 text-xs leading-relaxed">
+                  {dashboard.lastSync.sanitizedError}
+                </p>
               ) : null}
             </>
           ) : (

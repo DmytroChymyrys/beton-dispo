@@ -33,6 +33,7 @@ export async function testGoogleAdsConnectionAction(): Promise<void> {
     connected: result.connected,
     customerId: result.customerId,
     errorCode: result.errorCode,
+    errorMessage: result.errorMessage,
   });
   revalidatePath('/admin/integrations/google-ads');
 }
@@ -66,6 +67,7 @@ export async function syncGoogleAdsAction(formData: FormData): Promise<void> {
     status: summary.status,
     rowsUpserted: summary.rowsUpserted,
     errorCode: summary.errorCode,
+    errorMessage: summary.sanitizedError,
   });
   revalidatePath('/admin/analytics');
   revalidatePath('/admin/integrations/google-ads');

@@ -1,12 +1,14 @@
 import 'server-only';
 
 import { getGoogleAdsConfigOrThrow, getGoogleAdsPublicConfig } from './config';
-import { GoogleAdsApiError, sanitizeGoogleAdsError } from './errors';
+import { GoogleAdsApiError, googleAdsApiErrorFromBody, sanitizeGoogleAdsError } from './errors';
 import type { GoogleAdsConnectionResult, GoogleAdsPrivateConfig } from './types';
 
 type GoogleAdsSearchStreamChunk = {
   results?: unknown[];
 };
+
+type GoogleAdsErrorBody = Parameters<typeof googleAdsApiErrorFromBody>[0];
 
 async function refreshAccessToken(config: GoogleAdsPrivateConfig): Promise<string> {
   const response = await fetch('https://oauth2.googleapis.com/token', {
@@ -51,12 +53,15 @@ export async function googleAdsSearchStream(query: string): Promise<{
     },
   );
 
-  const body = (await response.json().catch(() => null)) as GoogleAdsSearchStreamChunk[] | { error?: { status?: string; message?: string } } | null;
+  const body = (await response.json().catch(() => null)) as
+    | GoogleAdsSearchStreamChunk[]
+    | GoogleAdsErrorBody
+    | null;
   if (!response.ok) {
-    const error = !Array.isArray(body) ? body?.error : undefined;
-    throw new GoogleAdsApiError(
-      error?.status ?? `http_${response.status}`,
-      error?.message ?? 'Google Ads API request failed.',
+    throw googleAdsApiErrorFromBody(
+      Array.isArray(body) ? null : body,
+      `http_${response.status}`,
+      'Google Ads API request failed.',
     );
   }
 
@@ -79,6 +84,7 @@ export async function testGoogleAdsConnection(): Promise<GoogleAdsConnectionResu
       timeZone: null,
       offlineUploadMode: publicConfig.offlineUploadMode,
       errorCode: 'not_configured',
+      errorMessage: 'Google Ads integration is not configured.',
     };
   }
 
@@ -112,6 +118,7 @@ export async function testGoogleAdsConnection(): Promise<GoogleAdsConnectionResu
       timeZone: row?.customer?.timeZone ?? null,
       offlineUploadMode: publicConfig.offlineUploadMode,
       errorCode: null,
+      errorMessage: null,
     };
   } catch (error) {
     const safe = sanitizeGoogleAdsError(error);
@@ -124,6 +131,7 @@ export async function testGoogleAdsConnection(): Promise<GoogleAdsConnectionResu
       timeZone: null,
       offlineUploadMode: publicConfig.offlineUploadMode,
       errorCode: safe.code,
+      errorMessage: safe.message,
     };
   }
 }
@@ -155,13 +163,14 @@ export async function googleAdsUploadClickConversions(
     },
   );
   const body = (await response.json().catch(() => null)) as
-    | { requestId?: string; partialFailureError?: unknown; error?: { status?: string; message?: string } }
+    | ({ requestId?: string; partialFailureError?: unknown } & NonNullable<GoogleAdsErrorBody>)
     | null;
 
   if (!response.ok) {
-    throw new GoogleAdsApiError(
-      body?.error?.status ?? `http_${response.status}`,
-      body?.error?.message ?? 'Google Ads conversion upload failed.',
+    throw googleAdsApiErrorFromBody(
+      body,
+      `http_${response.status}`,
+      'Google Ads conversion upload failed.',
     );
   }
 

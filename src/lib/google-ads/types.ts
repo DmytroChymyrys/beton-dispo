@@ -38,6 +38,7 @@ export type GoogleAdsConnectionResult = {
   timeZone: string | null;
   offlineUploadMode: GoogleAdsOfflineUploadMode;
   errorCode: string | null;
+  errorMessage: string | null;
 };
 
 export type GoogleAdsPerformanceRow = {

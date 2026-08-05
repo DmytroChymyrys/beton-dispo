@@ -944,6 +944,7 @@ export type GoogleAdsIntegrationDashboard = {
     rowsReceived: number;
     rowsUpserted: number;
     errorCode: string | null;
+    sanitizedError: string | null;
   } | null;
   queue: { status: string; count: number }[];
   recentFailures: {
@@ -970,6 +971,7 @@ export async function getGoogleAdsIntegrationDashboard(): Promise<GoogleAdsInteg
         rowsReceived: googleAdsSyncRuns.rowsReceived,
         rowsUpserted: googleAdsSyncRuns.rowsUpserted,
         errorCode: googleAdsSyncRuns.errorCode,
+        sanitizedError: googleAdsSyncRuns.sanitizedError,
       })
       .from(googleAdsSyncRuns)
       .orderBy(desc(googleAdsSyncRuns.startedAt))
