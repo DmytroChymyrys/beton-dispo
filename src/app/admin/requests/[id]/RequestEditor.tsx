@@ -20,12 +20,22 @@ export function RequestEditor({
   status,
   internalNotes,
   lostReason,
+  estimatedJobValueCad,
+  finalJobValueCad,
+  betondispoRevenueCad,
+  supplierSelected,
+  serviceDate,
   locale,
 }: {
   id: string;
   status: QuoteStatus;
   internalNotes: string;
   lostReason: string;
+  estimatedJobValueCad: string;
+  finalJobValueCad: string;
+  betondispoRevenueCad: string;
+  supplierSelected: string;
+  serviceDate: string;
   locale: AdminLocale;
 }) {
   const [state, formAction] = useActionState<UpdateState, FormData>(updateRequestAction, {});
@@ -95,6 +105,86 @@ export function RequestEditor({
       ) : (
         <input type="hidden" name="lostReason" value="" />
       )}
+
+      <div className="border-line space-y-4 border-t pt-4">
+        <h3 className="text-ink text-sm font-bold">{t.businessOutcome}</h3>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <label htmlFor="estimatedJobValueCad" className="block text-sm font-semibold">
+              {t.estimatedJobValue}
+            </label>
+            <input
+              id="estimatedJobValueCad"
+              name="estimatedJobValueCad"
+              type="number"
+              inputMode="decimal"
+              min="0"
+              step="0.01"
+              defaultValue={estimatedJobValueCad}
+              placeholder="0.00"
+              className={controlClass}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="finalJobValueCad" className="block text-sm font-semibold">
+              {t.finalJobValue}
+            </label>
+            <input
+              id="finalJobValueCad"
+              name="finalJobValueCad"
+              type="number"
+              inputMode="decimal"
+              min="0"
+              step="0.01"
+              defaultValue={finalJobValueCad}
+              placeholder="0.00"
+              className={controlClass}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="betondispoRevenueCad" className="block text-sm font-semibold">
+              {t.betondispoRevenue}
+            </label>
+            <input
+              id="betondispoRevenueCad"
+              name="betondispoRevenueCad"
+              type="number"
+              inputMode="decimal"
+              min="0"
+              step="0.01"
+              defaultValue={betondispoRevenueCad}
+              placeholder="0.00"
+              className={controlClass}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="serviceDate" className="block text-sm font-semibold">
+              {t.serviceDate}
+            </label>
+            <input
+              id="serviceDate"
+              name="serviceDate"
+              type="date"
+              defaultValue={serviceDate}
+              className={controlClass}
+            />
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <label htmlFor="supplierSelected" className="block text-sm font-semibold">
+            {t.supplierSelected}
+          </label>
+          <input
+            id="supplierSelected"
+            name="supplierSelected"
+            defaultValue={supplierSelected}
+            maxLength={160}
+            placeholder={t.supplierPlaceholder}
+            className={controlClass}
+          />
+        </div>
+        <p className="text-ink-muted text-xs">{t.businessOutcomeHelp}</p>
+      </div>
 
       <div className="space-y-1.5">
         <label htmlFor="internalNotes" className="block text-sm font-semibold">

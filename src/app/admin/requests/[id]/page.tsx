@@ -125,6 +125,20 @@ export default async function AdminRequestPage({ params }: { params: Promise<{ i
             </Card>
           ) : null}
 
+          <Card title={t.businessOutcome}>
+            <Row
+              label={t.estimatedJobValue}
+              value={moneyOrDash(request.estimatedJobValueCad, locale)}
+            />
+            <Row label={t.finalJobValue} value={moneyOrDash(request.finalJobValueCad, locale)} />
+            <Row
+              label={t.betondispoRevenue}
+              value={moneyOrDash(request.betondispoRevenueCad, locale)}
+            />
+            <Row label={t.supplierSelected} value={request.supplierSelected || '—'} />
+            <Row label={t.serviceDate} value={request.serviceDate || '—'} />
+          </Card>
+
           <Card title={t.acquisition}>
             <Subhead>{t.firstTouch}</Subhead>
             <Row label={t.source} value={request.firstTouchSource || '—'} />
@@ -199,11 +213,24 @@ export default async function AdminRequestPage({ params }: { params: Promise<{ i
           status={request.status}
           internalNotes={request.internalNotes ?? ''}
           lostReason={request.lostReason ?? ''}
+          estimatedJobValueCad={request.estimatedJobValueCad ?? ''}
+          finalJobValueCad={request.finalJobValueCad ?? ''}
+          betondispoRevenueCad={request.betondispoRevenueCad ?? ''}
+          supplierSelected={request.supplierSelected ?? ''}
+          serviceDate={request.serviceDate ?? ''}
           locale={locale}
         />
       </div>
     </div>
   );
+}
+
+function moneyOrDash(value: string | null, locale: Awaited<ReturnType<typeof getAdminLocale>>): string {
+  if (!value) return '—';
+  return new Intl.NumberFormat(locale === 'fr' ? 'fr-CA' : 'en-CA', {
+    style: 'currency',
+    currency: 'CAD',
+  }).format(Number(value));
 }
 
 function Timeline({

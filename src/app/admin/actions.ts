@@ -50,9 +50,26 @@ const updateSchema = z.object({
   status: z.enum(QUOTE_STATUSES),
   internalNotes: z.string().trim().max(5000),
   lostReason: z.string().trim().max(500),
+  estimatedJobValueCad: z.string().trim().max(16),
+  finalJobValueCad: z.string().trim().max(16),
+  betondispoRevenueCad: z.string().trim().max(16),
+  supplierSelected: z.string().trim().max(160),
+  serviceDate: z.string().trim().max(10),
 });
 
 export type UpdateState = { error?: 'validation' | 'server'; savedAt?: number };
+
+function moneyOrNull(value: string): string | null {
+  if (!value) return null;
+  const normalized = value.replace(',', '.');
+  if (!/^\d{1,10}(\.\d{1,2})?$/.test(normalized)) return 'invalid';
+  return Number(normalized).toFixed(2);
+}
+
+function dateOrNull(value: string): string | null {
+  if (!value) return null;
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : 'invalid';
+}
 
 export async function updateRequestAction(
   _prev: UpdateState,
@@ -67,13 +84,41 @@ export async function updateRequestAction(
     status: formData.get('status'),
     internalNotes: formData.get('internalNotes') ?? '',
     lostReason: formData.get('lostReason') ?? '',
+    estimatedJobValueCad: formData.get('estimatedJobValueCad') ?? '',
+    finalJobValueCad: formData.get('finalJobValueCad') ?? '',
+    betondispoRevenueCad: formData.get('betondispoRevenueCad') ?? '',
+    supplierSelected: formData.get('supplierSelected') ?? '',
+    serviceDate: formData.get('serviceDate') ?? '',
   });
 
   if (!parsed.success) {
     return { error: 'validation' };
   }
 
-  const { id, status, internalNotes, lostReason } = parsed.data;
+  const {
+    id,
+    status,
+    internalNotes,
+    lostReason,
+    estimatedJobValueCad,
+    finalJobValueCad,
+    betondispoRevenueCad,
+    supplierSelected,
+    serviceDate,
+  } = parsed.data;
+  const estimatedValue = moneyOrNull(estimatedJobValueCad);
+  const finalValue = moneyOrNull(finalJobValueCad);
+  const revenueValue = moneyOrNull(betondispoRevenueCad);
+  const serviceDateValue = dateOrNull(serviceDate);
+
+  if (
+    estimatedValue === 'invalid' ||
+    finalValue === 'invalid' ||
+    revenueValue === 'invalid' ||
+    serviceDateValue === 'invalid'
+  ) {
+    return { error: 'validation' };
+  }
 
   try {
     await updateQuoteRequest(id, {
@@ -81,6 +126,11 @@ export async function updateRequestAction(
       internalNotes: internalNotes || null,
       // A lost reason only means anything on a lost request.
       lostReason: status === 'LOST' ? lostReason || null : null,
+      estimatedJobValueCad: estimatedValue,
+      finalJobValueCad: finalValue,
+      betondispoRevenueCad: revenueValue,
+      supplierSelected: supplierSelected || null,
+      serviceDate: serviceDateValue,
     });
   } catch (error) {
     console.error('[admin] update failed', {

@@ -138,7 +138,16 @@ export async function listQuoteRequestEvents(id: string): Promise<QuoteRequestEv
 
 export async function updateQuoteRequest(
   id: string,
-  patch: { status?: QuoteStatus; internalNotes?: string | null; lostReason?: string | null },
+  patch: {
+    status?: QuoteStatus;
+    internalNotes?: string | null;
+    lostReason?: string | null;
+    estimatedJobValueCad?: string | null;
+    finalJobValueCad?: string | null;
+    betondispoRevenueCad?: string | null;
+    supplierSelected?: string | null;
+    serviceDate?: string | null;
+  },
 ): Promise<void> {
   const db = await getDb();
   const [before] = await db.select().from(quoteRequests).where(eq(quoteRequests.id, id)).limit(1);
@@ -205,6 +214,28 @@ export async function updateQuoteRequest(
       type: patch.internalNotes ? 'internal_notes_updated' : 'internal_notes_cleared',
       message: patch.internalNotes ? 'Internal notes updated.' : 'Internal notes cleared.',
       metadata: { hasInternalNotes: Boolean(patch.internalNotes) },
+    });
+  }
+
+  if (
+    (patch.estimatedJobValueCad !== undefined &&
+      patch.estimatedJobValueCad !== before.estimatedJobValueCad) ||
+    (patch.finalJobValueCad !== undefined && patch.finalJobValueCad !== before.finalJobValueCad) ||
+    (patch.betondispoRevenueCad !== undefined &&
+      patch.betondispoRevenueCad !== before.betondispoRevenueCad) ||
+    (patch.supplierSelected !== undefined && patch.supplierSelected !== before.supplierSelected) ||
+    (patch.serviceDate !== undefined && patch.serviceDate !== before.serviceDate)
+  ) {
+    events.push({
+      type: 'business_outcome_updated',
+      message: 'Business outcome fields updated.',
+      metadata: {
+        hasEstimatedValue: Boolean(patch.estimatedJobValueCad),
+        hasFinalValue: Boolean(patch.finalJobValueCad),
+        hasRevenue: Boolean(patch.betondispoRevenueCad),
+        hasSupplier: Boolean(patch.supplierSelected),
+        hasServiceDate: Boolean(patch.serviceDate),
+      },
     });
   }
 

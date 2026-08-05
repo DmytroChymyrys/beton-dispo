@@ -174,6 +174,8 @@ export const quoteRequests = pgTable(
     estimatedJobValueCad: numeric('estimated_job_value_cad', { precision: 12, scale: 2 }),
     finalJobValueCad: numeric('final_job_value_cad', { precision: 12, scale: 2 }),
     betondispoRevenueCad: numeric('betondispo_revenue_cad', { precision: 12, scale: 2 }),
+    supplierSelected: varchar('supplier_selected', { length: 160 }),
+    serviceDate: date('service_date'),
     internalNotes: text('internal_notes'),
     lostReason: text('lost_reason'),
   },

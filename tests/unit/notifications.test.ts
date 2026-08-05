@@ -71,6 +71,8 @@ const baseRequest: QuoteRequest = {
   estimatedJobValueCad: null,
   finalJobValueCad: null,
   betondispoRevenueCad: null,
+  supplierSelected: null,
+  serviceDate: null,
   internalNotes: null,
   lostReason: null,
 };
