@@ -9,6 +9,7 @@ import { StickyMobileCta } from '@/components/StickyMobileCta';
 import { AttributionTracker } from '@/components/AttributionTracker';
 import { AnalyticsInteractions } from '@/components/AnalyticsInteractions';
 import { GoogleAnalytics } from '@/components/GoogleAnalytics';
+import { MicrosoftClarity } from '@/components/MicrosoftClarity';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { JsonLd } from '@/components/JsonLd';
@@ -85,6 +86,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         {/* Cookieless, aggregate-only. No customer detail is ever sent here —
             see the allowed event properties in `src/lib/analytics.ts`. */}
         <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
+        <MicrosoftClarity projectId={process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID ?? 'xyag8ub8mx'} />
         <Analytics />
         <SpeedInsights />
       </body>
