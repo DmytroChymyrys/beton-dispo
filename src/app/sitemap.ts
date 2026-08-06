@@ -22,6 +22,11 @@ import {
   serviceProjectPath,
   projectArchiveMonths,
 } from '@/lib/project-intelligence-pages';
+import {
+  dynamicSeoLandingKeys,
+  seoLandingAlternates,
+  seoLandingPath,
+} from '@/lib/seo-landing-pages';
 import { getProjectPublicationReadiness } from '@/server/project-intelligence';
 
 /** Relative crawl priority. The home page and the quote form are the goal. */
@@ -101,6 +106,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   );
 
+  const seoLandingSitemapPages = dynamicSeoLandingKeys.flatMap((key) =>
+    locales.map((locale) => ({
+      url: absoluteUrl(seoLandingPath(key, locale)),
+      lastModified,
+      changeFrequency: 'monthly' as const,
+      priority: 0.78,
+      alternates: { languages: seoLandingAlternates(key) },
+    })),
+  );
+
   const projectCityPages = citySlugs.flatMap((city) => {
     if (!readiness.cityProjects[city].indexable) return [];
 
@@ -159,6 +174,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticPages,
     ...cityPages,
     ...localCalculatorPages,
+    ...seoLandingSitemapPages,
     ...projectCityPages,
     ...projectServicePages,
     ...projectCityServicePages,

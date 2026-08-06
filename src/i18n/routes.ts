@@ -67,6 +67,29 @@ const archiveMonthSlugPairs = [
   { fr: 'decembre', en: 'december' },
 ] as const satisfies readonly Record<Locale, string>[];
 
+const seoLandingSlugPairs = [
+  { fr: 'beton-garage', en: 'garage-concrete-slab' },
+  { fr: 'beton-fondation', en: 'foundation-concrete' },
+  { fr: 'beton-entree', en: 'concrete-driveway' },
+  { fr: 'beton-piscine', en: 'concrete-pool-deck' },
+  { fr: 'beton-sous-sol', en: 'basement-concrete-slab' },
+  { fr: 'semelle-beton', en: 'concrete-footings' },
+  { fr: 'trottoir-beton', en: 'concrete-sidewalk' },
+  { fr: 'beton-commercial', en: 'commercial-concrete' },
+  { fr: 'prix-beton-m3', en: 'concrete-price-per-cubic-metre' },
+  { fr: 'prix-livraison-beton', en: 'concrete-delivery-cost' },
+  { fr: 'prix-dalle-beton', en: 'concrete-slab-cost' },
+  { fr: 'prix-beton-garage', en: 'garage-slab-cost' },
+  { fr: 'prix-pompe-beton', en: 'concrete-pump-cost' },
+  { fr: 'beton-mobile', en: 'mobile-concrete' },
+  { fr: 'pompage-beton', en: 'concrete-pumping' },
+  { fr: 'beton-pret-emploi-vs-beton-en-sac', en: 'ready-mix-vs-bagged-concrete' },
+  { fr: 'pompe-beton-ou-brouette', en: 'concrete-pump-vs-wheelbarrow' },
+  { fr: 'fibre-ou-armature-dalle-beton', en: 'fiber-vs-rebar-concrete-slab' },
+  { fr: 'dalle-10-cm-ou-15-cm', en: '4-inch-vs-6-inch-concrete-slab' },
+  { fr: 'beton-vs-asphalte', en: 'concrete-vs-asphalt' },
+] as const satisfies readonly Record<Locale, string>[];
+
 /** Absolute, locale-prefixed path for a route key. Always starts with `/`. */
 export function pathFor(key: RouteKey, locale: Locale): string {
   const slug = routes[key][locale];
@@ -102,6 +125,12 @@ export function switchLocalePath(pathname: string, target: Locale): string {
   // City pages: /fr/beton/brossard -> /en/concrete/brossard
   if (first === locationSegment[from]) {
     return [`/${target}`, locationSegment[target], ...tail].join('/');
+  }
+
+  const seoLandingPair = seoLandingSlugPairs.find((pair) => pair[from] === first);
+  if (seoLandingPair) {
+    const translated = `/${target}/${seoLandingPair[target]}`;
+    return tail.length ? [translated, ...tail].join('/') : translated;
   }
 
   // Project intelligence pages: /fr/projets/brossard -> /en/projects/brossard

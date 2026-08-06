@@ -29,6 +29,7 @@
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "drizzle-orm": "^0.45.2",
+    "lucide-react": "^1.29.0",
     "next": "16.2.12",
     "pg": "^8.22.0",
     "react": "19.2.0",

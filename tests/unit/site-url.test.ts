@@ -46,6 +46,10 @@ describe('siteConfig canonical URL', () => {
 
     const xmlValues = JSON.stringify(await sitemap());
     expect(xmlValues).toContain('https://betondispo.ca/fr');
+    expect(xmlValues).toContain('https://betondispo.ca/fr/beton-garage');
+    expect(xmlValues).toContain('https://betondispo.ca/en/garage-concrete-slab');
+    expect(xmlValues).toContain('https://betondispo.ca/fr/prix-beton-m3');
+    expect(xmlValues).toContain('https://betondispo.ca/en/concrete-pumping');
     expect(xmlValues).not.toContain('betondispo.com');
     expect(xmlValues).not.toContain('vercel.app');
     expect(xmlValues).not.toContain('localhost:3987');

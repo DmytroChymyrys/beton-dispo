@@ -35,6 +35,18 @@ export function ServicesPage({ locale }: { locale: Locale }) {
       key: 'delivery',
       title: locale === 'fr' ? 'Livraison et chantier' : 'Delivery and job site',
     },
+    {
+      key: 'commercial',
+      title: locale === 'fr' ? 'Commercial' : 'Commercial',
+    },
+    {
+      key: 'pricing',
+      title: locale === 'fr' ? 'Prix et planification' : 'Pricing and planning',
+    },
+    {
+      key: 'decision',
+      title: locale === 'fr' ? 'Guides de décision' : 'Decision guides',
+    },
     { key: 'calculator', title: locale === 'fr' ? 'Estimation' : 'Estimating' },
     { key: 'support', title: locale === 'fr' ? 'Ressources' : 'Resources' },
   ];
@@ -96,7 +108,11 @@ export function ServicesPage({ locale }: { locale: Locale }) {
           {categories.map((category) => {
             const items = serviceNetwork.filter((item) => item.category === category.key);
             return (
-              <section key={category.key} className="rounded-card border-line bg-ground border p-6">
+              <section
+                key={category.key}
+                id={`service-category-${category.key}`}
+                className="rounded-card border-line bg-ground scroll-mt-24 border p-6"
+              >
                 <h2 className="text-2xl">{category.title}</h2>
                 <ul className="mt-4 space-y-3">
                   {items.map((item) => (

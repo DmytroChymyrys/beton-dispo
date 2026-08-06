@@ -90,6 +90,12 @@ describe('switchLocalePath', () => {
     ['/fr/politique-confidentialite', 'en', '/en/privacy'],
     ['/fr/services', 'en', '/en/services'],
     ['/fr/faq', 'en', '/en/faq'],
+    ['/fr/beton-garage', 'en', '/en/garage-concrete-slab'],
+    ['/en/foundation-concrete', 'fr', '/fr/beton-fondation'],
+    ['/fr/prix-beton-m3', 'en', '/en/concrete-price-per-cubic-metre'],
+    ['/en/concrete-pumping', 'fr', '/fr/pompage-beton'],
+    ['/fr/beton-pret-emploi-vs-beton-en-sac', 'en', '/en/ready-mix-vs-bagged-concrete'],
+    ['/fr/dalle-10-cm-ou-15-cm', 'en', '/en/4-inch-vs-6-inch-concrete-slab'],
   ] as const)('maps %s to %s -> %s', (pathname, target, expected) => {
     expect(switchLocalePath(pathname, target)).toBe(expected);
   });
