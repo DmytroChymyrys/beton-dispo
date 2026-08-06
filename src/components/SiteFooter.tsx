@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { Locale } from '@/i18n/config';
 import { pathFor, type RouteKey } from '@/i18n/routes';
 import { Logo } from '@/components/Logo';
+import { footerIntelligenceLinks } from '@/components/ProjectIntelligenceLinks';
 import type { Dictionary } from '@/i18n/dictionaries';
 import { siteConfig } from '@/lib/site';
 import { popularServices, serviceHref } from '@/lib/service-network';
@@ -9,9 +10,10 @@ import { popularServices, serviceHref } from '@/lib/service-network';
 const NAV_KEYS: RouteKey[] = ['calculator', 'howItWorks', 'services', 'faq', 'quote'];
 const LEGAL_KEYS: RouteKey[] = ['privacy', 'terms'];
 
-export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+export async function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const { footer, meta, nav, common } = dict;
   const year = new Date().getFullYear();
+  const marketLinks = await footerIntelligenceLinks(locale);
 
   const navLabels: Record<RouteKey, string> = {
     home: meta.siteName,
@@ -19,6 +21,8 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
     concreteSlab: locale === 'fr' ? 'Dalle de béton' : 'Concrete slab',
     concreteDelivery: locale === 'fr' ? 'Livraison de béton' : 'Concrete delivery',
     concretePatio: locale === 'fr' ? 'Béton pour terrasse' : 'Concrete patio',
+    recentProjects: locale === 'fr' ? 'Projets récents' : 'Recent projects',
+    marketIndex: locale === 'fr' ? 'Indice du marché' : 'Market index',
     howItWorks: nav.links.howItWorks,
     services: nav.links.services,
     faq: nav.links.faq,
@@ -29,7 +33,7 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
 
   return (
     <footer className="bg-steel mt-auto text-white/75">
-      <div className="container-page grid gap-10 py-14 md:grid-cols-5 md:gap-8">
+      <div className="container-page grid gap-10 py-14 md:grid-cols-6 md:gap-8">
         <div className="md:col-span-2">
           <Logo locale={locale} lead={meta.logoLead} accent={meta.logoAccent} onDark />
           <p className="mt-4 max-w-sm text-sm leading-relaxed">{footer.tagline}</p>
@@ -73,6 +77,26 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
             ))}
           </ul>
         </nav>
+
+        {marketLinks.length ? (
+          <nav aria-label={locale === 'fr' ? 'Données du marché' : 'Market data'}>
+            <h2 className="font-display text-sm font-bold tracking-wider text-white uppercase">
+              {locale === 'fr' ? 'Données du marché' : 'Market data'}
+            </h2>
+            <ul className="mt-4 space-y-1">
+              {marketLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="inline-flex min-h-10 items-center text-sm hover:text-white"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ) : null}
 
         <div>
           <h2 className="font-display text-sm font-bold tracking-wider text-white uppercase">

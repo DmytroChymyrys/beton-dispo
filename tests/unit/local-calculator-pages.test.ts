@@ -63,7 +63,7 @@ describe('local calculator pages', () => {
   it('adds approved local calculator routes to the sitemap', async () => {
     await loadLocalCalculatorPages();
     const { default: sitemap } = await import('@/app/sitemap');
-    const values = JSON.stringify(sitemap());
+    const values = JSON.stringify(await sitemap());
 
     expect(values).toContain('https://betondispo.ca/fr/calculateur-beton/montreal');
     expect(values).toContain('https://betondispo.ca/en/concrete-calculator/beloeil');

@@ -7,6 +7,7 @@ import { Section, SectionTitle } from '@/components/ui/Section';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { JsonLd } from '@/components/JsonLd';
 import { Photo } from '@/components/Photo';
+import { ProjectIntelligenceLinks } from '@/components/ProjectIntelligenceLinks';
 import { servicesSchema } from '@/lib/structured-data';
 import type { PhotoKey } from '@/lib/images';
 import { serviceHref, serviceNetwork, type ServiceCategory } from '@/lib/service-network';
@@ -117,6 +118,9 @@ export function ServicesPage({ locale }: { locale: Locale }) {
       </Section>
 
       <Section tone="surface" labelledBy="services-cta">
+        <div className="mb-10">
+          <ProjectIntelligenceLinks locale={locale} />
+        </div>
         <div className="rounded-card border-line bg-ground grid items-center gap-6 border p-8 md:grid-cols-[1.2fr_auto] md:p-12">
           <div>
             <SectionTitle id="services-cta" className="mt-0">

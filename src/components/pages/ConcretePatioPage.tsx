@@ -5,6 +5,7 @@ import { pathFor } from '@/i18n/routes';
 import { JsonLd } from '@/components/JsonLd';
 import { PatioSlabCalculator } from '@/components/pages/PatioSlabCalculator';
 import { Photo } from '@/components/Photo';
+import { ProjectIntelligenceLinks } from '@/components/ProjectIntelligenceLinks';
 import { RelatedServices, ServicePrevNext } from '@/components/RelatedServices';
 import { Breadcrumbs, type BreadcrumbItem } from '@/components/ui/Breadcrumbs';
 import { Section, SectionTitle } from '@/components/ui/Section';
@@ -521,6 +522,7 @@ export function ConcretePatioPage({ locale }: { locale: Locale }) {
 
       <Section tone="ground" className="py-12 md:py-16">
         <div className="space-y-6">
+          <ProjectIntelligenceLinks locale={locale} currentService="patio" />
           <RelatedServices locale={locale} current="concretePatio" />
           <ServicePrevNext locale={locale} current="concretePatio" />
         </div>

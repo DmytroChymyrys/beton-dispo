@@ -5,12 +5,18 @@ import { pathFor } from '@/i18n/routes';
 import { buttonClass } from '@/components/ui/button-styles';
 import { Breadcrumbs, type BreadcrumbItem } from '@/components/ui/Breadcrumbs';
 import { JsonLd } from '@/components/JsonLd';
+import { ProjectIntelligenceLinks } from '@/components/ProjectIntelligenceLinks';
 import { RelatedServices, ServicePrevNext } from '@/components/RelatedServices';
 import { Section, SectionTitle } from '@/components/ui/Section';
 import { absoluteUrl } from '@/lib/site';
 import { breadcrumbSchema, cityServiceSchema } from '@/lib/structured-data';
 import { relatedSeoLinks, seoLandingPages, type SeoLandingKey } from '@/lib/seo-landing-pages';
 import type { ServiceNetworkKey } from '@/lib/service-network';
+import type { ServiceProjectKey } from '@/lib/project-intelligence-pages';
+
+const PROJECT_INTELLIGENCE_BY_PAGE: Partial<Record<SeoLandingKey, ServiceProjectKey>> = {
+  concreteSlab: 'slab',
+};
 
 export function SeoLandingPage({ locale, pageKey }: { locale: Locale; pageKey: SeoLandingKey }) {
   const dict = getDictionary(locale);
@@ -118,6 +124,10 @@ export function SeoLandingPage({ locale, pageKey }: { locale: Locale; pageKey: S
 
       <Section tone="surface" className="py-12 md:py-16">
         <div className="space-y-6">
+          <ProjectIntelligenceLinks
+            locale={locale}
+            currentService={PROJECT_INTELLIGENCE_BY_PAGE[pageKey]}
+          />
           <RelatedServices locale={locale} current={serviceKey} />
           <ServicePrevNext locale={locale} current={serviceKey} />
         </div>

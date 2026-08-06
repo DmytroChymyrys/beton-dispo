@@ -19,6 +19,8 @@ export const routes = {
   concreteSlab: { fr: 'dalle-beton', en: 'concrete-slab' },
   concreteDelivery: { fr: 'livraison-beton', en: 'concrete-delivery' },
   concretePatio: { fr: 'beton-terrasse-exterieure', en: 'concrete-patio' },
+  recentProjects: { fr: 'projets-recents', en: 'recent-projects' },
+  marketIndex: { fr: 'indice-marche-beton', en: 'concrete-market-index' },
   howItWorks: { fr: 'comment-ca-marche', en: 'how-it-works' },
   services: { fr: 'services', en: 'services' },
   faq: { fr: 'faq', en: 'faq' },
@@ -36,6 +38,34 @@ export const locationSegment = {
   fr: 'beton',
   en: 'concrete',
 } as const satisfies Record<Locale, string>;
+
+export const projectSegment = {
+  fr: 'projets',
+  en: 'projects',
+} as const satisfies Record<Locale, string>;
+
+const serviceProjectSlugPairs = [
+  { fr: 'garage', en: 'garage-slab' },
+  { fr: 'fondation', en: 'foundation' },
+  { fr: 'patio', en: 'patio' },
+  { fr: 'dalle-beton', en: 'concrete-slab' },
+  { fr: 'commercial', en: 'commercial' },
+] as const satisfies readonly Record<Locale, string>[];
+
+const archiveMonthSlugPairs = [
+  { fr: 'janvier', en: 'january' },
+  { fr: 'fevrier', en: 'february' },
+  { fr: 'mars', en: 'march' },
+  { fr: 'avril', en: 'april' },
+  { fr: 'mai', en: 'may' },
+  { fr: 'juin', en: 'june' },
+  { fr: 'juillet', en: 'july' },
+  { fr: 'aout', en: 'august' },
+  { fr: 'septembre', en: 'september' },
+  { fr: 'octobre', en: 'october' },
+  { fr: 'novembre', en: 'november' },
+  { fr: 'decembre', en: 'december' },
+] as const satisfies readonly Record<Locale, string>[];
 
 /** Absolute, locale-prefixed path for a route key. Always starts with `/`. */
 export function pathFor(key: RouteKey, locale: Locale): string {
@@ -72,6 +102,44 @@ export function switchLocalePath(pathname: string, target: Locale): string {
   // City pages: /fr/beton/brossard -> /en/concrete/brossard
   if (first === locationSegment[from]) {
     return [`/${target}`, locationSegment[target], ...tail].join('/');
+  }
+
+  // Project intelligence pages: /fr/projets/brossard -> /en/projects/brossard
+  if (first === projectSegment[from]) {
+    const [projectSlug, ...projectTail] = tail;
+    const [archiveMonth, ...archiveTail] = projectTail;
+    const archivePair = archiveMonth
+      ? archiveMonthSlugPairs.find((pair) => pair[from] === archiveMonth)
+      : null;
+    if (projectSlug && archivePair && /^\d{4}$/.test(projectSlug)) {
+      return [
+        `/${target}`,
+        projectSegment[target],
+        projectSlug,
+        archivePair[target],
+        ...archiveTail,
+      ].join('/');
+    }
+    const servicePair = projectSlug
+      ? serviceProjectSlugPairs.find((pair) => pair[from] === projectSlug)
+      : null;
+    if (servicePair) {
+      const translated = `/${target}/${projectSegment[target]}/${servicePair[target]}`;
+      return projectTail.length ? [translated, ...projectTail].join('/') : translated;
+    }
+    return [`/${target}`, projectSegment[target], ...tail].join('/');
+  }
+
+  // City + service intelligence pages:
+  // /fr/brossard/dalle-beton -> /en/brossard/concrete-slab
+  if (tail.length > 0) {
+    const [serviceSlug, ...serviceTail] = tail;
+    const servicePair = serviceSlug
+      ? serviceProjectSlugPairs.find((pair) => pair[from] === serviceSlug)
+      : null;
+    if (servicePair) {
+      return [`/${target}`, first, servicePair[target], ...serviceTail].join('/');
+    }
   }
 
   const key = routeKeyForSlug(first, from);

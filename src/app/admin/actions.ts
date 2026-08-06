@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { createSession, destroySession, requireAdmin, verifyCredentials } from '@/server/auth';
 import { updateQuoteRequest } from '@/server/admin-queries';
+import { revalidateProjectIntelligencePublication } from '@/server/project-intelligence-revalidation';
 import { QUOTE_STATUSES } from '@/lib/quote-options';
 
 export type SignInState = {
@@ -121,7 +122,7 @@ export async function updateRequestAction(
   }
 
   try {
-    await updateQuoteRequest(id, {
+    const updated = await updateQuoteRequest(id, {
       status,
       internalNotes: internalNotes || null,
       // A lost reason only means anything on a lost request.
@@ -132,6 +133,13 @@ export async function updateRequestAction(
       supplierSelected: supplierSelected || null,
       serviceDate: serviceDateValue,
     });
+    if (updated) {
+      revalidateProjectIntelligencePublication({
+        city: updated.city,
+        projectType: updated.projectType,
+        createdAt: updated.createdAt,
+      });
+    }
   } catch (error) {
     console.error('[admin] update failed', {
       id,

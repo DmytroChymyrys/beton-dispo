@@ -29,6 +29,14 @@
         "title": "Béton pour terrasse extérieure | Livraison et soumission",
         "description": "Calculez la quantité de béton nécessaire pour votre terrasse extérieure et obtenez une soumission pour la livraison de béton dans le Grand Montréal."
       },
+      "recentProjects": {
+        "title": "Projets de béton récents au Québec | BétonDispo",
+        "description": "Consultez des projets de béton récents et anonymisés au Québec, avec volumes demandés, villes, types de projets et tendances du marché."
+      },
+      "marketIndex": {
+        "title": "Indice du marché du béton au Québec | BétonDispo",
+        "description": "Indice public et anonymisé de la demande de béton: volume moyen, ville la plus active, type de projet dominant et tendances récentes."
+      },
       "howItWorks": {
         "title": "Comment ça marche | BétonDispo",
         "description": "Trois étapes simples : décrivez votre projet, nous vérifions la disponibilité, vous recevez une option adaptée à votre chantier."

@@ -4,6 +4,7 @@ import { checkRateLimit } from '@/lib/rate-limit';
 import { createQuoteRequest } from '@/server/quote-service';
 import { sendQuoteNotification } from '@/server/notifications';
 import { hashForAbuse, verifyQuoteFormToken } from '@/server/abuse';
+import { revalidateProjectIntelligencePublication } from '@/server/project-intelligence-revalidation';
 
 export const runtime = 'nodejs';
 
@@ -141,6 +142,12 @@ export async function POST(request: Request) {
     });
     return json({ ok: true, publicId: result.row.publicId });
   }
+
+  revalidateProjectIntelligencePublication({
+    city: result.row.city,
+    projectType: result.row.projectType,
+    createdAt: result.row.createdAt,
+  });
 
   await sendQuoteNotification(result.row);
 

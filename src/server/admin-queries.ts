@@ -154,10 +154,10 @@ export async function updateQuoteRequest(
     supplierSelected?: string | null;
     serviceDate?: string | null;
   },
-): Promise<void> {
+): Promise<QuoteRequest | null> {
   const db = await getDb();
   const [before] = await db.select().from(quoteRequests).where(eq(quoteRequests.id, id)).limit(1);
-  if (!before) return;
+  if (!before) return null;
 
   const now = new Date();
   const timestampPatch: Partial<NewQuoteRequest> = {};
@@ -205,7 +205,7 @@ export async function updateQuoteRequest(
     .where(eq(quoteRequests.id, id))
     .returning();
 
-  if (!after) return;
+  if (!after) return null;
 
   const events: {
     type: string;
@@ -293,7 +293,7 @@ export async function updateQuoteRequest(
     });
   }
 
-  if (events.length === 0) return;
+  if (events.length === 0) return after;
 
   try {
     await db.insert(quoteRequestEvents).values(
@@ -312,6 +312,8 @@ export async function updateQuoteRequest(
       error: error instanceof Error ? error.message : String(error),
     });
   }
+
+  return after;
 }
 
 /** Distinct cities, for the filter dropdown. */

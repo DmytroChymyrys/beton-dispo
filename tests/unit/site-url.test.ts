@@ -44,7 +44,7 @@ describe('siteConfig canonical URL', () => {
     vi.resetModules();
     const { default: sitemap } = await import('@/app/sitemap');
 
-    const xmlValues = JSON.stringify(sitemap());
+    const xmlValues = JSON.stringify(await sitemap());
     expect(xmlValues).toContain('https://betondispo.ca/fr');
     expect(xmlValues).not.toContain('betondispo.com');
     expect(xmlValues).not.toContain('vercel.app');

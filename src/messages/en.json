@@ -29,6 +29,14 @@
         "title": "Concrete for an Outdoor Patio | Delivery and Quote",
         "description": "Calculate how much concrete your outdoor patio needs and request a concrete delivery quote in Greater Montreal."
       },
+      "recentProjects": {
+        "title": "Recent Concrete Projects in Québec | BétonDispo",
+        "description": "Explore anonymized recent concrete projects in Québec, including requested volumes, cities, project types and market trends."
+      },
+      "marketIndex": {
+        "title": "Québec Concrete Market Index | BétonDispo",
+        "description": "A public anonymized concrete demand index: average volume, most active city, top project type and recent market trends."
+      },
       "howItWorks": {
         "title": "How it works | BétonDispo",
         "description": "Three simple steps: tell us about your project, we check availability, you receive an option suited to your site."

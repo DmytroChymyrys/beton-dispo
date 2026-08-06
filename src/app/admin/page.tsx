@@ -1,6 +1,10 @@
 import Link from 'next/link';
 import { requireAdmin } from '@/server/auth';
 import { getDashboardStats, listQuoteRequests } from '@/server/admin-queries';
+import {
+  getProjectPublicationReadiness,
+  PROJECT_PUBLICATION_THRESHOLDS,
+} from '@/server/project-intelligence';
 import { StatusBadge } from '@/app/admin/StatusBadge';
 import {
   adminOptions,
@@ -21,10 +25,12 @@ export default async function AdminDashboardPage() {
   const t = adminText[locale].dashboardPage;
   const options = adminOptions(locale);
 
-  const [stats, latest] = await Promise.all([
+  const [stats, latest, projectReadiness] = await Promise.all([
     getDashboardStats(),
     listQuoteRequests({ sort: 'createdAt', direction: 'desc', page: 1 }),
+    getProjectPublicationReadiness(),
   ]);
+  const readinessCopy = projectReadinessCopy(locale);
 
   return (
     <div className="container-page space-y-8">
@@ -69,6 +75,50 @@ export default async function AdminDashboardPage() {
                 ))}
               </ul>
             )}
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="project-intelligence-readiness">
+        <div className="rounded-card border-line bg-surface border p-5">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-accent font-display text-xs font-bold tracking-[0.12em] uppercase">
+                {readinessCopy.eyebrow}
+              </p>
+              <h2 id="project-intelligence-readiness" className="mt-1 text-xl">
+                {readinessCopy.title}
+              </h2>
+              <p className="text-ink-muted mt-1 max-w-2xl text-sm">{readinessCopy.description}</p>
+            </div>
+            <span
+              className={`rounded-full px-3 py-1 text-sm font-semibold ${
+                projectReadiness.recentProjects.indexable
+                  ? 'bg-green-50 text-green-700'
+                  : 'bg-surface-sunken text-ink-muted'
+              }`}
+            >
+              {projectReadiness.recentProjects.indexable
+                ? readinessCopy.publishable
+                : readinessCopy.notPublishable}
+            </span>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            <ReadinessMetric
+              label={readinessCopy.recentProjects}
+              value={projectReadiness.recentProjects.totalProjects}
+              target={PROJECT_PUBLICATION_THRESHOLDS.recentProjects}
+            />
+            <ReadinessMetric
+              label={readinessCopy.cities}
+              value={projectReadiness.recentProjects.uniqueCities}
+              target={PROJECT_PUBLICATION_THRESHOLDS.recentCities}
+            />
+            <ReadinessMetric
+              label={readinessCopy.projectTypes}
+              value={projectReadiness.recentProjects.uniqueProjectTypes}
+              target={PROJECT_PUBLICATION_THRESHOLDS.recentProjectTypes}
+            />
           </div>
         </div>
       </section>
@@ -122,6 +172,53 @@ export default async function AdminDashboardPage() {
       </section>
     </div>
   );
+}
+
+function ReadinessMetric({ label, value, target }: { label: string; value: number; target: number }) {
+  const capped = Math.min(value, target);
+  const percent = target > 0 ? (capped / target) * 100 : 0;
+
+  return (
+    <div className="bg-surface-sunken rounded-lg p-4">
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="text-ink-muted text-sm font-semibold">{label}</p>
+        <p className="font-display text-xl font-extrabold tabular-nums">
+          {value} / {target}
+        </p>
+      </div>
+      <div className="bg-line mt-3 h-2 overflow-hidden rounded-full">
+        <div className="bg-accent h-full rounded-full" style={{ width: `${percent}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function projectReadinessCopy(locale: 'fr' | 'en') {
+  if (locale === 'en') {
+    return {
+      eyebrow: 'Publication gate',
+      title: 'Project Intelligence readiness',
+      description:
+        'Shows when the public recent-projects pages have enough anonymized data to become indexable.',
+      recentProjects: 'Recent projects',
+      cities: 'Cities represented',
+      projectTypes: 'Project types',
+      publishable: 'Publishable',
+      notPublishable: 'Not publishable',
+    };
+  }
+
+  return {
+    eyebrow: 'Publication',
+    title: 'Préparation Project Intelligence',
+    description:
+      'Indique quand les pages publiques de projets récents ont assez de données anonymisées pour être indexées.',
+    recentProjects: 'Projets récents',
+    cities: 'Villes représentées',
+    projectTypes: 'Types de projet',
+    publishable: 'Publiable',
+    notPublishable: 'Non publiable',
+  };
 }
 
 function Stat({
