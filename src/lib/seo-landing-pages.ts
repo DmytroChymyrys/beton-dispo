@@ -28,6 +28,8 @@ export type SeoLandingKey =
   | 'slabThickness'
   | 'concreteVsAsphalt';
 
+type SeoLandingGroup = 'project' | 'price' | 'service' | 'comparison';
+
 type SeoLandingCopy = {
   eyebrow: string;
   h1: string;
@@ -46,6 +48,7 @@ export type SeoLandingPage = {
   routeKey?: RouteKey;
   slugs: Record<Locale, string>;
   schemaType: 'project' | 'service';
+  group: SeoLandingGroup;
   popular?: boolean;
   copy: Record<Locale, SeoLandingCopy>;
 };
@@ -54,7 +57,7 @@ type LandingSeed = {
   key: SeoLandingKey;
   slugs: Record<Locale, string>;
   schemaType: 'project' | 'service';
-  group: 'project' | 'price' | 'service' | 'comparison';
+  group: SeoLandingGroup;
   popular?: boolean;
   routeKey?: RouteKey;
   fr: {
@@ -842,6 +845,7 @@ export const seoLandingPages = Object.fromEntries(
       routeKey: seed.routeKey,
       slugs: seed.slugs,
       schemaType: seed.schemaType,
+      group: seed.group,
       popular: seed.popular,
       copy: {
         fr: pageCopy(seed, 'fr'),
@@ -859,6 +863,15 @@ export const dynamicSeoLandingKeys = seoLandingKeys.filter(
 export function seoLandingPath(key: SeoLandingKey, locale: Locale): string {
   const page = seoLandingPages[key];
   return page.routeKey ? pathFor(page.routeKey, locale) : `/${locale}/${page.slugs[locale]}`;
+}
+
+export function seoLandingBreadcrumbGroupPath(key: SeoLandingKey, locale: Locale): string {
+  const group = seoLandingPages[key].group;
+  if (group === 'price') return `${pathFor('services', locale)}#service-category-pricing`;
+  if (group === 'comparison') return `${pathFor('services', locale)}#service-category-decision`;
+  if (group === 'service') return `${pathFor('services', locale)}#service-category-delivery`;
+
+  return `${pathFor('services', locale)}#service-category-residential`;
 }
 
 export function seoLandingAlternates(key: SeoLandingKey): Record<string, string> {

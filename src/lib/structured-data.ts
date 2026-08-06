@@ -75,7 +75,7 @@ export function faqSchema(locale: Locale) {
   };
 }
 
-export function breadcrumbSchema(items: { name: string; url?: string }[]) {
+export function breadcrumbSchema(items: { name: string; url: string }[]) {
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -83,7 +83,7 @@ export function breadcrumbSchema(items: { name: string; url?: string }[]) {
       '@type': 'ListItem',
       position: index + 1,
       name: item.name,
-      ...(item.url ? { item: item.url } : {}),
+      item: item.url.startsWith('http') ? item.url : absoluteUrl(item.url),
     })),
   };
 }

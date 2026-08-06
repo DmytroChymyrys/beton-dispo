@@ -96,7 +96,7 @@ export function ProjectIntelligencePage({
 
   const breadcrumbLdItems = breadcrumbs.map((item, index) => ({
     name: item.label,
-    url: item.href ? absoluteUrl(item.href) : index === breadcrumbs.length - 1 ? absoluteUrl(currentPath) : undefined,
+    url: item.href ? absoluteUrl(item.href) : index === breadcrumbs.length - 1 ? absoluteUrl(currentPath) : absoluteUrl(pathFor('recentProjects', locale)),
   }));
 
   return (

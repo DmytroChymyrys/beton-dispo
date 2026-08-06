@@ -12,6 +12,7 @@ import { absoluteUrl } from '@/lib/site';
 import { breadcrumbSchema, cityServiceSchema } from '@/lib/structured-data';
 import {
   relatedSeoLinks,
+  seoLandingBreadcrumbGroupPath,
   seoLandingPages,
   seoLandingPath,
   type SeoLandingKey,
@@ -40,6 +41,7 @@ export function SeoLandingPage({ locale, pageKey }: { locale: Locale; pageKey: S
     pageKey === 'concretePumping' ||
     pageKey === 'commercialConcrete';
   const homeLabel = locale === 'fr' ? 'Accueil' : 'Home';
+  const breadcrumbGroupUrl = absoluteUrl(seoLandingBreadcrumbGroupPath(pageKey, locale));
   const planning = planningGuide(locale, pageKey);
   const questions = peopleAlsoAsk(locale, pageKey);
   const breadcrumbs: BreadcrumbItem[] = [
@@ -53,7 +55,7 @@ export function SeoLandingPage({ locale, pageKey }: { locale: Locale; pageKey: S
       <JsonLd
         data={breadcrumbSchema([
           { name: homeLabel, url: absoluteUrl(pathFor('home', locale)) },
-          { name: copy.breadcrumbGroup },
+          { name: copy.breadcrumbGroup, url: breadcrumbGroupUrl },
           { name: copy.h1, url: pageUrl },
         ])}
       />

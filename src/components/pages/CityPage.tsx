@@ -24,7 +24,7 @@ export function CityPage({ locale, city }: { locale: Locale; city: CitySlug }) {
   ];
   const breadcrumbLdItems = [
     { name: homeLabel, url: absoluteUrl(pathFor('home', locale)) },
-    { name: cityRootLabel },
+    { name: cityRootLabel, url: absoluteUrl(pathFor('services', locale)) },
     { name: page.name, url: currentUrl },
   ];
 
