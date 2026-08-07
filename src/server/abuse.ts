@@ -28,6 +28,8 @@ export function issueQuoteFormToken(now: number = Date.now()) {
   };
 }
 
+export const issueSupplierApplicationFormToken = issueQuoteFormToken;
+
 export type FormTokenResult =
   { ok: true } | { ok: false; reason: 'invalid' | 'too_fast' | 'stale' };
 
@@ -66,6 +68,8 @@ export function verifyQuoteFormToken({
   if (age > MAX_FORM_AGE_MS) return { ok: false, reason: 'stale' };
   return { ok: true };
 }
+
+export const verifySupplierApplicationFormToken = verifyQuoteFormToken;
 
 export function hashForAbuse(value: string): string {
   return createHmac('sha256', secret()).update(value).digest('hex');

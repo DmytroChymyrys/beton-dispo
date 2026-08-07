@@ -13,6 +13,10 @@
         "title": "Request a quote | BétonDispo",
         "description": "Describe your project in a few minutes. We check available options for concrete delivery, mobile concrete or pumping across Greater Montréal."
       },
+      "partner": {
+        "title": "Become a BétonDispo Partner | Receive Concrete Requests",
+        "description": "Introduce your company to BétonDispo. Approved suppliers, operators and contractors may receive relevant concrete requests in their service area."
+      },
       "calculator": {
         "title": "Concrete Calculator | m³ Estimate | BétonDispo",
         "description": "Calculate the approximate concrete quantity required for a slab, footing, wall, column or tube. Get a cubic metre estimate and continue to a prefilled quote request."

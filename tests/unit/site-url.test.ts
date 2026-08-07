@@ -50,6 +50,8 @@ describe('siteConfig canonical URL', () => {
     expect(xmlValues).toContain('https://betondispo.ca/en/garage-concrete-slab');
     expect(xmlValues).toContain('https://betondispo.ca/fr/prix-beton-m3');
     expect(xmlValues).toContain('https://betondispo.ca/en/concrete-pumping');
+    expect(xmlValues).toContain('https://betondispo.ca/fr/devenir-partenaire');
+    expect(xmlValues).toContain('https://betondispo.ca/en/become-a-partner');
     expect(xmlValues).not.toContain('betondispo.com');
     expect(xmlValues).not.toContain('vercel.app');
     expect(xmlValues).not.toContain('localhost:3987');

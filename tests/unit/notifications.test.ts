@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import type { QuoteRequest } from '@/db/schema';
-import { notificationHtml, notificationSubject, notificationText } from '@/server/notifications';
+import type { QuoteRequest, SupplierApplication } from '@/db/schema';
+import {
+  notificationHtml,
+  notificationSubject,
+  notificationText,
+  supplierApplicationNotificationHtml,
+  supplierApplicationNotificationSubject,
+  supplierApplicationNotificationText,
+} from '@/server/notifications';
 
 const baseRequest: QuoteRequest = {
   id: '11111111-2222-3333-4444-555555555555',
@@ -157,5 +164,82 @@ describe('notificationHtml', () => {
     expect(notificationHtml(baseRequest)).toContain(
       'href="http://localhost:3987/admin/requests/11111111-2222-3333-4444-555555555555"',
     );
+  });
+});
+
+const baseSupplierApplication: SupplierApplication = {
+  id: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+  referenceNumber: 7,
+  publicId: 'BP-000007',
+  locale: 'fr',
+  status: 'NEW',
+  companyName: 'Béton <Partenaire>',
+  contactName: 'Sophie Gagnon',
+  email: 'sophie@example.com',
+  phone: '450-555-0199',
+  website: 'https://betonpartenaire.ca',
+  serviceAreaText: 'Brossard et Longueuil',
+  services: ['READY_MIX', 'PUMPING'],
+  message: 'Disponible "rapidement" & fin de semaine',
+  landingPage: '/fr/devenir-partenaire',
+  referrer: null,
+  gclid: 'gclid-123',
+  msclkid: null,
+  fbclid: null,
+  utmSource: 'google',
+  utmMedium: 'cpc',
+  utmCampaign: 'partenaires',
+  utmTerm: null,
+  utmContent: null,
+  firstTouchSource: 'google',
+  firstTouchMedium: 'cpc',
+  firstTouchCampaign: 'partenaires',
+  firstTouchTerm: null,
+  firstTouchContent: null,
+  firstTouchLandingPage: '/fr/devenir-partenaire',
+  firstTouchReferrer: null,
+  firstTouchTimestamp: new Date('2026-08-01T14:20:00Z'),
+  lastTouchSource: 'google',
+  lastTouchMedium: 'cpc',
+  lastTouchCampaign: 'partenaires',
+  lastTouchTerm: null,
+  lastTouchContent: null,
+  lastTouchLandingPage: '/fr/devenir-partenaire',
+  lastTouchReferrer: null,
+  lastTouchTimestamp: new Date('2026-08-01T14:25:00Z'),
+  submissionPage: '/fr/devenir-partenaire',
+  deviceCategory: 'desktop',
+  browserLanguage: 'fr-CA',
+  abuseStatus: 'clean',
+  sourceIpHash: 'hash',
+  duplicateFingerprint: 'fingerprint',
+  internalNotes: null,
+  firstContactedAt: null,
+  qualifiedAt: null,
+  approvedAt: null,
+  rejectedAt: null,
+  createdAt: new Date('2026-08-01T14:30:00Z'),
+  updatedAt: new Date('2026-08-01T14:30:00Z'),
+};
+
+describe('supplier application notifications', () => {
+  it('summarizes a partner application without writing into the quote workflow', () => {
+    expect(supplierApplicationNotificationSubject(baseSupplierApplication)).toBe(
+      'Nouvelle demande partenaire — Béton <Partenaire>',
+    );
+
+    const text = supplierApplicationNotificationText(baseSupplierApplication);
+    expect(text).toContain('BP-000007');
+    expect(text).toContain('Béton <Partenaire>');
+    expect(text).toContain('Livraison de béton prêt à l’emploi, Pompage de béton');
+    expect(text).toContain('/admin/suppliers/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');
+    expect(text).not.toContain('/admin/requests/');
+  });
+
+  it('escapes supplier-supplied text in the HTML notification', () => {
+    const html = supplierApplicationNotificationHtml(baseSupplierApplication);
+    expect(html).not.toContain('Béton <Partenaire>');
+    expect(html).toContain('Béton &lt;Partenaire&gt;');
+    expect(html).toContain('&quot;rapidement&quot; &amp; fin de semaine');
   });
 });

@@ -60,6 +60,8 @@ describe('route registry', () => {
     ['concreteDelivery', 'en', '/en/concrete-delivery'],
     ['howItWorks', 'fr', '/fr/comment-ca-marche'],
     ['howItWorks', 'en', '/en/how-it-works'],
+    ['partner', 'fr', '/fr/devenir-partenaire'],
+    ['partner', 'en', '/en/become-a-partner'],
     ['privacy', 'fr', '/fr/politique-confidentialite'],
     ['terms', 'en', '/en/terms'],
   ] as const)('builds %s/%s as %s', (key, locale, expected) => {
@@ -87,6 +89,8 @@ describe('switchLocalePath', () => {
     ['/en/concrete-delivery', 'fr', '/fr/livraison-beton'],
     ['/fr/comment-ca-marche', 'en', '/en/how-it-works'],
     ['/en/how-it-works', 'fr', '/fr/comment-ca-marche'],
+    ['/fr/devenir-partenaire', 'en', '/en/become-a-partner'],
+    ['/en/become-a-partner', 'fr', '/fr/devenir-partenaire'],
     ['/fr/politique-confidentialite', 'en', '/en/privacy'],
     ['/fr/services', 'en', '/en/services'],
     ['/fr/faq', 'en', '/en/faq'],

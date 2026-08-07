@@ -91,6 +91,14 @@ export const supplierStatusEnum = pgEnum('supplier_status', [
   'INACTIVE',
 ]);
 
+export const supplierApplicationStatusEnum = pgEnum('supplier_application_status', [
+  'NEW',
+  'CONTACTED',
+  'QUALIFIED',
+  'APPROVED',
+  'REJECTED',
+]);
+
 export const supplierAssignmentStatusEnum = pgEnum('supplier_assignment_status', [
   'PENDING',
   'VIEWED',
@@ -220,7 +228,9 @@ export const quoteRequests = pgTable(
     sourceIpHash: varchar('source_ip_hash', { length: 64 }),
     duplicateFingerprint: varchar('duplicate_fingerprint', { length: 64 }),
     status: quoteStatusEnum('status').notNull().default('NEW'),
-    qualificationStatus: qualificationStatusEnum('qualification_status').notNull().default('PENDING'),
+    qualificationStatus: qualificationStatusEnum('qualification_status')
+      .notNull()
+      .default('PENDING'),
     qualifiedAt: timestamp('qualified_at', { withTimezone: true }),
     qualifiedBy: varchar('qualified_by', { length: 120 }),
     qualificationReason: text('qualification_reason'),
@@ -316,10 +326,10 @@ export const googleAdsDailyPerformance = pgTable(
     clicks: integer('clicks').notNull().default(0),
     costMicros: bigint('cost_micros', { mode: 'number' }).notNull().default(0),
     conversions: numeric('conversions', { precision: 12, scale: 4 }).notNull().default('0'),
-    conversionValue: numeric('conversion_value', { precision: 14, scale: 4 }).notNull().default('0'),
-    allConversions: numeric('all_conversions', { precision: 12, scale: 4 })
+    conversionValue: numeric('conversion_value', { precision: 14, scale: 4 })
       .notNull()
       .default('0'),
+    allConversions: numeric('all_conversions', { precision: 12, scale: 4 }).notNull().default('0'),
     allConversionValue: numeric('all_conversion_value', { precision: 14, scale: 4 })
       .notNull()
       .default('0'),
@@ -378,7 +388,9 @@ export const googleAdsOfflineConversions = pgTable(
     wbraid: varchar('wbraid', { length: 256 }),
     orderId: varchar('order_id', { length: 80 }).notNull(),
     conversionDateTime: timestamp('conversion_date_time', { withTimezone: true }).notNull(),
-    conversionValue: numeric('conversion_value', { precision: 12, scale: 2 }).notNull().default('0'),
+    conversionValue: numeric('conversion_value', { precision: 12, scale: 2 })
+      .notNull()
+      .default('0'),
     currencyCode: varchar('currency_code', { length: 8 }).notNull().default('CAD'),
     valueStrategy: varchar('value_strategy', { length: 80 }).notNull().default('fixed'),
     consentAdUserData: adConsentEnum('consent_ad_user_data').notNull().default('UNKNOWN'),
@@ -416,6 +428,99 @@ export type GoogleAdsSyncRun = typeof googleAdsSyncRuns.$inferSelect;
 export type NewGoogleAdsSyncRun = typeof googleAdsSyncRuns.$inferInsert;
 export type GoogleAdsOfflineConversion = typeof googleAdsOfflineConversions.$inferSelect;
 export type NewGoogleAdsOfflineConversion = typeof googleAdsOfflineConversions.$inferInsert;
+
+/* -------------------------------------------------------------------------- */
+/* Supplier applications                                                       */
+/* -------------------------------------------------------------------------- */
+
+export const supplierApplicationReferenceSeq = pgSequence('supplier_application_reference_seq', {
+  startWith: 1,
+  increment: 1,
+});
+
+export const supplierApplications = pgTable(
+  'supplier_applications',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    referenceNumber: bigint('reference_number', { mode: 'number' })
+      .notNull()
+      .default(sql`nextval('supplier_application_reference_seq')`),
+    publicId: text('public_id')
+      .notNull()
+      .generatedAlwaysAs(sql`'BP-' || lpad(reference_number::text, 6, '0')`),
+    locale: localeEnum('locale').notNull().default('fr'),
+    status: supplierApplicationStatusEnum('status').notNull().default('NEW'),
+
+    companyName: varchar('company_name', { length: 160 }).notNull(),
+    contactName: varchar('contact_name', { length: 120 }).notNull(),
+    email: varchar('email', { length: 254 }).notNull(),
+    phone: varchar('phone', { length: 32 }).notNull(),
+    website: varchar('website', { length: 255 }),
+    serviceAreaText: varchar('service_area_text', { length: 500 }).notNull(),
+    services: jsonb('services')
+      .$type<string[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    message: text('message'),
+
+    landingPage: varchar('landing_page', { length: 512 }),
+    referrer: varchar('referrer', { length: 512 }),
+    gclid: varchar('gclid', { length: 256 }),
+    msclkid: varchar('msclkid', { length: 256 }),
+    fbclid: varchar('fbclid', { length: 256 }),
+    utmSource: varchar('utm_source', { length: 120 }),
+    utmMedium: varchar('utm_medium', { length: 120 }),
+    utmCampaign: varchar('utm_campaign', { length: 160 }),
+    utmTerm: varchar('utm_term', { length: 160 }),
+    utmContent: varchar('utm_content', { length: 160 }),
+    firstTouchSource: varchar('first_touch_source', { length: 120 }),
+    firstTouchMedium: varchar('first_touch_medium', { length: 120 }),
+    firstTouchCampaign: varchar('first_touch_campaign', { length: 160 }),
+    firstTouchTerm: varchar('first_touch_term', { length: 160 }),
+    firstTouchContent: varchar('first_touch_content', { length: 160 }),
+    firstTouchLandingPage: varchar('first_touch_landing_page', { length: 512 }),
+    firstTouchReferrer: varchar('first_touch_referrer', { length: 512 }),
+    firstTouchTimestamp: timestamp('first_touch_timestamp', { withTimezone: true }),
+    lastTouchSource: varchar('last_touch_source', { length: 120 }),
+    lastTouchMedium: varchar('last_touch_medium', { length: 120 }),
+    lastTouchCampaign: varchar('last_touch_campaign', { length: 160 }),
+    lastTouchTerm: varchar('last_touch_term', { length: 160 }),
+    lastTouchContent: varchar('last_touch_content', { length: 160 }),
+    lastTouchLandingPage: varchar('last_touch_landing_page', { length: 512 }),
+    lastTouchReferrer: varchar('last_touch_referrer', { length: 512 }),
+    lastTouchTimestamp: timestamp('last_touch_timestamp', { withTimezone: true }),
+    submissionPage: varchar('submission_page', { length: 512 }),
+    deviceCategory: varchar('device_category', { length: 16 }),
+    browserLanguage: varchar('browser_language', { length: 80 }),
+
+    abuseStatus: varchar('abuse_status', { length: 32 }).notNull().default('clean'),
+    sourceIpHash: varchar('source_ip_hash', { length: 64 }),
+    duplicateFingerprint: varchar('duplicate_fingerprint', { length: 64 }),
+    internalNotes: text('internal_notes'),
+    firstContactedAt: timestamp('first_contacted_at', { withTimezone: true }),
+    qualifiedAt: timestamp('qualified_at', { withTimezone: true }),
+    approvedAt: timestamp('approved_at', { withTimezone: true }),
+    rejectedAt: timestamp('rejected_at', { withTimezone: true }),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index('supplier_applications_created_at_idx').on(table.createdAt.desc()),
+    index('supplier_applications_status_idx').on(table.status),
+    index('supplier_applications_email_idx').on(table.email),
+    index('supplier_applications_company_idx').on(table.companyName),
+    index('supplier_applications_source_idx').on(table.firstTouchSource),
+    index('supplier_applications_duplicate_fingerprint_idx').on(table.duplicateFingerprint),
+    index('supplier_applications_source_ip_hash_idx').on(table.sourceIpHash),
+  ],
+);
+
+export type SupplierApplication = typeof supplierApplications.$inferSelect;
+export type NewSupplierApplication = typeof supplierApplications.$inferInsert;
 
 /* -------------------------------------------------------------------------- */
 /* Suppliers                                                                   */

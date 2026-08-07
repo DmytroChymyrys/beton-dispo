@@ -45,6 +45,7 @@ export async function SiteFooter({ locale, dict }: { locale: Locale; dict: Dicti
 
   const navLabels: Record<RouteKey, string> = {
     home: meta.siteName,
+    partner: locale === 'fr' ? 'Devenir partenaire' : 'Become a partner',
     calculator: nav.links.calculator,
     concreteSlab: locale === 'fr' ? 'Dalle de béton' : 'Concrete slab',
     concreteDelivery: locale === 'fr' ? 'Livraison de béton' : 'Concrete delivery',
@@ -71,9 +72,7 @@ export async function SiteFooter({ locale, dict }: { locale: Locale; dict: Dicti
         </div>
 
         <nav aria-label={footer.navTitle}>
-          <FooterSectionHeading icon={Compass}>
-            {footer.navTitle}
-          </FooterSectionHeading>
+          <FooterSectionHeading icon={Compass}>{footer.navTitle}</FooterSectionHeading>
           <ul className="mt-4 space-y-1">
             {NAV_KEYS.map((key) => (
               <li key={key}>
@@ -99,15 +98,19 @@ export async function SiteFooter({ locale, dict }: { locale: Locale; dict: Dicti
         />
 
         <div>
-          <FooterSectionHeading icon={Mail}>
-            {footer.contactTitle}
-          </FooterSectionHeading>
+          <FooterSectionHeading icon={Mail}>{footer.contactTitle}</FooterSectionHeading>
           <a
             href={`mailto:${footer.contactEmail}`}
             className="mt-3 inline-flex min-h-10 items-center text-sm hover:text-white"
           >
             {footer.contactEmail}
           </a>
+          <Link
+            href={pathFor('partner', locale)}
+            className="text-accent-bright mt-2 inline-flex min-h-9 items-center text-sm font-semibold hover:text-white"
+          >
+            {navLabels.partner}
+          </Link>
 
           <FooterSectionHeading icon={MapPin} className="mt-8">
             {footer.serviceAreaTitle}
@@ -115,9 +118,7 @@ export async function SiteFooter({ locale, dict }: { locale: Locale; dict: Dicti
           <p className="mt-3 max-w-xs text-sm">{footer.serviceArea}</p>
 
           <nav aria-label={footer.legalTitle} className="mt-8">
-            <FooterSectionHeading icon={ShieldCheck}>
-              {footer.legalTitle}
-            </FooterSectionHeading>
+            <FooterSectionHeading icon={ShieldCheck}>{footer.legalTitle}</FooterSectionHeading>
             <ul className="mt-4 space-y-1">
               {LEGAL_KEYS.map((key) => (
                 <li key={key}>
@@ -226,7 +227,9 @@ function FooterRecommendationSection({
         ))}
         {section.viewAll ? (
           <li>
-            <FooterViewAllLink href={section.viewAll.href}>{section.viewAll.label}</FooterViewAllLink>
+            <FooterViewAllLink href={section.viewAll.href}>
+              {section.viewAll.label}
+            </FooterViewAllLink>
           </li>
         ) : null}
       </ul>
@@ -249,37 +252,31 @@ function FooterSectionHeading({
 
   return (
     <Tag
-      className={`font-display group inline-flex items-center gap-2 text-sm font-bold tracking-wider text-white uppercase transition-colors hover:text-accent-bright ${className}`}
+      className={`font-display group hover:text-accent-bright inline-flex items-center gap-2 text-sm font-bold tracking-wider text-white uppercase transition-colors ${className}`}
     >
       <Icon
         aria-hidden="true"
         size={14}
         strokeWidth={1.5}
-        className="shrink-0 text-white/45 transition-colors group-hover:text-accent-bright"
+        className="group-hover:text-accent-bright shrink-0 text-white/45 transition-colors"
       />
       <span>{children}</span>
     </Tag>
   );
 }
 
-function FooterViewAllLink({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
+function FooterViewAllLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <Link
       href={href}
-      className="group inline-flex min-h-9 items-center gap-1.5 text-sm font-semibold text-white/85 transition-colors hover:text-accent-bright"
+      className="group hover:text-accent-bright inline-flex min-h-9 items-center gap-1.5 text-sm font-semibold text-white/85 transition-colors"
     >
       <span>{children}</span>
       <ArrowRight
         aria-hidden="true"
         size={14}
         strokeWidth={1.5}
-        className="shrink-0 text-white/45 transition-[color,transform] motion-safe:group-hover:translate-x-1 group-hover:text-accent-bright"
+        className="group-hover:text-accent-bright shrink-0 text-white/45 transition-[color,transform] motion-safe:group-hover:translate-x-1"
       />
     </Link>
   );

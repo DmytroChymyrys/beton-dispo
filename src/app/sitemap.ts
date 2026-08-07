@@ -38,6 +38,7 @@ import { getProjectPublicationReadiness } from '@/server/project-intelligence';
 const priorities: Record<RouteKey, number> = {
   home: 1,
   quote: 0.9,
+  partner: 0.68,
   calculator: 0.95,
   concreteSlab: 0.86,
   concreteDelivery: 0.86,

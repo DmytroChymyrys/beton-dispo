@@ -9,12 +9,15 @@ import {
   quoteRequestEvents,
   quoteRequests,
   supplierAssignments,
+  supplierApplications,
   suppliers,
   type NewQuoteRequest,
   type QuoteRequest,
   type QuoteRequestEvent,
+  type SupplierApplication,
 } from '@/db/schema';
 import { QUALIFIED_STATUSES, type CustomerType, type QuoteStatus } from '@/lib/quote-options';
+import type { SupplierApplicationStatus, SupplierServiceCode } from '@/lib/supplier-options';
 import { enqueueOfflineConversionForQuote } from '@/lib/google-ads/conversions';
 
 export const PAGE_SIZE = 50;
@@ -133,6 +136,153 @@ export async function getQuoteRequest(id: string): Promise<QuoteRequest | null> 
   return row ?? null;
 }
 
+export type SupplierApplicationFilters = {
+  status?: SupplierApplicationStatus;
+  service?: SupplierServiceCode;
+  query?: string;
+  source?: string;
+  createdFrom?: string;
+  createdTo?: string;
+  page?: number;
+};
+
+function supplierApplicationWhere(filters: SupplierApplicationFilters): SQL | undefined {
+  const clauses: SQL[] = [];
+
+  if (filters.status) clauses.push(eq(supplierApplications.status, filters.status));
+  if (filters.service) {
+    clauses.push(sql`${supplierApplications.services} ? ${filters.service}`);
+  }
+  if (filters.source) {
+    clauses.push(
+      sql`coalesce(${supplierApplications.firstTouchSource}, ${supplierApplications.utmSource}, '') ilike ${`${filters.source}%`}`,
+    );
+  }
+  if (filters.query) {
+    const term = `%${filters.query}%`;
+    clauses.push(
+      sql`(${supplierApplications.companyName} ilike ${term} or ${supplierApplications.contactName} ilike ${term} or ${supplierApplications.email} ilike ${term} or ${supplierApplications.phone} ilike ${term} or ${supplierApplications.serviceAreaText} ilike ${term})`,
+    );
+  }
+  if (filters.createdFrom) {
+    clauses.push(gte(supplierApplications.createdAt, new Date(`${filters.createdFrom}T00:00:00`)));
+  }
+  if (filters.createdTo) {
+    clauses.push(
+      lte(supplierApplications.createdAt, new Date(`${filters.createdTo}T23:59:59.999`)),
+    );
+  }
+
+  return clauses.length ? and(...clauses) : undefined;
+}
+
+export type SupplierApplicationListRow = Pick<
+  SupplierApplication,
+  | 'id'
+  | 'publicId'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'companyName'
+  | 'contactName'
+  | 'email'
+  | 'phone'
+  | 'serviceAreaText'
+  | 'services'
+  | 'status'
+  | 'firstTouchSource'
+  | 'utmSource'
+  | 'utmMedium'
+>;
+
+export async function listSupplierApplications(filters: SupplierApplicationFilters): Promise<{
+  rows: SupplierApplicationListRow[];
+  total: number;
+  page: number;
+  pageCount: number;
+}> {
+  const db = await getDb();
+  const where = supplierApplicationWhere(filters);
+  const page = Math.max(1, filters.page ?? 1);
+
+  const [rows, totals] = await Promise.all([
+    db
+      .select({
+        id: supplierApplications.id,
+        publicId: supplierApplications.publicId,
+        createdAt: supplierApplications.createdAt,
+        updatedAt: supplierApplications.updatedAt,
+        companyName: supplierApplications.companyName,
+        contactName: supplierApplications.contactName,
+        email: supplierApplications.email,
+        phone: supplierApplications.phone,
+        serviceAreaText: supplierApplications.serviceAreaText,
+        services: supplierApplications.services,
+        status: supplierApplications.status,
+        firstTouchSource: supplierApplications.firstTouchSource,
+        utmSource: supplierApplications.utmSource,
+        utmMedium: supplierApplications.utmMedium,
+      })
+      .from(supplierApplications)
+      .where(where)
+      .orderBy(desc(supplierApplications.createdAt))
+      .limit(PAGE_SIZE)
+      .offset((page - 1) * PAGE_SIZE),
+    db.select({ value: count() }).from(supplierApplications).where(where),
+  ]);
+
+  const total = totals[0]?.value ?? 0;
+  return { rows, total, page, pageCount: Math.max(1, Math.ceil(total / PAGE_SIZE)) };
+}
+
+export async function getSupplierApplication(id: string): Promise<SupplierApplication | null> {
+  const db = await getDb();
+  const [row] = await db
+    .select()
+    .from(supplierApplications)
+    .where(eq(supplierApplications.id, id))
+    .limit(1);
+  return row ?? null;
+}
+
+export async function updateSupplierApplication(
+  id: string,
+  patch: {
+    status: SupplierApplicationStatus;
+    internalNotes: string | null;
+  },
+): Promise<SupplierApplication | null> {
+  const db = await getDb();
+  const [before] = await db
+    .select()
+    .from(supplierApplications)
+    .where(eq(supplierApplications.id, id))
+    .limit(1);
+  if (!before) return null;
+
+  const now = new Date();
+  const timestampPatch: Partial<typeof supplierApplications.$inferInsert> = {};
+  if (patch.status !== before.status) {
+    if (patch.status === 'CONTACTED')
+      timestampPatch.firstContactedAt = before.firstContactedAt ?? now;
+    if (patch.status === 'QUALIFIED') timestampPatch.qualifiedAt = before.qualifiedAt ?? now;
+    if (patch.status === 'APPROVED') timestampPatch.approvedAt = before.approvedAt ?? now;
+    if (patch.status === 'REJECTED') timestampPatch.rejectedAt = before.rejectedAt ?? now;
+  }
+
+  const [row] = await db
+    .update(supplierApplications)
+    .set({
+      status: patch.status,
+      internalNotes: patch.internalNotes,
+      ...timestampPatch,
+      updatedAt: now,
+    })
+    .where(eq(supplierApplications.id, id))
+    .returning();
+
+  return row ?? null;
+}
+
 export async function listQuoteRequestEvents(id: string): Promise<QuoteRequestEvent[]> {
   const db = await getDb();
   return db
@@ -221,10 +371,7 @@ export async function updateQuoteRequest(
     });
   }
 
-  if (
-    after.qualificationStatus === 'QUALIFIED' &&
-    before.qualificationStatus !== 'QUALIFIED'
-  ) {
+  if (after.qualificationStatus === 'QUALIFIED' && before.qualificationStatus !== 'QUALIFIED') {
     events.push({
       type: 'lead_qualified',
       message: 'Lead marked qualified.',
@@ -512,7 +659,12 @@ export type AnalyticsReport = {
     campaigns: AdvertisingCampaignRow[];
     overTime: AdvertisingTimeRow[];
   };
-  funnel: { stage: string; count: number; rateFromPrevious: number | null; rateFromSubmitted: number }[];
+  funnel: {
+    stage: string;
+    count: number;
+    rateFromPrevious: number | null;
+    rateFromSubmitted: number;
+  }[];
   quotesOverTime: { date: string; quotes: number; won: number }[];
   byStatus: AnalyticsGroupRow[];
   bySource: AnalyticsGroupRow[];
@@ -543,18 +695,22 @@ function analyticsWhere(filters: AnalyticsFilters): SQL | undefined {
   if (filters.gclidPresent === true) clauses.push(sql`${quoteRequests.gclid} is not null`);
   if (filters.gclidPresent === false) clauses.push(sql`${quoteRequests.gclid} is null`);
   if (filters.locale) clauses.push(eq(quoteRequests.locale, filters.locale));
-  if (filters.projectType) clauses.push(eq(quoteRequests.projectType, filters.projectType as never));
+  if (filters.projectType)
+    clauses.push(eq(quoteRequests.projectType, filters.projectType as never));
   if (filters.city) clauses.push(ilike(quoteRequests.city, `${filters.city}%`));
   if (filters.status) clauses.push(eq(quoteRequests.status, filters.status));
   if (filters.customerType) clauses.push(eq(quoteRequests.customerType, filters.customerType));
-  if (filters.deviceCategory) clauses.push(eq(quoteRequests.deviceCategory, filters.deviceCategory));
+  if (filters.deviceCategory)
+    clauses.push(eq(quoteRequests.deviceCategory, filters.deviceCategory));
   if (filters.landingPage) clauses.push(ilike(landing, `${filters.landingPage}%`));
 
   return clauses.length ? and(...clauses) : undefined;
 }
 
 const contactedStatuses = sql.raw(
-  ['CONTACTED', 'QUALIFIED', 'QUOTING', 'OFFER_SENT', 'WON', 'LOST'].map((s) => `'${s}'`).join(', '),
+  ['CONTACTED', 'QUALIFIED', 'QUOTING', 'OFFER_SENT', 'WON', 'LOST']
+    .map((s) => `'${s}'`)
+    .join(', '),
 );
 
 function groupSelect(label: SQL<string>) {
@@ -570,8 +726,9 @@ function groupSelect(label: SQL<string>) {
       sql<number>`coalesce(sum(${quoteRequests.estimatedVolumeM3}::numeric) filter (where ${quoteRequests.volumeUnknown} = false), 0)`.mapWith(
         Number,
       ),
-    revenueCad:
-      sql<number>`coalesce(sum(${quoteRequests.finalJobValueCad}::numeric), 0)`.mapWith(Number),
+    revenueCad: sql<number>`coalesce(sum(${quoteRequests.finalJobValueCad}::numeric), 0)`.mapWith(
+      Number,
+    ),
   };
 }
 
@@ -613,8 +770,10 @@ function isoDateInToronto(date: Date): string {
 
 function adsWhere(filters: AnalyticsFilters): SQL | undefined {
   const clauses: SQL[] = [eq(googleAdsDailyPerformance.granularity, 'CAMPAIGN')];
-  if (filters.from) clauses.push(gte(googleAdsDailyPerformance.reportDate, isoDateInToronto(filters.from)));
-  if (filters.to) clauses.push(lte(googleAdsDailyPerformance.reportDate, isoDateInToronto(filters.to)));
+  if (filters.from)
+    clauses.push(gte(googleAdsDailyPerformance.reportDate, isoDateInToronto(filters.from)));
+  if (filters.to)
+    clauses.push(lte(googleAdsDailyPerformance.reportDate, isoDateInToronto(filters.to)));
   return and(...clauses);
 }
 
@@ -630,7 +789,9 @@ export async function getAnalyticsReport(filters: AnalyticsFilters): Promise<Ana
   const [kpiRow] = await db
     .select({
       total: sql<number>`count(*)`.mapWith(Number),
-      newLeads: sql<number>`count(*) filter (where ${quoteRequests.status} = 'NEW')`.mapWith(Number),
+      newLeads: sql<number>`count(*) filter (where ${quoteRequests.status} = 'NEW')`.mapWith(
+        Number,
+      ),
       contacted:
         sql<number>`count(*) filter (where ${quoteRequests.status} in (${contactedStatuses}))`.mapWith(
           Number,
@@ -640,11 +801,12 @@ export async function getAnalyticsReport(filters: AnalyticsFilters): Promise<Ana
           Number,
         ),
       won: sql<number>`count(*) filter (where ${quoteRequests.status} = 'WON')`.mapWith(Number),
-      lost: sql<number>`count(*) filter (where ${quoteRequests.status} in ('LOST', 'INVALID'))`.mapWith(Number),
-      open:
-        sql<number>`count(*) filter (where ${quoteRequests.status} not in ('WON', 'LOST', 'INVALID'))`.mapWith(
-          Number,
-        ),
+      lost: sql<number>`count(*) filter (where ${quoteRequests.status} in ('LOST', 'INVALID'))`.mapWith(
+        Number,
+      ),
+      open: sql<number>`count(*) filter (where ${quoteRequests.status} not in ('WON', 'LOST', 'INVALID'))`.mapWith(
+        Number,
+      ),
       totalVolumeM3:
         sql<number>`coalesce(sum(${quoteRequests.estimatedVolumeM3}::numeric) filter (where ${quoteRequests.volumeUnknown} = false), 0)`.mapWith(
           Number,
@@ -652,28 +814,36 @@ export async function getAnalyticsReport(filters: AnalyticsFilters): Promise<Ana
       averageResponseMinutes: sql<number | null>`avg(${responseMinutes})`.mapWith((v) =>
         v == null ? null : Number(v),
       ),
-      medianResponseMinutes:
-        sql<number | null>`percentile_cont(0.5) within group (order by ${responseMinutes}) filter (where ${quoteRequests.firstResponseAt} is not null)`.mapWith(
-          (v) => (v == null ? null : Number(v)),
-        ),
-      respondedWithin15:
-        sql<number | null>`avg(case when ${quoteRequests.firstResponseAt} is null then null when ${responseMinutes} <= 15 then 1 else 0 end)`.mapWith(
-          (v) => (v == null ? null : Number(v)),
-        ),
-      respondedWithin60:
-        sql<number | null>`avg(case when ${quoteRequests.firstResponseAt} is null then null when ${responseMinutes} <= 60 then 1 else 0 end)`.mapWith(
-          (v) => (v == null ? null : Number(v)),
-        ),
-      respondedWithin24h:
-        sql<number | null>`avg(case when ${quoteRequests.firstResponseAt} is null then null when ${responseMinutes} <= 1440 then 1 else 0 end)`.mapWith(
-          (v) => (v == null ? null : Number(v)),
-        ),
+      medianResponseMinutes: sql<
+        number | null
+      >`percentile_cont(0.5) within group (order by ${responseMinutes}) filter (where ${quoteRequests.firstResponseAt} is not null)`.mapWith(
+        (v) => (v == null ? null : Number(v)),
+      ),
+      respondedWithin15: sql<
+        number | null
+      >`avg(case when ${quoteRequests.firstResponseAt} is null then null when ${responseMinutes} <= 15 then 1 else 0 end)`.mapWith(
+        (v) => (v == null ? null : Number(v)),
+      ),
+      respondedWithin60: sql<
+        number | null
+      >`avg(case when ${quoteRequests.firstResponseAt} is null then null when ${responseMinutes} <= 60 then 1 else 0 end)`.mapWith(
+        (v) => (v == null ? null : Number(v)),
+      ),
+      respondedWithin24h: sql<
+        number | null
+      >`avg(case when ${quoteRequests.firstResponseAt} is null then null when ${responseMinutes} <= 1440 then 1 else 0 end)`.mapWith(
+        (v) => (v == null ? null : Number(v)),
+      ),
       estimatedJobValueCad:
-        sql<number>`coalesce(sum(${quoteRequests.estimatedJobValueCad}::numeric), 0)`.mapWith(Number),
+        sql<number>`coalesce(sum(${quoteRequests.estimatedJobValueCad}::numeric), 0)`.mapWith(
+          Number,
+        ),
       finalJobValueCad:
         sql<number>`coalesce(sum(${quoteRequests.finalJobValueCad}::numeric), 0)`.mapWith(Number),
       betondispoRevenueCad:
-        sql<number>`coalesce(sum(${quoteRequests.betondispoRevenueCad}::numeric), 0)`.mapWith(Number),
+        sql<number>`coalesce(sum(${quoteRequests.betondispoRevenueCad}::numeric), 0)`.mapWith(
+          Number,
+        ),
     })
     .from(quoteRequests)
     .where(where);
@@ -706,7 +876,9 @@ export async function getAnalyticsReport(filters: AnalyticsFilters): Promise<Ana
     .limit(50);
 
   const adsDateWhere = adsWhere(filters);
-  const googleAdsLeadWhere = and(...[where, sql`${quoteRequests.gclid} is not null`].filter(Boolean) as SQL[]);
+  const googleAdsLeadWhere = and(
+    ...([where, sql`${quoteRequests.gclid} is not null`].filter(Boolean) as SQL[]),
+  );
 
   const [
     [adsTotals],
@@ -729,19 +901,28 @@ export async function getAnalyticsReport(filters: AnalyticsFilters): Promise<Ana
   ] = await Promise.all([
     db
       .select({
-        spendCad: sql<number>`coalesce(sum(${googleAdsDailyPerformance.costMicros}) / 1000000.0, 0)`.mapWith(Number),
-        impressions: sql<number>`coalesce(sum(${googleAdsDailyPerformance.impressions}), 0)`.mapWith(Number),
+        spendCad:
+          sql<number>`coalesce(sum(${googleAdsDailyPerformance.costMicros}) / 1000000.0, 0)`.mapWith(
+            Number,
+          ),
+        impressions:
+          sql<number>`coalesce(sum(${googleAdsDailyPerformance.impressions}), 0)`.mapWith(Number),
         clicks: sql<number>`coalesce(sum(${googleAdsDailyPerformance.clicks}), 0)`.mapWith(Number),
         googleReportedConversions:
-          sql<number>`coalesce(sum(${googleAdsDailyPerformance.conversions}::numeric), 0)`.mapWith(Number),
+          sql<number>`coalesce(sum(${googleAdsDailyPerformance.conversions}::numeric), 0)`.mapWith(
+            Number,
+          ),
         googleReportedConversionValue:
-          sql<number>`coalesce(sum(${googleAdsDailyPerformance.conversionValue}::numeric), 0)`.mapWith(Number),
+          sql<number>`coalesce(sum(${googleAdsDailyPerformance.conversionValue}::numeric), 0)`.mapWith(
+            Number,
+          ),
       })
       .from(googleAdsDailyPerformance)
       .where(adsDateWhere),
     db
       .select({
-        gclidQuotes: sql<number>`count(*) filter (where ${quoteRequests.gclid} is not null)`.mapWith(Number),
+        gclidQuotes:
+          sql<number>`count(*) filter (where ${quoteRequests.gclid} is not null)`.mapWith(Number),
         gclidQualifiedLeads:
           sql<number>`count(*) filter (where ${quoteRequests.gclid} is not null and ${quoteRequests.qualificationStatus} = 'QUALIFIED')`.mapWith(
             Number,
@@ -767,12 +948,17 @@ export async function getAnalyticsReport(filters: AnalyticsFilters): Promise<Ana
           sql<number>`coalesce(sum(${googleAdsDailyPerformance.costMicros}) / 1000000.0, 0)`.mapWith(
             Number,
           ),
-        impressions: sql<number>`coalesce(sum(${googleAdsDailyPerformance.impressions}), 0)`.mapWith(Number),
+        impressions:
+          sql<number>`coalesce(sum(${googleAdsDailyPerformance.impressions}), 0)`.mapWith(Number),
         clicks: sql<number>`coalesce(sum(${googleAdsDailyPerformance.clicks}), 0)`.mapWith(Number),
         googleReportedConversions:
-          sql<number>`coalesce(sum(${googleAdsDailyPerformance.conversions}::numeric), 0)`.mapWith(Number),
+          sql<number>`coalesce(sum(${googleAdsDailyPerformance.conversions}::numeric), 0)`.mapWith(
+            Number,
+          ),
         googleReportedConversionValue:
-          sql<number>`coalesce(sum(${googleAdsDailyPerformance.conversionValue}::numeric), 0)`.mapWith(Number),
+          sql<number>`coalesce(sum(${googleAdsDailyPerformance.conversionValue}::numeric), 0)`.mapWith(
+            Number,
+          ),
       })
       .from(googleAdsDailyPerformance)
       .where(adsDateWhere)
@@ -788,7 +974,9 @@ export async function getAnalyticsReport(filters: AnalyticsFilters): Promise<Ana
           ),
         clicks: sql<number>`coalesce(sum(${googleAdsDailyPerformance.clicks}), 0)`.mapWith(Number),
         googleReportedConversions:
-          sql<number>`coalesce(sum(${googleAdsDailyPerformance.conversions}::numeric), 0)`.mapWith(Number),
+          sql<number>`coalesce(sum(${googleAdsDailyPerformance.conversions}::numeric), 0)`.mapWith(
+            Number,
+          ),
       })
       .from(googleAdsDailyPerformance)
       .where(adsDateWhere)
@@ -802,8 +990,12 @@ export async function getAnalyticsReport(filters: AnalyticsFilters): Promise<Ana
       })
       .from(quoteRequests)
       .where(where)
-      .groupBy(sql`to_char(${quoteRequests.createdAt} at time zone 'America/Toronto', 'YYYY-MM-DD')`)
-      .orderBy(sql`to_char(${quoteRequests.createdAt} at time zone 'America/Toronto', 'YYYY-MM-DD')`),
+      .groupBy(
+        sql`to_char(${quoteRequests.createdAt} at time zone 'America/Toronto', 'YYYY-MM-DD')`,
+      )
+      .orderBy(
+        sql`to_char(${quoteRequests.createdAt} at time zone 'America/Toronto', 'YYYY-MM-DD')`,
+      ),
     groupedAnalytics(sql<string>`${quoteRequests.status}::text`, filters),
     groupedAnalytics(sql<string>`coalesce(${source} || ' / ' || ${medium}, 'Unknown')`, filters),
     groupedAnalytics(campaign, filters),
@@ -1048,14 +1240,16 @@ export async function getSupplierAnalytics(): Promise<SupplierAnalyticsRow[]> {
         sql<number>`count(${supplierAssignments.id}) filter (where ${supplierAssignments.respondedAt} is not null)`.mapWith(
           Number,
         ),
-      responseRate:
-        sql<number | null>`count(${supplierAssignments.id}) filter (where ${supplierAssignments.respondedAt} is not null)::numeric / nullif(count(${supplierAssignments.id}) filter (where ${supplierAssignments.sentAt} is not null), 0)`.mapWith(
-          (v) => (v == null ? null : Number(v)),
-        ),
-      medianResponseMinutes:
-        sql<number | null>`percentile_cont(0.5) within group (order by extract(epoch from (${supplierAssignments.respondedAt} - ${supplierAssignments.sentAt})) / 60) filter (where ${supplierAssignments.sentAt} is not null and ${supplierAssignments.respondedAt} is not null)`.mapWith(
-          (v) => (v == null ? null : Number(v)),
-        ),
+      responseRate: sql<
+        number | null
+      >`count(${supplierAssignments.id}) filter (where ${supplierAssignments.respondedAt} is not null)::numeric / nullif(count(${supplierAssignments.id}) filter (where ${supplierAssignments.sentAt} is not null), 0)`.mapWith(
+        (v) => (v == null ? null : Number(v)),
+      ),
+      medianResponseMinutes: sql<
+        number | null
+      >`percentile_cont(0.5) within group (order by extract(epoch from (${supplierAssignments.respondedAt} - ${supplierAssignments.sentAt})) / 60) filter (where ${supplierAssignments.sentAt} is not null and ${supplierAssignments.respondedAt} is not null)`.mapWith(
+        (v) => (v == null ? null : Number(v)),
+      ),
       quotesSupplied:
         sql<number>`count(${supplierAssignments.id}) filter (where ${supplierAssignments.responseStatus} in ('QUOTED', 'ACCEPTED', 'WON'))`.mapWith(
           Number,
@@ -1072,14 +1266,16 @@ export async function getSupplierAnalytics(): Promise<SupplierAnalyticsRow[]> {
         sql<number>`count(${supplierAssignments.id}) filter (where ${supplierAssignments.responseStatus} = 'DECLINED')`.mapWith(
           Number,
         ),
-      declineRate:
-        sql<number | null>`count(${supplierAssignments.id}) filter (where ${supplierAssignments.responseStatus} = 'DECLINED')::numeric / nullif(count(${supplierAssignments.id}) filter (where ${supplierAssignments.responseStatus} in ('DECLINED', 'LOST', 'WON')), 0)`.mapWith(
-          (v) => (v == null ? null : Number(v)),
-        ),
-      winRate:
-        sql<number | null>`count(${supplierAssignments.id}) filter (where ${supplierAssignments.responseStatus} = 'WON')::numeric / nullif(count(${supplierAssignments.id}) filter (where ${supplierAssignments.responseStatus} in ('DECLINED', 'LOST', 'WON')), 0)`.mapWith(
-          (v) => (v == null ? null : Number(v)),
-        ),
+      declineRate: sql<
+        number | null
+      >`count(${supplierAssignments.id}) filter (where ${supplierAssignments.responseStatus} = 'DECLINED')::numeric / nullif(count(${supplierAssignments.id}) filter (where ${supplierAssignments.responseStatus} in ('DECLINED', 'LOST', 'WON')), 0)`.mapWith(
+        (v) => (v == null ? null : Number(v)),
+      ),
+      winRate: sql<
+        number | null
+      >`count(${supplierAssignments.id}) filter (where ${supplierAssignments.responseStatus} = 'WON')::numeric / nullif(count(${supplierAssignments.id}) filter (where ${supplierAssignments.responseStatus} in ('DECLINED', 'LOST', 'WON')), 0)`.mapWith(
+        (v) => (v == null ? null : Number(v)),
+      ),
       totalJobValueCad:
         sql<number>`coalesce(sum(${quoteRequests.finalJobValueCad}::numeric) filter (where ${supplierAssignments.responseStatus} = 'WON'), 0)`.mapWith(
           Number,

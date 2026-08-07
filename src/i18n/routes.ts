@@ -15,6 +15,7 @@ import { locales, type Locale } from './config';
 export const routes = {
   home: { fr: '', en: '' },
   quote: { fr: 'soumission', en: 'quote' },
+  partner: { fr: 'devenir-partenaire', en: 'become-a-partner' },
   calculator: { fr: 'calculateur-beton', en: 'concrete-calculator' },
   concreteSlab: { fr: 'dalle-beton', en: 'concrete-slab' },
   concreteDelivery: { fr: 'livraison-beton', en: 'concrete-delivery' },

@@ -40,7 +40,11 @@ export type QuoteEvent =
   | 'patio_calculator_used'
   | 'patio_calculator_margin_changed'
   | 'patio_calculator_quote_clicked'
-  | 'patio_full_calculator_clicked';
+  | 'patio_full_calculator_clicked'
+  | 'supplier_partner_page_view'
+  | 'supplier_application_start'
+  | 'supplier_application_submit'
+  | 'supplier_application_success';
 
 /**
  * Properties allowed on analytics events.
@@ -83,6 +87,7 @@ export type QuoteEventProps = {
   hasPrefilledVolume?: string;
   errorCount?: number;
   menuState?: string;
+  serviceCount?: number;
 };
 
 function scheduleAnalyticsDispatch(callback: () => void): void {

@@ -50,6 +50,13 @@
       "when": 1785942642133,
       "tag": "0006_rapid_galactus",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1786123965756,
+      "tag": "0007_flawless_lady_bullseye",
+      "breakpoints": true
     }
   ]
 }

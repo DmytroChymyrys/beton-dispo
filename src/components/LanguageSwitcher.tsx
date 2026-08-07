@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { otherLocale, type Locale } from '@/i18n/config';
 import { switchLocalePath } from '@/i18n/routes';
 import { cn } from '@/lib/cn';
@@ -19,6 +19,7 @@ type Props = {
  * through the route registry (/fr/soumission -> /en/quote).
  */
 export function LanguageSwitcher({ locale, label, ariaLabel, className, onDark = false }: Props) {
+  const router = useRouter();
   const pathname = usePathname() ?? `/${locale}`;
   const target = otherLocale(locale);
   const href = switchLocalePath(pathname, target);
@@ -28,6 +29,14 @@ export function LanguageSwitcher({ locale, label, ariaLabel, className, onDark =
       href={href}
       hrefLang={target}
       aria-label={ariaLabel}
+      onClick={(event) => {
+        const currentPath = window.location.pathname;
+        const currentTarget = switchLocalePath(currentPath, target);
+        if (currentTarget !== href) {
+          event.preventDefault();
+          router.push(currentTarget);
+        }
+      }}
       className={cn(
         'inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold tracking-wide uppercase transition-colors',
         onDark

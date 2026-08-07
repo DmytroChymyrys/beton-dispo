@@ -4,9 +4,10 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { createSession, destroySession, requireAdmin, verifyCredentials } from '@/server/auth';
-import { updateQuoteRequest } from '@/server/admin-queries';
+import { updateQuoteRequest, updateSupplierApplication } from '@/server/admin-queries';
 import { revalidateProjectIntelligencePublication } from '@/server/project-intelligence-revalidation';
 import { QUOTE_STATUSES } from '@/lib/quote-options';
+import { SUPPLIER_APPLICATION_STATUSES } from '@/lib/supplier-options';
 
 export type SignInState = {
   error?: 'invalid';
@@ -151,6 +152,45 @@ export async function updateRequestAction(
   revalidatePath('/admin');
   revalidatePath('/admin/requests');
   revalidatePath(`/admin/requests/${id}`);
+
+  return { savedAt: Date.now() };
+}
+
+const updateSupplierApplicationSchema = z.object({
+  id: z.uuid(),
+  status: z.enum(SUPPLIER_APPLICATION_STATUSES),
+  internalNotes: z.string().trim().max(5000),
+});
+
+export async function updateSupplierApplicationAction(
+  _prev: UpdateState,
+  formData: FormData,
+): Promise<UpdateState> {
+  await requireAdmin();
+
+  const parsed = updateSupplierApplicationSchema.safeParse({
+    id: formData.get('id'),
+    status: formData.get('status'),
+    internalNotes: formData.get('internalNotes') ?? '',
+  });
+
+  if (!parsed.success) return { error: 'validation' };
+
+  try {
+    await updateSupplierApplication(parsed.data.id, {
+      status: parsed.data.status,
+      internalNotes: parsed.data.internalNotes || null,
+    });
+  } catch (error) {
+    console.error('[admin] supplier application update failed', {
+      id: parsed.data.id,
+      error: error instanceof Error ? error.message : 'unknown error',
+    });
+    return { error: 'server' };
+  }
+
+  revalidatePath('/admin/suppliers');
+  revalidatePath(`/admin/suppliers/${parsed.data.id}`);
 
   return { savedAt: Date.now() };
 }

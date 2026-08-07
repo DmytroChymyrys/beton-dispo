@@ -2,8 +2,9 @@ import 'server-only';
 
 import { Resend } from 'resend';
 import { getDictionary } from '@/i18n/dictionaries';
-import type { QuoteRequest } from '@/db/schema';
+import type { QuoteRequest, SupplierApplication } from '@/db/schema';
 import { absoluteUrl } from '@/lib/site';
+import { SUPPLIER_SERVICE_LABELS } from '@/lib/supplier-options';
 
 /**
  * Internal notification for a new quote request.
@@ -188,6 +189,125 @@ export async function sendQuoteNotification(request: QuoteRequest): Promise<Noti
   } catch (error) {
     console.error('[quote] notification threw', {
       publicId: request.publicId,
+      error: error instanceof Error ? error.message : 'unknown error',
+    });
+    return { sent: false, reason: 'failed' };
+  }
+}
+
+function supplierRows(application: SupplierApplication): Row[] {
+  const locale = application.locale;
+  const serviceLabels = SUPPLIER_SERVICE_LABELS[locale];
+  const services = application.services
+    .map((code) => serviceLabels[code as keyof typeof serviceLabels] ?? code)
+    .join(', ');
+  const source = [
+    application.firstTouchSource ?? application.utmSource,
+    application.firstTouchMedium ?? application.utmMedium,
+    application.firstTouchCampaign ?? application.utmCampaign,
+  ]
+    .filter(Boolean)
+    .join(' / ');
+
+  return [
+    { label: 'Numéro', value: application.publicId },
+    { label: 'Reçue le', value: application.createdAt.toLocaleString('fr-CA') },
+    { label: 'Langue', value: locale === 'fr' ? 'Français' : 'Anglais' },
+    { label: 'Entreprise', value: application.companyName },
+    { label: 'Contact', value: application.contactName },
+    { label: 'Courriel', value: application.email },
+    { label: 'Téléphone', value: application.phone },
+    { label: 'Site web', value: application.website ?? '—' },
+    { label: 'Secteurs', value: application.serviceAreaText },
+    { label: 'Services', value: services || '—' },
+    { label: 'Message', value: application.message ?? '—' },
+    { label: 'Source', value: source || application.referrer || '—' },
+    { label: 'Page', value: application.landingPage ?? application.submissionPage ?? '—' },
+    { label: 'GCLID', value: application.gclid ?? '—' },
+  ];
+}
+
+export function supplierApplicationNotificationSubject(application: SupplierApplication): string {
+  return `Nouvelle demande partenaire — ${application.companyName}`;
+}
+
+export function supplierApplicationNotificationText(application: SupplierApplication): string {
+  const link = absoluteUrl(`/admin/suppliers/${application.id}`);
+  return [
+    `Nouvelle demande partenaire — ${application.publicId}`,
+    '',
+    ...supplierRows(application).map((row) => `${row.label}: ${row.value}`),
+    '',
+    `Ouvrir dans l'admin: ${link}`,
+  ].join('\n');
+}
+
+export function supplierApplicationNotificationHtml(application: SupplierApplication): string {
+  const link = absoluteUrl(`/admin/suppliers/${application.id}`);
+  const body = supplierRows(application)
+    .map(
+      (row) =>
+        `<tr>` +
+        `<td style="padding:6px 16px 6px 0;color:#5f6570;font-size:13px;white-space:nowrap;vertical-align:top">${escapeHtml(row.label)}</td>` +
+        `<td style="padding:6px 0;color:#17181c;font-size:14px">${escapeHtml(row.value).replace(/\n/g, '<br>')}</td>` +
+        `</tr>`,
+    )
+    .join('');
+
+  return `<!doctype html>
+<html lang="fr"><body style="margin:0;background:#f8f7f5;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
+<div style="max-width:640px;margin:0 auto;padding:24px">
+  <p style="margin:0 0 4px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#c2410c;font-weight:700">Nouvelle demande partenaire</p>
+  <h1 style="margin:0 0 20px;font-size:26px;color:#17181c">${escapeHtml(application.publicId)} — ${escapeHtml(application.companyName)}</h1>
+  <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #e2dfda;border-radius:8px;padding:12px">
+    ${body}
+  </table>
+  <p style="margin:24px 0 0">
+    <a href="${link}" style="display:inline-block;background:#c2410c;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600">Ouvrir dans l'admin</a>
+  </p>
+</div>
+</body></html>`;
+}
+
+export async function sendSupplierApplicationNotification(
+  application: SupplierApplication,
+): Promise<NotificationResult> {
+  const resend = getClient();
+  const to = recipients();
+  const from = process.env.QUOTE_NOTIFICATION_FROM;
+
+  if (!resend || to.length === 0 || !from) {
+    console.warn('[supplier_application] notification skipped: email is not configured', {
+      publicId: application.publicId,
+      hasApiKey: Boolean(resend),
+      hasRecipients: to.length > 0,
+      hasFrom: Boolean(from),
+    });
+    return { sent: false, reason: 'not-configured' };
+  }
+
+  try {
+    const { error } = await resend.emails.send({
+      from,
+      to,
+      replyTo: application.email,
+      subject: supplierApplicationNotificationSubject(application),
+      text: supplierApplicationNotificationText(application),
+      html: supplierApplicationNotificationHtml(application),
+    });
+
+    if (error) {
+      console.error('[supplier_application] notification failed', {
+        publicId: application.publicId,
+        error: error.message,
+      });
+      return { sent: false, reason: 'failed' };
+    }
+
+    return { sent: true };
+  } catch (error) {
+    console.error('[supplier_application] notification threw', {
+      publicId: application.publicId,
       error: error instanceof Error ? error.message : 'unknown error',
     });
     return { sent: false, reason: 'failed' };
