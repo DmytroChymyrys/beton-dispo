@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { startTransition, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import type { Locale } from '@/i18n/config';
 import { pathFor } from '@/i18n/routes';
@@ -200,8 +200,10 @@ export function ConcreteCalculator({
       });
       return;
     }
-    setHighlightResult(true);
-    setCalculationCount((count) => count + 1);
+    startTransition(() => {
+      setHighlightResult(true);
+      setCalculationCount((count) => count + 1);
+    });
     track('concrete_calculator_calculated', {
       locale,
       geometryType: geometry,

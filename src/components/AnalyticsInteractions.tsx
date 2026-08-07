@@ -52,60 +52,63 @@ export function AnalyticsInteractions() {
     function handleClick(event: MouseEvent) {
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
-      if (target.closest('[data-analytics-ignore]')) return;
 
-      const explicit = target.closest<HTMLElement>('[data-analytics-event]');
-      if (explicit) {
-        const eventName = explicit.dataset.analyticsEvent;
-        if (eventName === 'mobile_menu_toggled') {
-          track('mobile_menu_toggled', {
-            area: linkArea(explicit),
-            menuState: explicit.getAttribute('aria-expanded') === 'true' ? 'closing' : 'opening',
-          });
+      window.setTimeout(() => {
+        if (target.closest('[data-analytics-ignore]')) return;
+
+        const explicit = target.closest<HTMLElement>('[data-analytics-event]');
+        if (explicit) {
+          const eventName = explicit.dataset.analyticsEvent;
+          if (eventName === 'mobile_menu_toggled') {
+            track('mobile_menu_toggled', {
+              area: linkArea(explicit),
+              menuState: explicit.getAttribute('aria-expanded') === 'true' ? 'closing' : 'opening',
+            });
+          }
+          return;
         }
-        return;
-      }
 
-      const link = target.closest<HTMLAnchorElement>('a[href]');
-      if (!link) return;
+        const link = target.closest<HTMLAnchorElement>('a[href]');
+        if (!link) return;
 
-      const href = link.getAttribute('href') ?? '';
-      const area = linkArea(link);
-      const linkText = readableText(link);
-      const targetPath = safeTargetPath(href);
+        const href = link.getAttribute('href') ?? '';
+        const area = linkArea(link);
+        const linkText = readableText(link);
+        const targetPath = safeTargetPath(href);
 
-      if (href.startsWith('mailto:')) {
-        track('contact_clicked', { area, destinationType: 'email', linkText });
-        return;
-      }
+        if (href.startsWith('mailto:')) {
+          track('contact_clicked', { area, destinationType: 'email', linkText });
+          return;
+        }
 
-      if (href.startsWith('tel:')) {
-        track('contact_clicked', { area, destinationType: 'phone', linkText });
-        return;
-      }
+        if (href.startsWith('tel:')) {
+          track('contact_clicked', { area, destinationType: 'phone', linkText });
+          return;
+        }
 
-      if (link.hreflang) {
-        track('language_switched', { area, targetPath, destinationType: link.hreflang });
-        return;
-      }
+        if (link.hreflang) {
+          track('language_switched', { area, targetPath, destinationType: link.hreflang });
+          return;
+        }
 
-      const type = destinationType(targetPath);
-      const payload = {
-        area,
-        targetPath,
-        destinationType: type,
-        hasPrefilledVolume: href.includes('volume=') ? 'yes' : 'no',
-      };
+        const type = destinationType(targetPath);
+        const payload = {
+          area,
+          targetPath,
+          destinationType: type,
+          hasPrefilledVolume: href.includes('volume=') ? 'yes' : 'no',
+        };
 
-      if (type === 'quote') {
-        track('site_cta_clicked', payload);
-      } else {
-        track('site_link_clicked', { ...payload, linkText });
-      }
+        if (type === 'quote') {
+          track('site_cta_clicked', payload);
+        } else {
+          track('site_link_clicked', { ...payload, linkText });
+        }
+      }, 0);
     }
 
-    document.addEventListener('click', handleClick, { capture: true });
-    return () => document.removeEventListener('click', handleClick, { capture: true });
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
   }, []);
 
   return null;

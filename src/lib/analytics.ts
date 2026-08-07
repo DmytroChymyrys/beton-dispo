@@ -85,6 +85,17 @@ export type QuoteEventProps = {
   menuState?: string;
 };
 
+function scheduleAnalyticsDispatch(callback: () => void): void {
+  if (typeof window === 'undefined') return;
+
+  if (typeof window.setTimeout === 'function') {
+    window.setTimeout(callback, 0);
+    return;
+  }
+
+  callback();
+}
+
 export function track(event: QuoteEvent, props: QuoteEventProps = {}): void {
   // Drop undefined keys so the dashboard doesn't fill with empty dimensions.
   const clean: Record<string, string | number> = {};
@@ -92,12 +103,14 @@ export function track(event: QuoteEvent, props: QuoteEventProps = {}): void {
     if (v !== undefined && v !== '') clean[k] = v;
   }
 
-  try {
-    vercelTrack(event, clean);
-    window.gtag?.('event', event, clean);
-  } catch {
-    // Analytics must never break a submission.
-  }
+  scheduleAnalyticsDispatch(() => {
+    try {
+      vercelTrack(event, clean);
+      window.gtag?.('event', event, clean);
+    } catch {
+      // Analytics must never break a submission.
+    }
+  });
 }
 
 export type QuoteSubmitAnalyticsPayload = {

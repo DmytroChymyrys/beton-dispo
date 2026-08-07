@@ -30,17 +30,9 @@ const NAV_ITEMS: { key: RouteKey; label: keyof HeaderStrings['links'] }[] = [
 ];
 
 export function SiteHeader({ locale, strings }: { locale: Locale; strings: HeaderStrings }) {
-  const [open, setOpen] = useState(false);
   const pathname = usePathname();
-
-  // Close the mobile menu on navigation so the panel never survives a route
-  // change. Adjusted during render rather than in an effect, which avoids the
-  // extra commit that would briefly paint the open panel on the new page.
-  const [lastPathname, setLastPathname] = useState(pathname);
-  if (pathname !== lastPathname) {
-    setLastPathname(pathname);
-    setOpen(false);
-  }
+  const [menuState, setMenuState] = useState({ open: false, pathname });
+  const open = menuState.open && menuState.pathname === pathname;
 
   return (
     <header className="border-line bg-surface/95 supports-[backdrop-filter]:bg-surface/80 sticky top-0 z-40 border-b backdrop-blur">
@@ -85,7 +77,7 @@ export function SiteHeader({ locale, strings }: { locale: Locale; strings: Heade
           />
           <button
             type="button"
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => setMenuState({ open: !open, pathname })}
             data-analytics-event="mobile_menu_toggled"
             aria-expanded={open}
             aria-controls="mobile-nav"
