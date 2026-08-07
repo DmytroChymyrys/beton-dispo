@@ -278,7 +278,7 @@
     "hero": {
       "eyebrow": "Free tool",
       "title": "Concrete Calculator",
-      "intro": "Quickly calculate the approximate amount of concrete required for a slab, foundation, wall, column or another project. Enter your dimensions and get an estimate in cubic metres.",
+      "intro": "Quickly calculate the approximate amount of concrete required for a slab, foundation, wall, column or another project. Use this concrete quantity calculator, concrete measurement calculator and concrete slab estimator to calculate concrete volume before requesting a quote.",
       "primaryCta": "Calculate my volume"
     },
     "toolEyebrow": "m³ estimate",
@@ -354,7 +354,7 @@
     },
     "seo": {
       "howTitle": "How do you calculate concrete quantity?",
-      "howBody": "Concrete quantity is calculated from the physical dimensions of the project. For a rectangular slab, multiply length, width and thickness. For a round shape, use the radius and height. The result is then converted to cubic metres.",
+      "howBody": "Concrete quantity is calculated from the physical dimensions of the project. For a rectangular slab, multiply length, width and thickness. For a round shape, use the radius and height. The result is then converted to cubic metres for a clear cubic metre concrete calculator estimate.",
       "wasteTitle": "How much extra concrete should I allow?",
       "wasteBody": "An allowance can help cover small depth variations, site waste and irregular ground or formwork. The calculator lets you choose 0%, 5%, 10% or 15% depending on the level of uncertainty.",
       "unitsTitle": "Which unit is used to order concrete in Québec?",

@@ -278,7 +278,7 @@
     "hero": {
       "eyebrow": "Outil gratuit",
       "title": "Calculateur de béton",
-      "intro": "Calculez rapidement la quantité approximative de béton nécessaire pour une dalle, une fondation, un mur, une colonne ou un autre projet. Entrez simplement vos dimensions et obtenez une estimation en mètres cubes.",
+      "intro": "Calculez rapidement la quantité approximative de béton nécessaire pour une dalle, une fondation, un mur, une colonne ou un autre projet. Cette calculatrice béton vous aide à faire un calcul m³ béton, un calcul de quantité de béton ou un calcul béton pour dalle avant de demander une soumission.",
       "primaryCta": "Calculer mon volume"
     },
     "toolEyebrow": "Estimation en m³",
@@ -354,7 +354,7 @@
     },
     "seo": {
       "howTitle": "Comment calculer la quantité de béton?",
-      "howBody": "La quantité de béton se calcule à partir des dimensions physiques du projet. Pour une dalle rectangulaire, on multiplie la longueur, la largeur et l’épaisseur. Pour une forme ronde, on utilise le rayon et la hauteur. Le résultat est ensuite converti en mètres cubes.",
+      "howBody": "La quantité de béton se calcule à partir des dimensions physiques du projet. Pour une dalle rectangulaire, on multiplie la longueur, la largeur et l’épaisseur. Pour une forme ronde, on utilise le rayon et la hauteur. Le résultat est ensuite converti en mètres cubes pour répondre à la question: combien de béton faut-il?",
       "wasteTitle": "Combien de béton dois-je prévoir en plus?",
       "wasteBody": "Une marge peut aider à couvrir les petites variations de profondeur, les pertes au chantier et les irrégularités du sol ou du coffrage. La calculatrice vous laisse choisir 0 %, 5 %, 10 % ou 15 % selon le niveau d’incertitude.",
       "unitsTitle": "Quelle unité utilise-t-on pour commander du béton au Québec?",

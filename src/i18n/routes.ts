@@ -83,6 +83,7 @@ const seoLandingSlugPairs = [
   { fr: 'prix-pompe-beton', en: 'concrete-pump-cost' },
   { fr: 'beton-mobile', en: 'mobile-concrete' },
   { fr: 'pompage-beton', en: 'concrete-pumping' },
+  { fr: 'beton-estampe', en: 'stamped-concrete' },
   { fr: 'beton-pret-emploi-vs-beton-en-sac', en: 'ready-mix-vs-bagged-concrete' },
   { fr: 'pompe-beton-ou-brouette', en: 'concrete-pump-vs-wheelbarrow' },
   { fr: 'fibre-ou-armature-dalle-beton', en: 'fiber-vs-rebar-concrete-slab' },

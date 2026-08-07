@@ -27,6 +27,11 @@ import {
   seoLandingAlternates,
   seoLandingPath,
 } from '@/lib/seo-landing-pages';
+import {
+  stampedConcreteAlternates,
+  stampedConcreteCitySlugs,
+  stampedConcretePath,
+} from '@/lib/stamped-concrete-pages';
 import { getProjectPublicationReadiness } from '@/server/project-intelligence';
 
 /** Relative crawl priority. The home page and the quote form are the goal. */
@@ -116,6 +121,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   );
 
+  const stampedConcreteLocalPages = stampedConcreteCitySlugs.flatMap((city) =>
+    locales.map((locale) => ({
+      url: absoluteUrl(stampedConcretePath(city, locale)),
+      lastModified,
+      changeFrequency: 'monthly' as const,
+      priority: 0.76,
+      alternates: { languages: stampedConcreteAlternates(city) },
+    })),
+  );
+
   const projectCityPages = citySlugs.flatMap((city) => {
     if (!readiness.cityProjects[city].indexable) return [];
 
@@ -175,6 +190,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...cityPages,
     ...localCalculatorPages,
     ...seoLandingSitemapPages,
+    ...stampedConcreteLocalPages,
     ...projectCityPages,
     ...projectServicePages,
     ...projectCityServicePages,

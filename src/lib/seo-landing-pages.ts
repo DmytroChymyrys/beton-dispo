@@ -22,6 +22,7 @@ export type SeoLandingKey =
   | 'concretePumpCost'
   | 'mobileConcrete'
   | 'concretePumping'
+  | 'stampedConcrete'
   | 'readyMixVsBags'
   | 'pumpVsWheelbarrow'
   | 'fiberVsRebar'
@@ -68,6 +69,7 @@ type LandingSeed = {
     aside: string;
     metaTitle?: string;
     metaDescription?: string;
+    sections?: { title: string; body: string }[];
   };
   en: {
     eyebrow: string;
@@ -77,6 +79,7 @@ type LandingSeed = {
     aside: string;
     metaTitle?: string;
     metaDescription?: string;
+    sections?: { title: string; body: string }[];
   };
 };
 
@@ -500,6 +503,67 @@ const seeds: LandingSeed[] = [
     },
   },
   {
+    key: 'stampedConcrete',
+    slugs: { fr: 'beton-estampe', en: 'stamped-concrete' },
+    schemaType: 'service',
+    group: 'service',
+    popular: true,
+    fr: {
+      eyebrow: 'Béton décoratif',
+      h1: 'Béton estampé',
+      intro:
+        'Planifiez un projet de béton estampé avec une estimation de volume, les contraintes d’accès et les détails utiles avant de vérifier les options de livraison et de finition.',
+      subject: 'béton estampé',
+      aside:
+        'BétonDispo aide à structurer la demande de béton. La finition estampée, les motifs, la couleur, le scellant et la pose doivent être validés avec l’entrepreneur responsable.',
+      sections: [
+        {
+          title: 'Qu’est-ce que le béton estampé?',
+          body: 'Le béton estampé est un béton coulé sur place dont la surface est texturée avec des moules pour imiter la pierre, la dalle, le pavé ou d’autres motifs. Le volume de béton se calcule comme une dalle, mais la finition demande une préparation et une équipe spécialisées.',
+        },
+        {
+          title: 'Applications courantes',
+          body: 'Il est souvent utilisé pour les terrasses, contours de piscine, trottoirs, entrées de cour et surfaces extérieures décoratives. L’usage prévu influence l’épaisseur, la préparation du sol, le drainage et la marge à prévoir.',
+        },
+        {
+          title: 'Avantages et points d’attention',
+          body: 'Le béton estampé peut offrir une surface durable et personnalisée, mais il demande une bonne fenêtre météo, une mise en place efficace, une finition coordonnée, puis un scellant adapté. Les retouches sont plus difficiles qu’avec une dalle simple.',
+        },
+        {
+          title: 'Volume, livraison et coordination',
+          body: 'Estimez d’abord les mètres cubes avec le calculateur, puis indiquez la date, la ville, l’accès au chantier, la distance entre le camion et la coulée et les besoins de pompage. BétonDispo ne prétend pas réaliser la finition; nous aidons à orienter la demande de béton.',
+        },
+      ],
+    },
+    en: {
+      eyebrow: 'Decorative concrete',
+      h1: 'Stamped concrete',
+      intro:
+        'Plan a stamped concrete project with a volume estimate, access constraints and useful details before checking delivery and finishing options.',
+      subject: 'stamped concrete',
+      aside:
+        'BétonDispo helps structure the concrete request. Stamped finishing, patterns, colour, sealer and installation must be confirmed with the contractor responsible for the work.',
+      sections: [
+        {
+          title: 'What is stamped concrete?',
+          body: 'Stamped concrete is poured concrete whose surface is textured with mats to imitate stone, slabs, pavers or other patterns. The volume is calculated like a slab, but the finish requires preparation and a specialized crew.',
+        },
+        {
+          title: 'Common applications',
+          body: 'It is often used for patios, pool decks, sidewalks, driveways and decorative exterior surfaces. Intended use affects thickness, base preparation, drainage and the allowance to include.',
+        },
+        {
+          title: 'Benefits and points to watch',
+          body: 'Stamped concrete can create a durable custom surface, but it needs a suitable weather window, efficient placement, coordinated finishing and proper sealing. Repairs are less straightforward than with a plain slab.',
+        },
+        {
+          title: 'Volume, delivery and coordination',
+          body: 'Start by estimating cubic metres with the calculator, then include date, city, site access, distance from truck to pour and pumping needs. BétonDispo does not claim to perform the finishing; we help route the concrete request.',
+        },
+      ],
+    },
+  },
+  {
     key: 'readyMixVsBags',
     slugs: { fr: 'beton-pret-emploi-vs-beton-en-sac', en: 'ready-mix-vs-bagged-concrete' },
     schemaType: 'service',
@@ -638,7 +702,8 @@ function pageCopy(seed: LandingSeed, locale: Locale): SeoLandingCopy {
     asideBody: local.aside,
     relatedTitle: locale === 'fr' ? 'Guides connexes' : 'Related guides',
     sections:
-      locale === 'fr'
+      local.sections ??
+      (locale === 'fr'
         ? [
             {
               title: `Calculer le volume pour ${local.subject}`,
@@ -674,7 +739,7 @@ function pageCopy(seed: LandingSeed, locale: Locale): SeoLandingCopy {
               title: 'Prepare the quote request',
               body: 'Add the city, address, desired date, project type, estimated quantity and constraints. A precise request makes it easier to check a suitable option quickly.',
             },
-          ],
+          ]),
   };
 }
 
@@ -691,7 +756,8 @@ function priceCopy(seed: LandingSeed, locale: Locale): SeoLandingCopy {
     asideBody: local.aside,
     relatedTitle: locale === 'fr' ? 'Guides connexes' : 'Related guides',
     sections:
-      locale === 'fr'
+      local.sections ??
+      (locale === 'fr'
         ? [
             {
               title: 'Les principaux facteurs de coût',
@@ -727,7 +793,7 @@ function priceCopy(seed: LandingSeed, locale: Locale): SeoLandingCopy {
               title: 'Get a useful quote',
               body: 'Send dimensions, desired date, address, access and site notes. These details lead to a more relevant response than a broad average.',
             },
-          ],
+          ]),
   };
 }
 
@@ -744,7 +810,8 @@ function serviceCopy(seed: LandingSeed, locale: Locale): SeoLandingCopy {
     asideBody: local.aside,
     relatedTitle: locale === 'fr' ? 'Services connexes' : 'Related services',
     sections:
-      locale === 'fr'
+      local.sections ??
+      (locale === 'fr'
         ? [
             {
               title: `Quand utiliser ${local.subject}?`,
@@ -780,7 +847,7 @@ function serviceCopy(seed: LandingSeed, locale: Locale): SeoLandingCopy {
               title: 'BétonDispo’s role',
               body: 'BétonDispo does not imply ownership of every piece of equipment. We centralize your request and check suitable options with our network.',
             },
-          ],
+          ]),
   };
 }
 
@@ -928,6 +995,7 @@ export function relatedSeoLinks(locale: Locale, current?: SeoLandingKey) {
     'concreteSlabCost',
     'garageConcrete',
     'foundationConcrete',
+    'stampedConcrete',
     'mobileConcrete',
     'concretePumping',
     'concreteSlab',

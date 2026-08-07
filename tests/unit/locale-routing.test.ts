@@ -94,6 +94,9 @@ describe('switchLocalePath', () => {
     ['/en/foundation-concrete', 'fr', '/fr/beton-fondation'],
     ['/fr/prix-beton-m3', 'en', '/en/concrete-price-per-cubic-metre'],
     ['/en/concrete-pumping', 'fr', '/fr/pompage-beton'],
+    ['/fr/beton-estampe', 'en', '/en/stamped-concrete'],
+    ['/fr/beton-estampe/longueuil', 'en', '/en/stamped-concrete/longueuil'],
+    ['/en/stamped-concrete/candiac', 'fr', '/fr/beton-estampe/candiac'],
     ['/fr/beton-pret-emploi-vs-beton-en-sac', 'en', '/en/ready-mix-vs-bagged-concrete'],
     ['/fr/dalle-10-cm-ou-15-cm', 'en', '/en/4-inch-vs-6-inch-concrete-slab'],
   ] as const)('maps %s to %s -> %s', (pathname, target, expected) => {

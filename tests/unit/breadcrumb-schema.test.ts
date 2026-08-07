@@ -12,14 +12,15 @@ async function loadBreadcrumbModules() {
   vi.stubEnv('NEXT_PUBLIC_SITE_URL', 'https://betondispo.ca');
   vi.resetModules();
 
-  const [routes, site, structuredData, seoLandingPages] = await Promise.all([
+  const [routes, site, structuredData, seoLandingPages, stampedConcretePages] = await Promise.all([
     import('@/i18n/routes'),
     import('@/lib/site'),
     import('@/lib/structured-data'),
     import('@/lib/seo-landing-pages'),
+    import('@/lib/stamped-concrete-pages'),
   ]);
 
-  return { routes, site, structuredData, seoLandingPages };
+  return { routes, site, structuredData, seoLandingPages, stampedConcretePages };
 }
 
 afterEach(() => {
@@ -92,6 +93,37 @@ describe('breadcrumbSchema', () => {
           {
             name: copy.h1,
             url: site.absoluteUrl(seoLandingPages.seoLandingPath(key, locale)),
+          },
+        ]);
+
+        assertValidBreadcrumbItems(schema);
+      }
+    }
+  });
+
+  it('generates valid breadcrumb items for local stamped-concrete pages', async () => {
+    const { routes, site, structuredData, seoLandingPages, stampedConcretePages } =
+      await loadBreadcrumbModules();
+
+    for (const locale of locales) {
+      for (const city of stampedConcretePages.stampedConcreteCitySlugs) {
+        const cityPage = stampedConcretePages.stampedConcretePages[city];
+        const schema = structuredData.breadcrumbSchema([
+          {
+            name: locale === 'fr' ? 'Accueil' : 'Home',
+            url: site.absoluteUrl(routes.pathFor('home', locale)),
+          },
+          {
+            name: 'Services',
+            url: site.absoluteUrl(routes.pathFor('services', locale)),
+          },
+          {
+            name: locale === 'fr' ? 'Béton estampé' : 'Stamped concrete',
+            url: site.absoluteUrl(seoLandingPages.seoLandingPath('stampedConcrete', locale)),
+          },
+          {
+            name: cityPage.name,
+            url: site.absoluteUrl(stampedConcretePages.stampedConcretePath(city, locale)),
           },
         ]);
 

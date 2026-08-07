@@ -42,6 +42,7 @@ function readiness(overrides: ReadinessOverride = {}): ProjectPublicationReadine
       longueuil: { indexable: false, totalProjects: 0 },
       candiac: { indexable: false, totalProjects: 0 },
       brossard: { indexable: false, totalProjects: 0 },
+      'greenfield-park': { indexable: false, totalProjects: 0 },
       'la-prairie': { indexable: false, totalProjects: 0 },
       boucherville: { indexable: false, totalProjects: 0 },
     },

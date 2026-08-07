@@ -9,6 +9,7 @@ export const citySlugs = [
   'longueuil',
   'brossard',
   'candiac',
+  'greenfield-park',
   'la-prairie',
   'boucherville',
 ] as const;
@@ -219,6 +220,66 @@ export const cityPages: Record<CitySlug, CityPage> = {
           'Describe the site, desired date and estimated quantity. We check options suited to your request.',
         quoteCta: 'Request a quote in Candiac',
         calculatorCta: 'Estimate my concrete',
+        nearbyTitle: 'Nearby areas',
+      },
+    },
+  },
+  'greenfield-park': {
+    slug: 'greenfield-park',
+    name: 'Greenfield Park',
+    copy: {
+      fr: {
+        metaTitle: 'Béton à Greenfield Park — Livraison et soumission | BétonDispo',
+        metaDescription:
+          'Besoin de béton à Greenfield Park? Estimez votre volume pour dalle, garage, trottoir, terrasse ou rénovation et demandez une soumission.',
+        eyebrow: 'Agglomération de Longueuil',
+        h1: 'Besoin de béton à Greenfield Park?',
+        intro:
+          'Pour une dalle, une terrasse, un trottoir, un garage ou une rénovation à Greenfield Park, BétonDispo vous aide à préparer une demande claire avec volume, date et accès au chantier.',
+        servicesTitle: 'Livraison, béton mobile et pompage à Greenfield Park',
+        servicesBody:
+          'Le secteur est surtout résidentiel et l’accès peut varier selon la rue, la cour et le stationnement. Indiquez si une livraison directe est possible ou si une pompe pourrait être utile.',
+        projectsTitle: 'Projets courants dans le secteur',
+        projectsBody:
+          'Les demandes peuvent concerner des patios, trottoirs, dalles de garage, petites fondations, agrandissements et travaux extérieurs. Une estimation en m³ rend la demande plus précise.',
+        logisticsTitle: 'Accès urbain et préparation',
+        logisticsBody:
+          'Ajoutez les contraintes comme une entrée étroite, des fils aériens, un accès par ruelle, une cour arrière ou une distance importante entre le camion et la zone de coulée.',
+        calculatorTitle: 'Calculer avant de demander une soumission',
+        calculatorBody:
+          'Utilisez le calculateur de béton pour obtenir une quantité approximative, puis transmettez cette estimation avec les détails du chantier.',
+        ctaTitle: 'Vérifier une option pour Greenfield Park',
+        ctaBody:
+          'Envoyez le type de projet, l’adresse, la date souhaitée et la quantité estimée pour vérifier les options disponibles.',
+        quoteCta: 'Obtenir une soumission à Greenfield Park',
+        calculatorCta: 'Calculer mon volume',
+        nearbyTitle: 'Secteurs voisins',
+      },
+      en: {
+        metaTitle: 'Concrete in Greenfield Park — Delivery and Quote | BétonDispo',
+        metaDescription:
+          'Need concrete in Greenfield Park? Estimate volume for a slab, garage, sidewalk, patio or renovation and request a quote.',
+        eyebrow: 'Longueuil agglomeration',
+        h1: 'Need concrete in Greenfield Park?',
+        intro:
+          'For a slab, patio, sidewalk, garage or renovation in Greenfield Park, BétonDispo helps you prepare a clear request with volume, date and site access.',
+        servicesTitle: 'Delivery, mobile concrete and pumping in Greenfield Park',
+        servicesBody:
+          'The area is mostly residential and access can vary by street, yard and parking. Note whether direct delivery is possible or whether pumping may be useful.',
+        projectsTitle: 'Common projects in the area',
+        projectsBody:
+          'Requests may involve patios, sidewalks, garage slabs, small foundations, extensions and exterior work. An m³ estimate makes the request more precise.',
+        logisticsTitle: 'Urban access and preparation',
+        logisticsBody:
+          'Add constraints such as a narrow driveway, overhead wires, lane access, backyard work or significant distance between the truck and the pour area.',
+        calculatorTitle: 'Calculate before requesting a quote',
+        calculatorBody:
+          'Use the concrete calculator to get an approximate quantity, then send that estimate with the site details.',
+        ctaTitle: 'Check an option for Greenfield Park',
+        ctaBody:
+          'Send the project type, address, desired date and estimated quantity to check available options.',
+        quoteCta: 'Request a quote in Greenfield Park',
+        calculatorCta: 'Calculate my volume',
         nearbyTitle: 'Nearby areas',
       },
     },

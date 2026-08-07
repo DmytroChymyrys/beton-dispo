@@ -117,6 +117,10 @@ export const serviceNetwork: ServiceNetworkItem[] = [
     fr: 'Évaluer le pompage lorsque le camion ne peut pas atteindre la zone de coulée.',
     en: 'Assess pumping when the truck cannot reach the pour area.',
   }),
+  seoService('stampedConcrete', 'residential', true, {
+    fr: 'Planifier un projet de béton estampé avec volume, accès et coordination de finition.',
+    en: 'Plan a stamped concrete project with volume, access and finishing coordination.',
+  }),
   seoService('commercialConcrete', 'commercial', true, {
     fr: 'Envoyer une demande pour béton commercial léger avec horaire et contraintes.',
     en: 'Send a request for light commercial concrete with schedule and constraints.',
